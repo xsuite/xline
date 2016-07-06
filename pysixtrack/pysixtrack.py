@@ -1,0 +1,347 @@
+from collections import namedtuple
+from copy import deepcopy
+
+import numpy as np
+
+class Bunch(object):
+  clight=299792458
+  pi=3.141592653589793238
+  echarge=1.602176565e-19
+  emass=0.510998928e6
+  pmass=938.272046e6
+  epsilon0=8.854187817e-12
+  mu0=4e-7*pi
+  eradius=echarge**2/(4*pi*epsilon0*emass*clight**2)
+  pradius=echarge**2/(4*pi*epsilon0*pmass*clight**2)
+  anumber=6.02214129e23
+  kboltz=1.3806488e-23
+  def _g1(self,m0,p0c,e0):
+      beta0=p0c/e0;     gamma0=e0/m0
+      return m0,beta0,gamma0,p0c,e0
+  def _g2(self,m0,beta0,gamma0):
+      e0=m0*gamma0;     p0c=e0*beta0
+      return m0,beta0,gamma0,p0c,e0
+  def _f1(self,m0,p0c):
+      sqrt=self._m.sqrt
+      e0=sqrt(p0c**2+m0**2)
+      return self._g1(m0,p0c,e0)
+  def _f2(self,m0,e0):
+      sqrt=self._m.sqrt
+      p0c=sqrt(e0**2-m0**2)
+      return self._g1(m0,p0c,e0)
+  def _f3(self,m0,beta0):
+      sqrt=self._m.sqrt
+      gamma0=1/sqrt(1-beta0**2)
+      return self._g2(m0,beta0,gamma0)
+  def _f4(self,m0,gamma0):
+      sqrt=self._m.sqrt
+      beta0=sqrt(1-1/gamma0**2)
+      return self._g2(m0,beta0,gamma0)
+  def copy(self):
+      p=Bunch()
+      for k,v in self.__dict__.items():
+          if type(v) in [np.ndarray,dict]:
+              v=v.copy()
+          p.__dict__[k]=v
+      return p
+  def __init__(self,s=0.,x=0.,px=0.,y=0.,py=0.,tau=0.,pt=None,delta=None,
+               q0=1,m0=pmass,beta0=None,gamma0=None,p0c=None,e0=None,
+               mratio=1.0,qratio=1.0,chi=None,
+               mathlib=np,**args):
+    self._m=mathlib
+    self.s=s
+    self.x=x; self.px=px
+    self.y=y; self.py=py
+    self._m0=m0
+    self._p0c=p0c
+    self._e0=e0
+    self._gamma0=gamma0
+    self._beta0=beta0
+    self.tau=tau
+    self._pt=pt
+    self._delta=delta
+    self._chi=chi
+    self._qratio=qratio
+    self._mratio=mratio
+    self.__dict__.update(**args)
+    if p0c is not None:
+       self._update_ref(*self._f1(m0,p0c))
+    elif e0 is not None:
+       self._update_ref(*self._f2(m0,e0))
+    elif beta0 is not None:
+       self._update_ref(*self._f3(m0,beta0))
+    elif gamma0 is not None:
+       self._update_ref(*self._f4(m0,beta0))
+    if qratio is not None:
+       self._chi=self._qratio/self._mratio
+    elif chi is not None:
+       self._qratio=self._chi*self._mratio
+    if delta is not None:
+        self.delta=delta
+    elif pt is not None:
+        self.pt=pt
+  # fully dependent quantities
+  Px=property(lambda p: p.px*p.p0c*p.mratio)
+  Py=property(lambda p: p.py*p.p0c*p.mratio)
+  E =property(lambda p: (p.pt*p.p0c+p.e0)*p.mratio)
+  Pc=property(lambda p: (p.delta*p.p0c+p.p0c)*p.mratio)
+  m =property(lambda p:  p.m0*p.mratio)
+  beta =property(lambda p:  (1+p.delta)/(1/p.beta0+p.pt))
+  # interdepent quantities
+  pt=property(lambda self: self._pt)
+  @pt.setter
+  def pt(self,pt):
+    sqrt=self._m.sqrt
+    self._pt=pt
+    self._delta=sqrt(pt**2+2*pt/self.beta0+1)-1
+  delta=property(lambda self: self._delta)
+  @delta.setter
+  def delta(self,delta):
+    sqrt=self._m.sqrt
+    self._delta=delta
+    self._pt=sqrt((1+self.delta)**2+1/(self.beta0*self.gamma0)**2)-1/self.beta0
+  m0=property(lambda self: self._m0)
+  @m0.setter
+  def m0(self,m0):
+    new=self._f1(m0,self.p0c)
+    self._update_ref(*new)
+    self._update_particles(*new)
+  beta0=property(lambda self: self._beta0)
+  @beta0.setter
+  def beta0(self,beta0):
+    new=self._f3(self.m0,beta0)
+    self._update_ref(*new)
+    self._update_particles(*new)
+  gamma0=property(lambda self: self._gamma0)
+  @gamma0.setter
+  def gamma0(self,gamma0):
+    new=self._f4(self.m0,gamma0)
+    self._update_ref(*new)
+    self._update_particles(*new)
+  p0c=property(lambda self: self._p0c)
+  @p0c.setter
+  def p0c(self,p0c):
+    new=self._f1(self.m0,p0c)
+    self._update_ref(*new)
+    self._update_particles(*new)
+  e0=property(lambda self: self._e0)
+  @e0.setter
+  def e0(self,e0):
+    new=self._f2(self.m0,e0)
+    self._update_ref(*new)
+    self._update_particles(*new)
+  mratio=property(lambda self: self._mratio)
+  @mratio.setter
+  def mratio(self,mratio):
+    Px,Py,E,Pc=self.Px,self.Py,self.E,self.Pc
+    self._pt=E/(mratio*e0)-1
+    self._delta=E/(delta*e0)-1
+    self.px=Px/(p0c*mratio)
+    self.py=Py/(p0c*mratio)
+    self._chi=self._qratio/mratio
+    self._mratio=mratio
+  qratio=property(lambda self: self._qratio)
+  @qratio.setter
+  def qratio(self,qratio):
+    self._chi=qratio/self._mratio
+    self._qratio=qratio
+  chi=property(lambda self: self._chi)
+  @chi.setter
+  def chi(self,chi):
+    self._qratio=self._chi*self._mratio
+    self._chi=chi
+  def _update_ref(self,m0,beta0,gamma0,p0c,e0):
+    self._m0=m0
+    self._beta0=beta0
+    self._gamma0=gamma0
+    self._p0c=p0c
+    self._e0=e0
+  def _update_particles(self,m0,beta0,gamma0,p0c,e0):
+    Px,Py,E,Pc,m=self.Px,self.Py,self.E,self.Pc,self.m
+    mratio=m/m0
+    self._mratio=mratio
+    self._chi=self._qratio/mratio
+    self._pt=E/(mratio*e0)-1
+    self._delta=E/(delta*e0)-1
+    self.px=Px/(p0c*mratio)
+    self.py=Py/(p0c*mratio)
+  def __repr__(self):
+    out=[]
+    for nn in 'm0 p0c e0 beta0 gamma0'.split():
+      out.append('%-7s = %s'%(nn,getattr(self,nn)))
+    for nn in 's x px y py tau pt delta'.split():
+      out.append('%-7s = %s'%(nn,getattr(self,nn)))
+    for nn in 'mratio qratio chi'.split():
+      out.append('%-7s = %s'%(nn,getattr(self,nn)))
+    return '\n'.join(out)
+
+
+def ctaylor(x,y,kn,ks):
+  dpx=kn[-1]
+  dpy=ks[-1]
+  nn=range(1,len(kn)+1)
+  for nn,kkn,kks in zip(nn,kn,ks)[-2::-1]:
+    zre=(dpx*x-dpy*y)/float(nn)
+    zim=(dpx*y+dpy*x)/float(nn)
+    dpx=kkn-zre
+    dpy=kks+zin
+  return dpx,dpy
+
+
+class Element(object):
+    _floats=[]
+    _ints=[]
+    def __init__(self,*args,**nargs):
+      for kk,vv in self._get_keys_default():
+          setattr(self,kk,vv)
+      for kk,vv in zip(self._get_keys(),args):
+          setattr(self,kk,vv)
+      self.__dict__.update(nargs)
+    def _get_keys_default(self):
+      keys=[]
+      for kk in self._floats:
+          vv=0.0
+          if type(kk) is tuple:
+              kk,vv=kk
+          keys.append([kk,vv])
+      for kk in self._ints:
+          vv=0
+          if type(kk) is tuple:
+              kk,vv=kk
+          keys.append([kk,vv])
+      return keys
+    def _get_keys(self):
+       return zip(*self._get_keys_default())[0]
+    def __repr__(self):
+      out=['%s=%s'%(kk,repr(getattr(self,kk))) for kk in self._get_keys()]
+      return '%s(%s)'%(self.__class__.__name__,','.join(out))
+
+class Drift(Element):
+    _floats=['l']
+    def track(self,p):
+        l=self.l
+        opdi=1/(1+p.delta)
+        lbeta0i=l/p.beta0
+        lbetai=(lbeta0i+p.pt*l)*opdi
+        xp=p.px*opdi; yp=p.py*opdi
+        p.x+=xp*l ;  p.y+=yp*l
+        p.tau+=lbeta0i-lbetai*(1+(xp**2+yp**2)/2)
+        p.s+=l
+
+class DriftExact(Element):
+    _floats=['l']
+    def track(self,p):
+        sqrt=p._m.sqrt
+        l=self.l
+        px=p.px;py=p.py;beta0=p.beta0;delta=p.delta;pt=p.pt
+        pzi=l/sqrt((1+delta)**2-px**2-py**2)
+        bzi=(1/beta0+pt)*pzi
+        xp=px*pzi; yp=py*pzi
+        p.x+=xp ;  p.y+=yp
+        p.tau+=l/beta0-bzi
+        p.s+=l
+
+class Multipole(Element):
+    _floats=[('knl',[]), ('ksl',[]), 'hxl', 'hyl', 'l']
+    _ints=['order']
+    def __init__(self,*args,**nargs):
+        self.rel=0
+        Element.__init__(self,*args,**nargs)
+        self.update()
+    def update(self):
+        lknl=len(self.knl)
+        lksl=len(self.ksl)
+        if lknl>lksl:
+            self.ksl+=[0.0]*(lknl-lksl)
+        elif lksl>lknl:
+            self.knl+=[0.0]*(lksl-lknl)
+        if self.rel!=0:
+          if self.rel>0:
+            fact=kn[self.rel-1]
+            ks[self.rel-1]*=fact
+          else:
+            fact=ks[-self.rel-1]
+            kn[self.rel-1]*=fact
+          for i in range(p.rel,len(kn)):
+              kn[i]*=fact
+              ks[i]*=fact
+    def track(self,p):
+        kn=self.knl; ks=self.ksl
+        x=p.x;y=p.y; chi=p.chi ;
+        # multipole kick
+        dpx=0 if len(kn)==0 else kn[-1];
+        dpy=0 if len(ks)==0 else ks[-1];
+        nn=range(1,len(kn)+1)
+        for nn,kkn,kks in zip(nn,kn,ks)[-2::-1]:
+          zre=(dpx*x-dpy*y)/float(nn)
+          zim=(dpx*y+dpy*x)/float(nn)
+          dpx=kkn+zre
+          dpy=kks+zim
+        dpx=-chi*dpx
+        dpy=chi*dpy
+        # curvature effect kick
+        l=self.l
+        if l!=0:
+          betai=(1/p.beta0+p.pt)/(1+p.delta)
+          b1l=chi*kn[0]; a1l=chi*ks[0]
+          hxl=self.hxl ;  hyl=self.hyl
+          hxx=hxl/l*x; hyy=hyl/l*y; delta=p.delta
+          dpx+=hxl + hxl*delta - b1l*hxx
+          dpy-=hyl + hyl*delta - a1l*hyy
+          p.tau-=chi*(hxx-hyy)*l*betai
+        p.px+=dpx ;  p.py+=dpy
+
+
+class Cavity(Element):
+    _floats=['vn', 'f', 'lag', 'scav']
+    def track(self,p):
+      sin=p._m.sin
+      pi=p._m.pi
+      k=2*pi*self.f/p.clight
+      phase=self.lag*pi/180-k*p.tau
+      if self.scav>=0:
+        # phi is the phase when s=scav
+        phase+=k*(p.s-self.scav)/p.beta0
+      p.pt+=p.chi*self.vn*sin(phase)
+
+
+class Align(Element):
+    _floats=['dx', 'dy', 'tilt', 'cx', 'cy']
+    tilt=property(lambda self: self._tilt)
+    @tilt.setter
+    def tilt(self,tilt):
+      self._tilt=tilt
+      an=tilt*np.pi/180
+      self.cx=np.cos(an); self.sx=np.sin(an)
+    def track(self,p):
+      sin=p._m.sin; cos=p._m.cos; pi=p._m.pi
+      an=self.tilt*pi/180
+      cx=cos(an); sx=sin(an)
+      xn= self.dx; yn= self.dy
+      cx=self.cx;cy=self.cy
+      xn+= cx*p.x-sx*p.y
+      yn+= sx*p.x+cx*p.y
+      p.x=xn;p.y=yn;
+      pxn= cx*p.px-sx*p.py
+      pyn= sx*p.px+cx*p.py
+      p.px=pxn;p.py=pyn;
+
+
+class Block(Element):
+    _ints=[('elems',[])]
+    def track(self,p):
+        for el in self.elems:
+            el.track(p)
+
+
+convert={'drift':Drift,
+         'mult' :Multipole,
+         'cav'  :Cavity,
+         'align':Align,
+         'block':Block   }
+
+if __name__=='__main__':
+   print Multipole()._get_keys_default()
+   print Multipole()._get_keys()
+   print Multipole()
+
