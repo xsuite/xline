@@ -249,6 +249,10 @@ class Multipole(Element):
         Element.__init__(self,*args,**nargs)
         self.update()
     def update(self):
+        if len(self.knl)==0:
+          self.knl=[0.0]
+        if len(self.ksl)==0:
+          self.ksl=[0.0]
         lknl=len(self.knl)
         lksl=len(self.ksl)
         if lknl>lksl:
@@ -269,8 +273,8 @@ class Multipole(Element):
         kn=self.knl; ks=self.ksl
         x=p.x;y=p.y; chi=p.chi ;
         # multipole kick
-        dpx=0 if len(kn)==0 else kn[-1];
-        dpy=0 if len(ks)==0 else ks[-1];
+        dpx=kn[-1];
+        dpy=ks[-1];
         nn=range(1,len(kn)+1)
         for nn,kkn,kks in zip(nn,kn,ks)[-2::-1]:
           zre=(dpx*x-dpy*y)/float(nn)
