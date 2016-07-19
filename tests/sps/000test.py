@@ -1,10 +1,11 @@
-import pickle,time,gzip
+import time,gzip
 
 import numpy as np
 
-import pysixtrack
+from pysixtrack import Drift, DriftExact, Multipole, \
+                       Align, Cavity, Block, Bunch
 
-def savedat(out,fname):
+def savedata(out,fname):
   fmt="%5d"*2 +" %26.15e"*13 +'\n'
   fh=gzip.open(fname,'w')
   for iel,p in enumerate(ptrack):
@@ -17,12 +18,14 @@ def savedat(out,fname):
                     p.e0,p.p0c,p.m0))
   fh.close()
 
-# load machine description
-sps=pickle.load(open('sps.pickle','rb'))
+# Load machine description
+sps=eval(open('sps.dat').read())
+
 
 # particle starting conditions
+
 npart=15
-pstart=pysixtrack.Bunch(
+pstart=Bunch(
          x =np.linspace(0,5e-3,npart),
          px=np.zeros(npart),
          y =np.linspace(0,-3e-3,npart),
@@ -32,19 +35,16 @@ pstart=pysixtrack.Bunch(
          e0=26.01692438e9, m0=0.93827205e9)
 
 # element-by-element tracking
+
 ptrack=[]; p=pstart.copy()
 for iel,el in enumerate(sps.elems):
     ptrack.append(p.copy())
     el.track(p)
 
-savedat(ptrack,'elem-by-elem.dat.gz')
+savedata(ptrack,'elem-by-elem.dat.gz')
 
 
 # many turn tracking
-p=pysixtrack.Bunch(x=np.linspace(0,5e-3,100),px=0.,
-                   y=np.linspace(0,-3e-3,100),py=0.,
-                   tau=0.74,pt=0.,
-                   e0=26.01692438e9, m0=0.93827205e9)
 
 ttrack=[]; p=pstart.copy()
 before=time.time()
@@ -55,4 +55,4 @@ for i in range(25):
   print(i,"%4.2f sec"%(now-before))
   before=now
 
-savedat(ttrack,'turn-by-turn.dat.gz')
+savedata(ttrack,'turn-by-turn.dat.gz')
