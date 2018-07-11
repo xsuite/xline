@@ -8,7 +8,6 @@ setuptools.setup(
         author_email='riccardo.de.maria@cern.ch',
         url='https://github.com/rdemaria/pysixtrack',
         packages=['pysixtrack'],
-        package_dir={'pytimber': 'pytimber'},
+        package_dir={'pysixtrack': 'pysixtrack'},
         install_requires=['numpy']
 )
-

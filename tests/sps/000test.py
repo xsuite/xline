@@ -3,7 +3,7 @@ import time,gzip
 import numpy as np
 
 from pysixtrack import Drift, DriftExact, Multipole, \
-                       Align, Cavity, Block, Bunch
+                       Align, Cavity, Block, Particles
 
 def savedata(out,fname):
   fmt="%5d"*2 +" %26.15e"*13 +'\n'
@@ -25,7 +25,7 @@ sps=eval(open('sps.dat').read())
 # particle starting conditions
 
 npart=15
-pstart=Bunch(
+pstart=Particles(
          x =np.linspace(0,5e-3,npart),
          px=np.zeros(npart),
          y =np.linspace(0,-3e-3,npart),
