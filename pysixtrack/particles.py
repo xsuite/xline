@@ -4,6 +4,9 @@ from copy import deepcopy
 import numpy as np
 
 
+def count_not_none(*lst):
+    return len(lst)-sum(p is None for p in lst)
+
 class Particles(object):
     clight = 299792458
     pi = 3.141592653589793238
@@ -56,7 +59,7 @@ class Particles(object):
         return p
 
     def __init__ref(self, p0c, energy0, gamma0, beta0):
-        not_none = 4-[beta0, gamma0, p0c, energy0].count(None)
+        not_none = count_not_none(beta0, gamma0, p0c, energy0)
         if not_none == 0:
             raise ValueError("Particles defined without energy reference")
         elif not_none == 1:
@@ -77,7 +80,7 @@ class Particles(object):
             beta0  = {beta0}""")
 
     def __init__delta(self, delta, ptau, psigma):
-        not_none = 3-[delta, ptau, psigma].count(None)
+        not_none = count_not_none(delta, ptau, psigma)
         if not_none == 0:
             self.delta = 0.
         elif not_none == 1:
@@ -95,7 +98,7 @@ class Particles(object):
             psigma = {psigma}""")
 
     def __init__zeta(self, zeta, tau, sigma):
-        not_none = 3-[zeta, tau, sigma].count(None)
+        not_none = count_not_none(zeta, tau, sigma)
         if not_none == 0:
             self.zeta = 0.
         elif not_none == 1:
@@ -148,6 +151,7 @@ class Particles(object):
                  mass0=pmass, q0=1.,
                  p0c=1e9, energy0=None, gamma0=None, beta0=None,
                  chi=None, mratio=None, qratio=None,
+                 partid = None, turn = None, state = None, elemid= None,
                  mathlib=np, **args):
         self._m = mathlib
         self.s = s
@@ -164,6 +168,9 @@ class Particles(object):
         self.__init__zeta(zeta, tau, sigma)
         self.__init__chi(chi, mratio, qratio)
         self._update_coordinates=True
+        self.partid=partid
+        self.turn=turn
+        self.state=state
 
     Px = property(lambda p: p.px*p.p0c*p.mratio)
     Py = property(lambda p: p.py*p.p0c*p.mratio)
@@ -172,6 +179,10 @@ class Particles(object):
     mass = property(lambda p:  p.mass0*p.mratio)
     beta = property(lambda p:  (1+p.delta)/(1/p.beta0+p.ptau))
     rvv = property(lambda self: self.beta/self.beta0)
+    rpp = property(lambda self: 1/(1+self.delta))
+
+    def add_to_energy(self,energy):
+        self.ptau+=energy/self.p0c
 
     delta = property(lambda self: self._delta)
     @delta.setter
@@ -299,3 +310,6 @@ class Particles(object):
         qratio  = {self.qratio}
         chi     = {self.chi}"""
         return out
+
+
+

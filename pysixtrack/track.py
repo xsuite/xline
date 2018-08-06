@@ -55,7 +55,7 @@ class Drift(Element):
         yp = p.py*rpp
         p.x += xp*length
         p.y += yp*length
-        p.z += length*(p.rvv+(xp**2+yp**2)/2)
+        p.zeta += length*(p.rvv+(xp**2+yp**2)/2)
         p.s += length
 
 
@@ -72,18 +72,18 @@ class DriftExact(Element):
         yp = p.py*rpp
         p.x += xp*length
         p.y += yp*length
-        p.z += length*(p.rvv+(xp**2+yp**2)/2)
+        p.zeta += length*(p.rvv+(xp**2+yp**2)/2)
         p.s += length
 
 
 class Multipole(Element):
-    __slots__ = ('knl', 'ksl', 'length', 'hxl', 'hyl')
-    __units__ = ('meter^-order', 'meter^-order', 'meter', 'radian', 'radian')
+    __slots__ = ('knl', 'ksl', 'hxl', 'hyl', 'length')
+    __units__ = ('meter^-order', 'meter^-order', 'radian', 'radian', 'meter')
     __defaults__ = ([], [], 0, 0, 0)
 
     @property
     def order(self):
-        return max(len(self.knl), len(self.ksl))
+        return max(len(self.knl), len(self.ksl))-1
 
     def track(self, p):
         order = self.order
@@ -96,18 +96,18 @@ class Multipole(Element):
             knl = nknl
         elif len(knl) > len(ksl):
             nksl = np.zeros(order, dtype=ksl.dtype)
-            nknl[:len(ksl)] = ksl
+            nksl[:len(ksl)] = ksl
             ksl = nksl
         x = p.x
         y = p.y
         chi = p.chi
-        dpx = knl[order]*_factorial[order]
-        dpy = ksl[order]*_factorial[order]
-        for ii in range(order-1, 0, -1):
-            zre = (dpx*x-dpy*y)
-            zim = (dpx*y+dpy*x)
-            dpx = knl[ii]*_factorial[ii]+zre
-            dpy = ksl[ii]*_factorial[ii]+zim
+        dpx = knl[order]
+        dpy = ksl[order]
+        for ii in range(order, 0, -1):
+            zre = (dpx*x-dpy*y)/ii
+            zim = (dpx*y+dpy*x)/ii
+            dpx = knl[ii-1]+zre
+            dpy = ksl[ii-1]+zim
         dpx = -chi*dpx
         dpy = chi*dpy
         # curvature effect kick
@@ -118,7 +118,7 @@ class Multipole(Element):
             hyy = hyl/length*y
             dpx += hxl + hxl*p.delta - b1l*hxx
             dpy -= hyl + hyl*p.delta - a1l*hyy
-            p.z -= chi*(hxx-hyy)*l
+            p.zeta -= chi*(hxx-hyy)*l
         p.px += dpx
         p.py += dpy
 
@@ -161,7 +161,7 @@ class Cavity(Element):
         sin = p._m.sin
         pi = p._m.pi
         k = 2*pi*self.frequency/p.clight
-        tau = p.s/p.rvv/p.beta0
+        tau = p.zeta/p.rvv/p.beta0
         phase = self.lag*pi/180-k*tau
         p.add_to_energy(p.chi*self.voltage*sin(phase))
 
@@ -180,6 +180,16 @@ class Line(Element):
         for el in self.elements:
             el.track(p)
 
+class BeamBeam4D(Element):
+    pass
+
+class BeamBeam6D(Element):
+    pass
+
 
 classes = [cls for cls in globals().values() if isinstance(cls, type)]
-__all__ = [cls.__name__ for cls in classes if issubclass(cls, Element)]
+elements = [cls for cls in classes if issubclass(cls, Element)]
+__all__ = [cls.__name__ for cls in elements]
+__all__.append('element_types')
+
+element_types = dict( (cls.__name__, cls) for cls in elements)
