@@ -139,8 +139,9 @@ class SRotation(Element):
     __defaults__ = (0,)
 
     def track(self, p):
-        cz = p._m.cos(self.angle)
-        sz = p._m.sin(self.angle)
+        deg2rag = p._m.pi/180
+        cz = p._m.cos(self.angle*deg2rag)
+        sz = p._m.sin(self.angle*deg2rag)
         xn = cz*p.x-sz*p.y
         yn = sz*p.x+cz*p.y
         p.x = xn
@@ -163,6 +164,12 @@ class Cavity(Element):
         tau = p.s/p.rvv/p.beta0
         phase = self.lag*pi/180-k*tau
         p.add_to_energy(p.chi*self.voltage*sin(phase))
+
+class RFMultipole(Element):
+    __slots__ = ('voltage', 'frequency', 'knl', 'ksl', 'pn', 'ps')
+    __units__ = ('volt', 'hertz', [], [], [], [])
+    __defaults__ = (0, 0, 0)
+
 
 
 class Line(Element):
