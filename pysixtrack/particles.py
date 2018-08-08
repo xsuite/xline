@@ -17,35 +17,35 @@ class Particles(object):
     anumber = 6.02214129e23
     kboltz = 1.3806488e-23
 
-    def _g1(self, m0, p0c, e0):
-        beta0 = p0c/e0
-        gamma0 = e0/m0
-        return m0, beta0, gamma0, p0c, e0
+    def _g1(self, mass0, p0c, energy0):
+        beta0 = p0c/energy0
+        gamma0 = energy0/mass0
+        return mass0, beta0, gamma0, p0c, energy0
 
-    def _g2(self, m0, beta0, gamma0):
-        e0 = m0*gamma0
-        p0c = e0*beta0
-        return m0, beta0, gamma0, p0c, e0
+    def _g2(self, mass0, beta0, gamma0):
+        energy0 = mass0*gamma0
+        p0c = energy0*beta0
+        return mass0, beta0, gamma0, p0c, energy0
 
-    def _f1(self, m0, p0c):
+    def _f1(self, mass0, p0c):
         sqrt = self._m.sqrt
-        e0 = sqrt(p0c**2+m0**2)
-        return self._g1(m0, p0c, e0)
+        energy0 = sqrt(p0c**2+mass0**2)
+        return self._g1(mass0, p0c, energy0)
 
-    def _f2(self, m0, e0):
+    def _f2(self, mass0, energy0):
         sqrt = self._m.sqrt
-        p0c = sqrt(e0**2-m0**2)
-        return self._g1(m0, p0c, e0)
+        p0c = sqrt(energy0**2-mass0**2)
+        return self._g1(mass0, p0c, energy0)
 
-    def _f3(self, m0, beta0):
+    def _f3(self, mass0, beta0):
         sqrt = self._m.sqrt
         gamma0 = 1/sqrt(1-beta0**2)
-        return self._g2(m0, beta0, gamma0)
+        return self._g2(mass0, beta0, gamma0)
 
-    def _f4(self, m0, gamma0):
+    def _f4(self, mass0, gamma0):
         sqrt = self._m.sqrt
         beta0 = sqrt(1-1/gamma0**2)
-        return self._g2(m0, beta0, gamma0)
+        return self._g2(mass0, beta0, gamma0)
 
     def copy(self):
         p = Particles()
@@ -55,76 +55,76 @@ class Particles(object):
             p.__dict__[k] = v
         return p
 
-    def __init__ref(self, p0c, e0, gamma0, beta0):
-        cnt = [beta0, gamma0, p0c, e0].count(None)
-        if cnt == 0:
+    def __init__ref(self, p0c, energy0, gamma0, beta0):
+        not_none = 4-[beta0, gamma0, p0c, energy0].count(None)
+        if not_none == 0:
             raise ValueError("Particles defined without energy reference")
-        elif cnt == 1:
+        elif not_none == 1:
             if p0c is not None:
                 self.p0c = p0c
-            elif e0 is not None:
-                self.e0 = e0
+            elif energy0 is not None:
+                self.energy0 = energy0
             elif gamma0 is not None:
                 self.gamma0 = gamma0
             elif beta0 is not None:
                 self.beta0 = beta0
         else:
-            raise ValueError(f"""
+            raise ValueError(f"""\
             Particles defined with multiple energy references:
             p0c    = {p0c},
-            e0     = {e0},
+            energy0     = {energy0},
             gamma0 = {gamma0},
             beta0  = {beta0}""")
 
     def __init__delta(self, delta, ptau, psigma):
-        cnt = [delta, pt, psigma].count(None)
-        if cnt == 0:
+        not_none = 3-[delta, ptau, psigma].count(None)
+        if not_none == 0:
             self.delta = 0.
-        elif cnt == 1:
+        elif not_none == 1:
             if delta is not None:
                 self.delta = delta
-            elif pt is not None:
-                self.pt = pt
+            elif ptau is not None:
+                self.ptau = ptau
             elif psigma is not None:
                 self.psigma = psigma
         else:
             raise ValueError(f"""
             Particles defined with multiple energy deviations:
             delta  = {delta},
-            pt     = {pt},
+            ptau     = {ptau},
             psigma = {psigma}""")
 
-    def __init__z(self, z, t, sigma):
-        cnt = [z, t, sigma].count(None)
-        if cnt == 0:
-            self.z = 0.
-        elif cnt == 1:
-            if z is not None:
-                self.z = z
+    def __init__zeta(self, zeta, tau, sigma):
+        not_none = 3-[zeta, tau, sigma].count(None)
+        if not_none == 0:
+            self.zeta = 0.
+        elif not_none == 1:
+            if zeta is not None:
+                self.zeta = zeta
             elif t is not None:
                 self.t = t
             elif sigma is not None:
                 self.sigma = sigma
         else:
-            raise ValueError(f"""
+            raise ValueError(f"""\
             Particles defined with multiple time deviations:
-            z     = {z},
-            t     = {t},
+            zeta  = {zeta},
+            tau   = {tau},
             sigma = {sigma}""")
 
     def __init__chi(self, mratio, qratio, chi):
-        cnt = [z, t, sigma].count(None)
-        if cnt == 0:
+        not_none = 3 - [mratio, qratio, chi].count(None)
+        if not_none == 0:
             self._chi = 1.
             self._mratio = 1.
             self._qratio = 1.
-        elif cnt == 1:
-            raise ValueError(f"""
+        elif not_none == 1:
+            raise ValueError(f"""\
             Particles defined with insufficient mass/charge information:
             chi    = {chi},
             mratio = {mratio},
             qratio = {qratio}""")
-        elif cnt == 2:
+        elif not_none == 2:
             if chi is None:
                 self._mratio = mratio
                 self.qratio = qratio
@@ -143,10 +143,10 @@ class Particles(object):
 
     def __init__(self,
                  s=0., x=0., px=0., y=0., py=0.,
-                 delta=None, pt=None, psigma=None,
-                 z=None, tau=None, sigma=None,
-                 m0=pmass, q0=1.,
-                 p0c=None, e0=None, gamma0=None, beta0=None,
+                 delta=None, ptau=None, psigma=None, rvv=None,
+                 zeta=None, tau=None, sigma=None,
+                 mass0=pmass, q0=1.,
+                 p0c=1e9, energy0=None, gamma0=None, beta0=None,
                  chi=None, mratio=None, qratio=None,
                  mathlib=np, **args):
         self._m = mathlib
@@ -155,78 +155,93 @@ class Particles(object):
         self.px = px
         self.y = y
         self.py = py
-        self.z = z
-        self._m0 = m0
+        self.zeta = zeta
+        self._mass0 = mass0
         self._q0 = q0
-        self.__init__ref(p0c, e0, gamma0, beta0)
-        self.__init__delta(delta, pt, psigma)
-        self.__init__z(z, tau, sigma)
+        self._update_coordinates=False
+        self.__init__ref(p0c, energy0, gamma0, beta0)
+        self.__init__delta(delta, ptau, psigma)
+        self.__init__zeta(zeta, tau, sigma)
         self.__init__chi(chi, mratio, qratio)
+        self._update_coordinates=True
 
     Px = property(lambda p: p.px*p.p0c*p.mratio)
     Py = property(lambda p: p.py*p.p0c*p.mratio)
-    E = property(lambda p: (p.pt*p.p0c+p.e0)*p.mratio)
+    Energy = property(lambda p: (p.ptau*p.p0c+p.energy0)*p.mratio)
     Pc = property(lambda p: (p.delta*p.p0c+p.p0c)*p.mratio)
-    m = property(lambda p:  p.m0*p.mratio)
-    beta = property(lambda p:  (1+p.delta)/(1/p.beta0+p.pt))
-    # interdepent quantities
-    pt = property(lambda self: self._pt)
+    mass = property(lambda p:  p.mass0*p.mratio)
+    beta = property(lambda p:  (1+p.delta)/(1/p.beta0+p.ptau))
+    rvv = property(lambda self: self.beta/self.beta0)
 
-    @pt.setter
-    def pt(self, pt):
-        sqrt = self._m.sqrt
-        self._pt = pt
-        self._delta = sqrt(pt**2+2*pt/self.beta0+1)-1
     delta = property(lambda self: self._delta)
-
     @delta.setter
     def delta(self, delta):
         sqrt = self._m.sqrt
         self._delta = delta
-        self._pt = sqrt((1+self.delta)**2+1 /
-                        (self.beta0*self.gamma0)**2)-1/self.beta0
-    m0 = property(lambda self: self._m0)
+        self._ptau = sqrt(self.delta**2+2*self.delta+1/self.beta0**2)-1/self.beta0
 
-    @m0.setter
-    def m0(self, m0):
-        new = self._f1(m0, self.p0c)
-        self._update_ref(*new)
-        self._update_particles(*new)
+    psigma = property(lambda self: self._ptau/self.beta0)
+    @psigma.setter
+    def set_psigma(self, psigma):
+        self.ptau=psigma*self.beta0
+
+    tau= property(lambda self: self.zeta/self.beta)
+    @tau.setter
+    def set_tau(self,tau):
+        self._zeta=self.beta*tau
+
+    sigma= property(lambda self: self.beta0/self.beta*self.zeta)
+    @sigma.setter
+    def set_sigma(self,sigma):
+        self._zeta=self.beta/self.beta0*sigma
+
+    ptau = property(lambda self: self._ptau)
+    @ptau.setter
+    def ptau(self, ptau):
+        sqrt = self._m.sqrt
+        self._ptau = ptau
+        self._delta = sqrt(ptau**2+2*ptau/self.beta0+1)-1
+
+    mass0 = property(lambda self: self._mass0)
+
+    @mass0.setter
+    def mass0(self, mass0):
+        new = self._f1(mass0, self.p0c)
+
     beta0 = property(lambda self: self._beta0)
-
     @beta0.setter
     def beta0(self, beta0):
-        new = self._f3(self.m0, beta0)
+        new = self._f3(self.mass0, beta0)
         self._update_ref(*new)
         self._update_particles(*new)
-    gamma0 = property(lambda self: self._gamma0)
 
+    gamma0 = property(lambda self: self._gamma0)
     @gamma0.setter
     def gamma0(self, gamma0):
-        new = self._f4(self.m0, gamma0)
+        new = self._f4(self.mass0, gamma0)
         self._update_ref(*new)
         self._update_particles(*new)
-    p0c = property(lambda self: self._p0c)
 
+    p0c = property(lambda self: self._p0c)
     @p0c.setter
     def p0c(self, p0c):
-        new = self._f1(self.m0, p0c)
+        new = self._f1(self.mass0, p0c)
         self._update_ref(*new)
         self._update_particles(*new)
-    e0 = property(lambda self: self._e0)
 
-    @e0.setter
-    def e0(self, e0):
-        new = self._f2(self.m0, e0)
+    energy0 = property(lambda self: self._energy0)
+    @energy0.setter
+    def energy0(self, energy0):
+        new = self._f2(self.mass0, energy0)
         self._update_ref(*new)
         self._update_particles(*new)
     mratio = property(lambda self: self._mratio)
 
     @mratio.setter
     def mratio(self, mratio):
-        Px, Py, E, Pc = self.Px, self.Py, self.E, self.Pc
-        self._pt = E/(mratio*e0)-1
-        self._delta = E/(delta*e0)-1
+        Px, Py, Energy, Pc = self.Px, self.Py, self.Energy, self.Pc
+        self._ptau = Energy/(mratio*energy0)-1
+        self._delta = Energy/(delta*energy0)-1
         self.px = Px/(p0c*mratio)
         self.py = Py/(p0c*mratio)
         self._chi = self._qratio/mratio
@@ -244,29 +259,43 @@ class Particles(object):
         self._qratio = self._chi*self._mratio
         self._chi = chi
 
-    def _update_ref(self, m0, beta0, gamma0, p0c, e0):
-        self._m0 = m0
+    def _update_ref(self, mass0, beta0, gamma0, p0c, energy0):
+        self._mass0 = mass0
         self._beta0 = beta0
         self._gamma0 = gamma0
         self._p0c = p0c
-        self._e0 = e0
+        self._energy0 = energy0
 
-    def _update_particles(self, m0, beta0, gamma0, p0c, e0):
-        Px, Py, E, Pc, m = self.Px, self.Py, self.E, self.Pc, self.m
-        mratio = m/m0
-        self._mratio = mratio
-        self._chi = self._qratio/mratio
-        self._pt = E/(mratio*e0)-1
-        self._delta = E/(delta*e0)-1
-        self.px = Px/(p0c*mratio)
-        self.py = Py/(p0c*mratio)
+    def _update_particles(self, mass0, beta0, gamma0, p0c, energy0):
+        if self._update_coordinates:
+          Px = self.Px
+          Py = self.Py
+          Energy = self.Energy
+          Pc = self.Pc
+          mratio = mass/mass0
+          self._mratio = mratio
+          self._chi = self._qratio/mratio
+          self._ptau = Energy/(mratio*energy0)-1
+          self._delta = Energy/(delta*energy0)-1
+          self.px = Px/(p0c*mratio)
+          self.py = Py/(p0c*mratio)
 
     def __repr__(self):
-        out = []
-        for nn in 'm0 p0c e0 beta0 gamma0'.split():
-            out.append('%-7s = %s' % (nn, getattr(self, nn)))
-        for nn in 's x px y py tau pt delta'.split():
-            out.append('%-7s = %s' % (nn, getattr(self, nn)))
-        for nn in 'mratio qratio chi'.split():
-            out.append('%-7s = %s' % (nn, getattr(self, nn)))
-        return '\n'.join(out)
+        out=f"""\
+        mass0   = {self.mass0}
+        p0c     = {self.p0c}
+        energy0 = {self.energy0}
+        beta0   = {self.beta0}
+        gamma0  = {self.gamma0}
+        s       = {self.s}
+        x       = {self.x}
+        px      = {self.px}
+        y       = {self.y}
+        py      = {self.py}
+        zeta    = {self.zeta}
+        delta   = {self.delta}
+        ptau    = {self.ptau}
+        mratio  = {self.mratio}
+        qratio  = {self.qratio}
+        chi     = {self.chi}"""
+        return out
