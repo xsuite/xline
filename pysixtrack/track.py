@@ -111,23 +111,23 @@ class Multipole(Element):
         dpx = -chi*dpx
         dpy = chi*dpy
         # curvature effect kick
+        hxl=self.hxl
+        hyl=self.hyl
+        delta=p.delta
         if (length > 0):
             b1l = chi*knl[0]
             a1l = chi*ksl[0]
             hxx = hxl/length*x
             hyy = hyl/length*y
-            dpx += hxl + hxl*p.delta - b1l*hxx
-            dpy -= hyl + hyl*p.delta - a1l*hyy
-<<<<<<< HEAD
-            p.z -= chi*(hxx-hyy)*length
-=======
-            p.zeta -= chi*(hxx-hyy)*l
->>>>>>> 5141fe6dc449478c19401e2e844d725be0d0f46b
+            dpx += hxl + hxl*delta - b1l*hxx
+            dpy -= hyl + hyl*delta - a1l*hyy
+            p.zeta -= chi*(hxx-hyy)*length
         p.px += dpx
         p.py += dpy
 
 
 class XYShift(Element):
+    """shift of the reference"""
     __slots__ = ('dx', 'dy')
     __units__ = ('meter', 'meter')
     __defaults__ = (0, 0)
@@ -138,6 +138,7 @@ class XYShift(Element):
 
 
 class SRotation(Element):
+    """anti-clockwise rotation of the reference frame"""
     __slots__ = ('angle',)
     __units__ = ('degree',)
     __defaults__ = (0,)
@@ -146,12 +147,13 @@ class SRotation(Element):
         deg2rag = p._m.pi/180
         cz = p._m.cos(self.angle*deg2rag)
         sz = p._m.sin(self.angle*deg2rag)
-        xn = cz*p.x-sz*p.y
-        yn = sz*p.x+cz*p.y
+        print(cz,sz)
+        xn =  cz*p.x + sz*p.y
+        yn = -sz*p.x + cz*p.y
         p.x = xn
         p.y = yn
-        xn = cz*p.px-sz*p.py
-        yn = sz*p.px+cz*p.py
+        xn =  cz*p.px + sz*p.py
+        yn = -sz*p.px + cz*p.py
         p.px = xn
         p.py = yn
 
