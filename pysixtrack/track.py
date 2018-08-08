@@ -55,7 +55,7 @@ class Drift(Element):
         yp = p.py*rpp
         p.x += xp*length
         p.y += yp*length
-        p.zeta += length*(p.rvv+(xp**2+yp**2)/2)
+        p.zeta += length*(p.rvv-(1+(xp**2+yp**2)/2))
         p.s += length
 
 
