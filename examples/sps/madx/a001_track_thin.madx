@@ -19,7 +19,7 @@ start, x=1e-3, px=0., y=-0.5e-3, py=0., t=0.74, pt=0.;
 !observe, place=qf.10010..2; !err=1e-17
 !observe, place=mba.10030..1;
 !observe, place=acta.31637;
-observe, place=end.10010;
+!observe, place=end.10010;
 !run, turns=512;
 run, turns=1;
 endtrack;
