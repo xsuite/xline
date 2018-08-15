@@ -111,9 +111,9 @@ class Multipole(Element):
         dpx = -chi*dpx
         dpy = chi*dpy
         # curvature effect kick
-        hxl=self.hxl
-        hyl=self.hyl
-        delta=p.delta
+        hxl = self.hxl
+        hyl = self.hyl
+        delta = p.delta
         if (length > 0):
             b1l = chi*knl[0]
             a1l = chi*ksl[0]
@@ -147,12 +147,12 @@ class SRotation(Element):
         deg2rag = p._m.pi/180
         cz = p._m.cos(self.angle*deg2rag)
         sz = p._m.sin(self.angle*deg2rag)
-        print(cz,sz)
-        xn =  cz*p.x + sz*p.y
+        print(cz, sz)
+        xn = cz*p.x + sz*p.y
         yn = -sz*p.x + cz*p.y
         p.x = xn
         p.y = yn
-        xn =  cz*p.px + sz*p.py
+        xn = cz*p.px + sz*p.py
         yn = -sz*p.px + cz*p.py
         p.px = xn
         p.py = yn
@@ -171,11 +171,11 @@ class Cavity(Element):
         phase = self.lag*pi/180-k*tau
         p.add_to_energy(p.chi*self.voltage*sin(phase))
 
+
 class RFMultipole(Element):
     __slots__ = ('voltage', 'frequency', 'knl', 'ksl', 'pn', 'ps')
     __units__ = ('volt', 'hertz', [], [], [], [])
     __defaults__ = (0, 0, 0, 0, 0)
-
 
 
 class Line(Element):
@@ -186,21 +186,19 @@ class Line(Element):
         for el in self.elements:
             el.track(p)
 
+
 class BeamBeam4D(Element):
     __slots__ = ('sigma_xx', 'sigma_yy', 'h_sep', 'v_sep', 'strengthratio')
     __units__ = ('mm^2', 'mm^2', 'mm', 'mm', [])
     __defaults__ = (0, 0, 0, 0, 0)
 
 
-
 class BeamBeam6D(Element):
     __slots__ = tuple(('ibsix xang xplane h_sep v_sep ' +
-                              'sigma_xx sigma_xxp sigma_xpxp sigma_yy sigma_yyp ' +
-                              'sigma_ypyp sigma_xy sigma_xyp sigma_xpy sigma_xpyp strengthratio').split())
+                       'sigma_xx sigma_xxp sigma_xpxp sigma_yy sigma_yyp ' +
+                       'sigma_ypyp sigma_xy sigma_xyp sigma_xpy sigma_xpyp strengthratio').split())
     __units__ = tuple(len(__slots__)*[[]])
     __defaults__ = tuple(len(__slots__)*[0.])
-
-
 
 
 classes = [cls for cls in globals().values() if isinstance(cls, type)]
@@ -208,4 +206,4 @@ elements = [cls for cls in classes if issubclass(cls, Element)]
 __all__ = [cls.__name__ for cls in elements]
 __all__.append('element_types')
 
-element_types = dict( (cls.__name__, cls) for cls in elements)
+element_types = dict((cls.__name__, cls) for cls in elements)
