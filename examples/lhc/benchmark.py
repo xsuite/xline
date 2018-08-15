@@ -33,6 +33,7 @@ for ii in range(1,len(iconv)):
     out=compare(prun,pbench)
     print("-----------------------\n\n")
     if out>1e-13:
+        print("Too large discrepancy")
         break
 
 
