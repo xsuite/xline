@@ -174,7 +174,7 @@ class Cavity(Element):
 class RFMultipole(Element):
     __slots__ = ('voltage', 'frequency', 'knl', 'ksl', 'pn', 'ps')
     __units__ = ('volt', 'hertz', [], [], [], [])
-    __defaults__ = (0, 0, 0)
+    __defaults__ = (0, 0, 0, 0, 0)
 
 
 
@@ -187,10 +187,20 @@ class Line(Element):
             el.track(p)
 
 class BeamBeam4D(Element):
-    pass
+    __slots__ = ('sigma_xx', 'sigma_yy', 'h_sep', 'v_sep', 'strengthratio')
+    __units__ = ('mm^2', 'mm^2', 'mm', 'mm', [])
+    __defaults__ = (0, 0, 0, 0, 0)
+
+
 
 class BeamBeam6D(Element):
-    pass
+    __slots__ = tuple(('ibsix xang xplane h_sep v_sep ' +
+                              'sigma_xx sigma_xxp sigma_xpxp sigma_yy sigma_yyp ' +
+                              'sigma_ypyp sigma_xy sigma_xyp sigma_xpy sigma_xpyp strengthratio').split())
+    __units__ = tuple(len(__slots__)*[[]])
+    __defaults__ = tuple(len(__slots__)*[0.])
+
+
 
 
 classes = [cls for cls in globals().values() if isinstance(cls, type)]
