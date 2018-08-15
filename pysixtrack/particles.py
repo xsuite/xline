@@ -162,7 +162,7 @@ class Particles(object):
         self.py = py
         self.zeta = zeta
         self._mass0 = mass0
-        self._q0 = q0
+        self.q0 = q0
         self._update_coordinates = False
         self.__init__ref(p0c, energy0, gamma0, beta0)
         self.__init__delta(delta, ptau, psigma)
@@ -206,7 +206,7 @@ class Particles(object):
     def set_tau(self, tau):
         self._zeta = self.beta*tau
 
-    sigma = property(lambda self: self.beta0/self.beta*self.zeta)
+    sigma = property(lambda self: (self.beta0/self.beta)*self.zeta)
 
     @sigma.setter
     def set_sigma(self, sigma):
