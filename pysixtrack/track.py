@@ -55,7 +55,7 @@ class Drift(Element):
         yp = p.py*rpp
         p.x += xp*length
         p.y += yp*length
-        p.zeta += length*(p.rvv+(xp**2+yp**2)/2)
+        p.zeta += length*(p.rvv-(1+(xp**2+yp**2)/2))
         p.s += length
 
 
@@ -91,11 +91,11 @@ class Multipole(Element):
         knl = np.array(self.knl)
         ksl = np.array(self.ksl)
         if len(knl) < len(ksl):
-            nknl = np.zeros(order, dtype=knl.dtype)
+            nknl = np.zeros(order+1, dtype=knl.dtype)
             nknl[:len(knl)] = knl
             knl = nknl
         elif len(knl) > len(ksl):
-            nksl = np.zeros(order, dtype=ksl.dtype)
+            nksl = np.zeros(order+1, dtype=ksl.dtype)
             nksl[:len(ksl)] = ksl
             ksl = nksl
         x = p.x
@@ -111,19 +111,23 @@ class Multipole(Element):
         dpx = -chi*dpx
         dpy = chi*dpy
         # curvature effect kick
+        hxl=self.hxl
+        hyl=self.hyl
+        delta=p.delta
         if (length > 0):
             b1l = chi*knl[0]
             a1l = chi*ksl[0]
             hxx = hxl/length*x
             hyy = hyl/length*y
-            dpx += hxl + hxl*p.delta - b1l*hxx
-            dpy -= hyl + hyl*p.delta - a1l*hyy
+            dpx += hxl + hxl*delta - b1l*hxx
+            dpy -= hyl + hyl*delta - a1l*hyy
             p.zeta -= chi*(hxx-hyy)*length
         p.px += dpx
         p.py += dpy
 
 
 class XYShift(Element):
+    """shift of the reference"""
     __slots__ = ('dx', 'dy')
     __units__ = ('meter', 'meter')
     __defaults__ = (0, 0)
@@ -134,6 +138,7 @@ class XYShift(Element):
 
 
 class SRotation(Element):
+    """anti-clockwise rotation of the reference frame"""
     __slots__ = ('angle',)
     __units__ = ('degree',)
     __defaults__ = (0,)
@@ -142,12 +147,13 @@ class SRotation(Element):
         deg2rag = p._m.pi/180
         cz = p._m.cos(self.angle*deg2rag)
         sz = p._m.sin(self.angle*deg2rag)
-        xn = cz*p.x-sz*p.y
-        yn = sz*p.x+cz*p.y
+        print(cz,sz)
+        xn =  cz*p.x + sz*p.y
+        yn = -sz*p.x + cz*p.y
         p.x = xn
         p.y = yn
-        xn = cz*p.px-sz*p.py
-        yn = sz*p.px+cz*p.py
+        xn =  cz*p.px + sz*p.py
+        yn = -sz*p.px + cz*p.py
         p.px = xn
         p.py = yn
 
@@ -168,7 +174,7 @@ class Cavity(Element):
 class RFMultipole(Element):
     __slots__ = ('voltage', 'frequency', 'knl', 'ksl', 'pn', 'ps')
     __units__ = ('volt', 'hertz', [], [], [], [])
-    __defaults__ = (0, 0, 0)
+    __defaults__ = (0, 0, 0, 0, 0)
 
 
 
@@ -181,10 +187,20 @@ class Line(Element):
             el.track(p)
 
 class BeamBeam4D(Element):
-    pass
+    __slots__ = ('sigma_xx', 'sigma_yy', 'h_sep', 'v_sep', 'strengthratio')
+    __units__ = ('mm^2', 'mm^2', 'mm', 'mm', [])
+    __defaults__ = (0, 0, 0, 0, 0)
+
+
 
 class BeamBeam6D(Element):
-    pass
+    __slots__ = tuple(('ibsix xang xplane h_sep v_sep ' +
+                              'sigma_xx sigma_xxp sigma_xpxp sigma_yy sigma_yyp ' +
+                              'sigma_ypyp sigma_xy sigma_xyp sigma_xpy sigma_xpyp strengthratio').split())
+    __units__ = tuple(len(__slots__)*[[]])
+    __defaults__ = tuple(len(__slots__)*[0.])
+
+
 
 
 classes = [cls for cls in globals().values() if isinstance(cls, type)]

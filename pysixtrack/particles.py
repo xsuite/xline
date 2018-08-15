@@ -7,6 +7,7 @@ import numpy as np
 def count_not_none(*lst):
     return len(lst)-sum(p is None for p in lst)
 
+
 class Particles(object):
     clight = 299792458
     pi = 3.141592653589793238
@@ -116,7 +117,7 @@ class Particles(object):
             sigma = {sigma}""")
 
     def __init__chi(self, mratio, qratio, chi):
-        not_none = 3 - [mratio, qratio, chi].count(None)
+        not_none = count_not_none(mratio, qratio, chi)
         if not_none == 0:
             self._chi = 1.
             self._mratio = 1.
@@ -151,7 +152,7 @@ class Particles(object):
                  mass0=pmass, q0=1.,
                  p0c=1e9, energy0=None, gamma0=None, beta0=None,
                  chi=None, mratio=None, qratio=None,
-                 partid = None, turn = None, state = None, elemid= None,
+                 partid=None, turn=None, state=None, elemid=None,
                  mathlib=np, **args):
         self._m = mathlib
         self.s = s
@@ -161,16 +162,16 @@ class Particles(object):
         self.py = py
         self.zeta = zeta
         self._mass0 = mass0
-        self._q0 = q0
-        self._update_coordinates=False
+        self.q0 = q0
+        self._update_coordinates = False
         self.__init__ref(p0c, energy0, gamma0, beta0)
         self.__init__delta(delta, ptau, psigma)
         self.__init__zeta(zeta, tau, sigma)
         self.__init__chi(chi, mratio, qratio)
-        self._update_coordinates=True
-        self.partid=partid
-        self.turn=turn
-        self.state=state
+        self._update_coordinates = True
+        self.partid = partid
+        self.turn = turn
+        self.state = state
 
     Px = property(lambda p: p.px*p.p0c*p.mratio)
     Py = property(lambda p: p.py*p.p0c*p.mratio)
@@ -181,32 +182,38 @@ class Particles(object):
     rvv = property(lambda self: self.beta/self.beta0)
     rpp = property(lambda self: 1/(1+self.delta))
 
-    def add_to_energy(self,energy):
-        self.ptau+=energy/self.p0c
+    def add_to_energy(self, energy):
+        self.ptau += energy/self.p0c
 
     delta = property(lambda self: self._delta)
+
     @delta.setter
     def delta(self, delta):
         sqrt = self._m.sqrt
         self._delta = delta
-        self._ptau = sqrt(self.delta**2+2*self.delta+1/self.beta0**2)-1/self.beta0
+        self._ptau = sqrt(self.delta**2+2*self.delta +
+                          1/self.beta0**2)-1/self.beta0
 
     psigma = property(lambda self: self._ptau/self.beta0)
+
     @psigma.setter
     def set_psigma(self, psigma):
-        self.ptau=psigma*self.beta0
+        self.ptau = psigma*self.beta0
 
-    tau= property(lambda self: self.zeta/self.beta)
+    tau = property(lambda self: self.zeta/self.beta)
+
     @tau.setter
-    def set_tau(self,tau):
-        self._zeta=self.beta*tau
+    def set_tau(self, tau):
+        self._zeta = self.beta*tau
 
-    sigma= property(lambda self: (self.beta0/self.beta)*self.zeta)
+    sigma = property(lambda self: (self.beta0/self.beta)*self.zeta)
+
     @sigma.setter
-    def set_sigma(self,sigma):
-        self._zeta=self.beta/self.beta0*sigma
+    def set_sigma(self, sigma):
+        self._zeta = self.beta/self.beta0*sigma
 
     ptau = property(lambda self: self._ptau)
+
     @ptau.setter
     def ptau(self, ptau):
         sqrt = self._m.sqrt
@@ -220,6 +227,7 @@ class Particles(object):
         new = self._f1(mass0, self.p0c)
 
     beta0 = property(lambda self: self._beta0)
+
     @beta0.setter
     def beta0(self, beta0):
         new = self._f3(self.mass0, beta0)
@@ -227,6 +235,7 @@ class Particles(object):
         self._update_particles(*new)
 
     gamma0 = property(lambda self: self._gamma0)
+
     @gamma0.setter
     def gamma0(self, gamma0):
         new = self._f4(self.mass0, gamma0)
@@ -234,6 +243,7 @@ class Particles(object):
         self._update_particles(*new)
 
     p0c = property(lambda self: self._p0c)
+
     @p0c.setter
     def p0c(self, p0c):
         new = self._f1(self.mass0, p0c)
@@ -241,6 +251,7 @@ class Particles(object):
         self._update_particles(*new)
 
     energy0 = property(lambda self: self._energy0)
+
     @energy0.setter
     def energy0(self, energy0):
         new = self._f2(self.mass0, energy0)
@@ -279,20 +290,20 @@ class Particles(object):
 
     def _update_particles(self, mass0, beta0, gamma0, p0c, energy0):
         if self._update_coordinates:
-          Px = self.Px
-          Py = self.Py
-          Energy = self.Energy
-          Pc = self.Pc
-          mratio = mass/mass0
-          self._mratio = mratio
-          self._chi = self._qratio/mratio
-          self._ptau = Energy/(mratio*energy0)-1
-          self._delta = Energy/(delta*energy0)-1
-          self.px = Px/(p0c*mratio)
-          self.py = Py/(p0c*mratio)
+            Px = self.Px
+            Py = self.Py
+            Energy = self.Energy
+            Pc = self.Pc
+            mratio = mass/mass0
+            self._mratio = mratio
+            self._chi = self._qratio/mratio
+            self._ptau = Energy/(mratio*energy0)-1
+            self._delta = Energy/(delta*energy0)-1
+            self.px = Px/(p0c*mratio)
+            self.py = Py/(p0c*mratio)
 
     def __repr__(self):
-        out=f"""\
+        out = f"""\
         mass0   = {self.mass0}
         p0c     = {self.p0c}
         energy0 = {self.energy0}
@@ -310,6 +321,3 @@ class Particles(object):
         qratio  = {self.qratio}
         chi     = {self.chi}"""
         return out
-
-
-
