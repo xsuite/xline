@@ -118,7 +118,7 @@ class Multipole(Element):
             hyy = hyl/length*y
             dpx += hxl + hxl*p.delta - b1l*hxx
             dpy -= hyl + hyl*p.delta - a1l*hyy
-            p.zeta -= chi*(hxx-hyy)*l
+            p.zeta -= chi*(hxx-hyy)*length
         p.px += dpx
         p.py += dpy
 

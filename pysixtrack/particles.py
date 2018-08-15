@@ -201,7 +201,7 @@ class Particles(object):
     def set_tau(self,tau):
         self._zeta=self.beta*tau
 
-    sigma= property(lambda self: self.sigma/self.beta0)
+    sigma= property(lambda self: (self.beta0/self.beta)*self.zeta)
     @sigma.setter
     def set_sigma(self,sigma):
         self._zeta=self.beta/self.beta0*sigma
