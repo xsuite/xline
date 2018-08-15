@@ -193,8 +193,32 @@ class BeamBeam4D(Element):
     __units__ = tuple(len(__slots__)*[[]])
     __defaults__ = tuple(len(__slots__)*[0.])
 
+    def track(self, p):
+        charge = p.qratio*p.q0*qe 
+        x  = p.x -  self.Delta_x
+        px = p.px
+        y  = p.y - self.Delta_y
+        py = p.py 
     
+        chi = p.chi 
+        
+        beta = p.beta0/p.rvv
+        p0c  = p.p0c*qe;
+    
+        # get_Ex_Ey_Gx_Gy_gauss(x, y, 
+        #     bb4ddata->sigma_x,
+        #     bb4ddata->sigma_y,
+        #     bb4ddata->min_sigma_diff,
+        #     &Ex, &Ey, skip_Gs, &Gx, &Gy);
+        Ex, Ey = 0., 0. #TEMP
+        
+        fact_kick = chi * self.N_part * self.q_part * charge * (1. + beta * self.beta_s)/(p0c*(beta + self.beta_s))
+    
+        px += fact_kick*Ex
+        py += fact_kick*Ey;
 
+        p.px = px
+        p.py = py
 
 
 class BeamBeam6D(Element):
