@@ -2,6 +2,8 @@ import numpy as np
 import math
 import numba
 
+from scipy.constants import e as qe
+
 _factorial = np.array([1,
                        1,
                        2,
@@ -187,9 +189,11 @@ class Line(Element):
             el.track(p)
 
 class BeamBeam4D(Element):
-    __slots__ = ('sigma_xx', 'sigma_yy', 'h_sep', 'v_sep', 'strengthratio')
-    __units__ = ('mm^2', 'mm^2', 'mm', 'mm', [])
-    __defaults__ = (0, 0, 0, 0, 0)
+    __slots__ = ('q_part', 'N_part', 'sigma_x', 'sigma_y', 'beta_s', 'min_sigma_diff', 'Delta_x', 'Delta_y')
+    __units__ = tuple(len(__slots__)*[[]])
+    __defaults__ = tuple(len(__slots__)*[0.])
+
+    
 
 
 
