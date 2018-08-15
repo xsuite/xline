@@ -91,11 +91,11 @@ class Multipole(Element):
         knl = np.array(self.knl)
         ksl = np.array(self.ksl)
         if len(knl) < len(ksl):
-            nknl = np.zeros(order, dtype=knl.dtype)
+            nknl = np.zeros(order+1, dtype=knl.dtype)
             nknl[:len(knl)] = knl
             knl = nknl
         elif len(knl) > len(ksl):
-            nksl = np.zeros(order, dtype=ksl.dtype)
+            nksl = np.zeros(order+1, dtype=ksl.dtype)
             nksl[:len(ksl)] = ksl
             ksl = nksl
         x = p.x
