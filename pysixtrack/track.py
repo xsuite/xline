@@ -4,6 +4,8 @@ import numba
 
 from scipy.constants import e as qe
 
+from  .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
+
 _factorial = np.array([1,
                        1,
                        2,
@@ -205,12 +207,8 @@ class BeamBeam4D(Element):
         beta = p.beta0/p.rvv
         p0c  = p.p0c*qe;
     
-        # get_Ex_Ey_Gx_Gy_gauss(x, y, 
-        #     bb4ddata->sigma_x,
-        #     bb4ddata->sigma_y,
-        #     bb4ddata->min_sigma_diff,
-        #     &Ex, &Ey, skip_Gs, &Gx, &Gy);
-        Ex, Ey = 0., 0. #TEMP
+        Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(x, y, self.sigma_x, self.sigma_y, 
+            min_sigma_diff=1e-10, skip_Gs=True, mathlib=p._m)
         
         fact_kick = chi * self.N_part * self.q_part * charge * (1. + beta * self.beta_s)/(p0c*(beta + self.beta_s))
     

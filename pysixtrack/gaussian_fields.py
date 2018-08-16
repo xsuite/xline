@@ -1,7 +1,7 @@
 from scipy.constants import epsilon_0
-from numpy import pi
+from numpy import pi, sqrt
 
-sqrt_pi = np.sqrt(pi)
+sqrt_pi = sqrt(pi)
 
 
 def get_transv_field_gauss_round(sigma, Delta_x, Delta_y, x, y, mathlib):  
@@ -21,7 +21,7 @@ def get_transv_field_gauss_round(sigma, Delta_x, Delta_y, x, y, mathlib):
 
 
 
-def get_transv_field_gauss_ellip(sigma_x, sigma_y, Delta_x, Delta_y, x, y, mathlib):  
+def get_transv_field_gauss_ellip(sigmax, sigmay, Delta_x, Delta_y, x, y, mathlib):  
     
   abs = mathlib.abs
   exp = mathlib.exp
@@ -89,7 +89,7 @@ def get_Ex_Ey_Gx_Gy_gauss(x, y, sigma_x, sigma_y, min_sigma_diff, skip_Gs, mathl
     abs = mathlib.abs    
        
     
-    if (fabs(sigma_x-sigma_y)< min_sigma_diff):
+    if (abs(sigma_x-sigma_y)< min_sigma_diff):
         
        
         sigma = 0.5*(sigma_x+sigma_y)
@@ -112,8 +112,8 @@ def get_Ex_Ey_Gx_Gy_gauss(x, y, sigma_x, sigma_y, min_sigma_diff, skip_Gs, mathl
         
         Ex, Ey = get_transv_field_gauss_ellip(sigma_x, sigma_y, Delta_x, Delta_y, x, y, mathlib)
 
-        double Sig_11 = sigma_x*sigma_x
-        double Sig_33 = sigma_y*sigma_y
+        Sig_11 = sigma_x*sigma_x
+        Sig_33 = sigma_y*sigma_y
         if not skip_Gs:    
           Gx =-1./(2*(Sig_11-Sig_33))*(x*Ex+y*Ey+1./(2*pi*epsilon_0)*\
                     (sigma_y/sigma_x*exp(-x*x/(2*Sig_11)-y*y/(2*Sig_33))-1.))
