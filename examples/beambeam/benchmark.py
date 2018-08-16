@@ -40,7 +40,7 @@ for ibb, bb_ele in enumerate(bb_ele_list):
     delta_y_st = bb.Delta_y
     bb.Delta_y = st_CO_exit_BB4D.y[ibb]+delta_y_st
 
-# Evaluate kick at CO location
+# Evaluate kick at CO location (using particle at exit, will not work or 6D)
 for ibb, bb_ele in enumerate(bb_ele_list):
     bb = bb_ele[2]
     ptemp = pysixtrack.Particles(**st_CO_exit_BB4D[ibb].get_minimal_beam())
@@ -50,6 +50,9 @@ for ibb, bb_ele in enumerate(bb_ele_list):
 
     Dpx = ptemp.px - ptempin.px
     Dpy = ptemp.py - ptempin.py
+
+    bb.Dpx_sub = Dpx
+    bb.Dpy_sub = Dpy
 
 
 

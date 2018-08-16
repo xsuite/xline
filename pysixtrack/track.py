@@ -191,7 +191,7 @@ class Line(Element):
             el.track(p)
 
 class BeamBeam4D(Element):
-    __slots__ = ('q_part', 'N_part', 'sigma_x', 'sigma_y', 'beta_s', 'min_sigma_diff', 'Delta_x', 'Delta_y')
+    __slots__ = ('q_part', 'N_part', 'sigma_x', 'sigma_y', 'beta_s', 'min_sigma_diff', 'Delta_x', 'Delta_y', 'Dpx_sub', 'Dpy_sub')
     __units__ = tuple(len(__slots__)*[[]])
     __defaults__ = tuple(len(__slots__)*[0.])
 
@@ -212,8 +212,8 @@ class BeamBeam4D(Element):
         
         fact_kick = chi * self.N_part * self.q_part * charge * (1. + beta * self.beta_s)/(p0c*(beta + self.beta_s))
     
-        px += fact_kick*Ex
-        py += fact_kick*Ey;
+        px += (fact_kick*Ex - self.Dpx_sub)
+        py += (fact_kick*Ey - self.Dpy_sub)
 
         p.px = px
         p.py = py
