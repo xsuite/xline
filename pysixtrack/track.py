@@ -4,7 +4,7 @@ import numba
 
 from scipy.constants import e as qe
 
-from  .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
+from .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
 
 _factorial = np.array([1,
                        1,
@@ -31,6 +31,10 @@ _factorial = np.array([1,
 
 class Element(object):
     def __init__(self, **nargs):
+        not_allowed=set(nargs.keys())-set(self.__slots__)
+        if len(not_allowed)>0:
+            cname=self.__class__.__name__
+            raise NameError(f"{not_allowed} not allowed by {cname}")
         for name, default in zip(self.__slots__, self.__defaults__):
             setattr(self, name, nargs.get(name, default))
 
@@ -192,32 +196,35 @@ class Line(Element):
 
 
 class BeamBeam4D(Element):
-    __slots__ = ('q_part', 'N_part', 'sigma_x', 'sigma_y', 'beta_s', 'min_sigma_diff', 'Delta_x', 'Delta_y', 'Dpx_sub', 'Dpy_sub')
+    __slots__ = ('q_part', 'N_part', 'sigma_x', 'sigma_y', 'beta_s',
+                 'min_sigma_diff', 'Delta_x', 'Delta_y', 'Dpx_sub', 'Dpy_sub')
     __units__ = tuple(len(__slots__)*[[]])
     __defaults__ = tuple(len(__slots__)*[0.])
 
     def track(self, p):
-        charge = p.qratio*p.q0*qe 
-        x  = p.x -  self.Delta_x
+        charge = p.qratio*p.q0*qe
+        x = p.x - self.Delta_x
         px = p.px
-        y  = p.y - self.Delta_y
-        py = p.py 
-    
-        chi = p.chi 
-        
+        y = p.y - self.Delta_y
+        py = p.py
+
+        chi = p.chi
+
         beta = p.beta0/p.rvv
-        p0c  = p.p0c*qe;
-    
-        Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(x, y, self.sigma_x, self.sigma_y, 
-            min_sigma_diff=1e-10, skip_Gs=True, mathlib=p._m)
-        
-        fact_kick = chi * self.N_part * self.q_part * charge * (1. + beta * self.beta_s)/(p0c*(beta + self.beta_s))
-    
+        p0c = p.p0c*qe
+
+        Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(x, y, self.sigma_x, self.sigma_y,
+                                       min_sigma_diff=1e-10, skip_Gs=True, mathlib=p._m)
+
+        fact_kick = chi * self.N_part * self.q_part * charge * \
+            (1. + beta * self.beta_s)/(p0c*(beta + self.beta_s))
+
         px += (fact_kick*Ex - self.Dpx_sub)
         py += (fact_kick*Ey - self.Dpy_sub)
 
         p.px = px
         p.py = py
+
 
 class BeamBeam6D(Element):
     __slots__ = tuple(('ibsix xang xplane h_sep v_sep ' +
