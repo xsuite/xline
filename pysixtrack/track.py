@@ -194,6 +194,12 @@ class Line(Element):
         for el in self.elements:
             el.track(p)
 
+    def track_elem_by_elem(self,p):
+        out=[]
+        for el in self.elements:
+            out.append(p.copy())
+            el.track(p)
+        return out
 
 class BeamBeam4D(Element):
     __slots__ = ('q_part', 'N_part', 'sigma_x', 'sigma_y', 'beta_s',
