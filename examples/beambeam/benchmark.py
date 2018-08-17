@@ -1,9 +1,60 @@
 import sixtracktools
 import pysixtrack
 
+import numpy as np
+
 six = sixtracktools.SixTrackInput('.')
 line, rest, iconv = six.expand_struct(convert=pysixtrack.element_types)
-sixdump = sixtracktools.SixDump101('res/dump3.dat')[::2]
+sixdump_all = sixtracktools.SixDump101('res/dump3.dat')
+
+N_st_ele = len(iconv) #Number of elements in SixTrack
+N_pyst_ele = len(line) #Number of elements in PySixTrack
+
+# extract closed orbit and test particle
+sixdump_CO = sixdump_all[::2]
+sixdump = sixdump_all[1::2]
+
+# Type of PyST elements
+pyst_ele_type_list = [ele[1] for ele in line]
+pyst_used_types = set(pyst_ele_type_list)
+
+# Index of bb elements in PyST
+pyst_ind_BB4D = np.where([ss=='BeamBeam4D' for ss in pyst_ele_type_list])[0]
+
+# Build list of bb elements in PyST
+bb_ele_list = [line[ind] for ind in pyst_ind_BB4D]
+
+# Index of bb elem in ST
+st_ind_BB4D = np.array([iconv.index(ind) for ind in pyst_ind_BB4D])
+
+#Find closed-orbit at beam-beam interactions
+st_CO_exit_BB4D = sixdump_CO[st_ind_BB4D]
+
+# Adjust delta definitions
+for ibb, bb_ele in enumerate(bb_ele_list):
+    bb = bb_ele[2]
+
+    delta_x_st = bb.Delta_x
+    bb.Delta_x = st_CO_exit_BB4D.x[ibb]-delta_x_st
+
+    delta_y_st = bb.Delta_y
+    bb.Delta_y = st_CO_exit_BB4D.y[ibb]-delta_y_st
+
+# Evaluate kick at CO location (using particle at exit, will not work or 6D)
+for ibb, bb_ele in enumerate(bb_ele_list):
+    bb = bb_ele[2]
+    ptemp = pysixtrack.Particles(**st_CO_exit_BB4D[ibb].get_minimal_beam())
+    ptempin = ptemp.copy()
+
+    bb.track(ptemp)
+
+    Dpx = ptemp.px - ptempin.px
+    Dpy = ptemp.py - ptempin.py
+
+    bb.Dpx_sub = Dpx
+    bb.Dpy_sub = Dpy
+
+
 
 def compare(prun,pbench):
     out=[]
