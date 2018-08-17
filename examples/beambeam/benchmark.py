@@ -87,4 +87,5 @@ for ii in range(1,len(iconv)):
         print("Too large discrepancy")
         break
 
+lattice = pysixtrack.Line(elememts=[elem for label,elem_type,elem in line])
 
