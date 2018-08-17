@@ -35,10 +35,10 @@ for ibb, bb_ele in enumerate(bb_ele_list):
     bb = bb_ele[2]
 
     delta_x_st = bb.Delta_x
-    bb.Delta_x = st_CO_exit_BB4D.x[ibb]+delta_x_st
+    bb.Delta_x = st_CO_exit_BB4D.x[ibb]-delta_x_st
 
     delta_y_st = bb.Delta_y
-    bb.Delta_y = st_CO_exit_BB4D.y[ibb]+delta_y_st
+    bb.Delta_y = st_CO_exit_BB4D.y[ibb]-delta_y_st
 
 # Evaluate kick at CO location (using particle at exit, will not work or 6D)
 for ibb, bb_ele in enumerate(bb_ele_list):
