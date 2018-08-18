@@ -203,33 +203,36 @@ class Line(Element):
 
 class BeamBeam4D(Element):
     __slots__ = ('q_part', 'N_part', 'sigma_x', 'sigma_y', 'beta_s',
-                 'min_sigma_diff', 'Delta_x', 'Delta_y', 'Dpx_sub', 'Dpy_sub')
-    __units__ = tuple(len(__slots__)*[[]])
-    __defaults__ = tuple(len(__slots__)*[0.])
+                 'min_sigma_diff', 'Delta_x', 'Delta_y', 'Dpx_sub', 'Dpy_sub', 'enabled')
+    __units__ = ('C', [], 'm', 'm', [],
+                 'm', 'm', 'm', [], [], [])
+    __defaults__ = (0., 0., 0., 0., 0.,
+                 0., 0., 0., 0., 0., True)
 
     def track(self, p):
-        charge = p.qratio*p.q0*qe
-        x = p.x - self.Delta_x
-        px = p.px
-        y = p.y - self.Delta_y
-        py = p.py
+        if self.enabled:
+            charge = p.qratio*p.q0*qe
+            x = p.x - self.Delta_x
+            px = p.px
+            y = p.y - self.Delta_y
+            py = p.py
 
-        chi = p.chi
+            chi = p.chi
 
-        beta = p.beta0/p.rvv
-        p0c = p.p0c*qe
+            beta = p.beta0/p.rvv
+            p0c = p.p0c*qe
 
-        Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(x, y, self.sigma_x, self.sigma_y,
-                                       min_sigma_diff=1e-10, skip_Gs=True, mathlib=p._m)
+            Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(x, y, self.sigma_x, self.sigma_y,
+                                           min_sigma_diff=1e-10, skip_Gs=True, mathlib=p._m)
 
-        fact_kick = chi * self.N_part * self.q_part * charge * \
-            (1. + beta * self.beta_s)/(p0c*(beta + self.beta_s))
+            fact_kick = chi * self.N_part * self.q_part * charge * \
+                (1. + beta * self.beta_s)/(p0c*(beta + self.beta_s))
 
-        px += (fact_kick*Ex - self.Dpx_sub)
-        py += (fact_kick*Ey - self.Dpy_sub)
+            px += (fact_kick*Ex - self.Dpx_sub)
+            py += (fact_kick*Ey - self.Dpy_sub)
 
-        p.px = px
-        p.py = py
+            p.px = px
+            p.py = py
 
 
 class BeamBeam6D(Element):
@@ -238,6 +241,9 @@ class BeamBeam6D(Element):
                        'sigma_ypyp sigma_xy sigma_xyp sigma_xpy sigma_xpyp strengthratio').split())
     __units__ = tuple(len(__slots__)*[[]])
     __defaults__ = tuple(len(__slots__)*[0.])
+    def track(self, *args, **kwargs):
+        pass
+
 
 
 classes = [cls for cls in globals().values() if isinstance(cls, type)]
