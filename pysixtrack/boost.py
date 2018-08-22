@@ -2,23 +2,7 @@ import numpy as np
 
 # I program as close as possible to C...
 
-class ParBoost(object):
-    #it is practically a struct
-    def __init__(self, phi, alpha):
-        self.sphi = np.sin(phi)
-        self.cphi = np.cos(phi)
-        self.tphi = np.tan(phi)
-        self.salpha = np.sin(alpha)
-        self.calpha = np.cos(alpha)
-        
-    def tobuffer(self):
-        buf = [
-           self.sphi,
-           self.cphi,
-           self.tphi,
-           self.salpha,
-           self.calpha]
-        return np.array(buf, dtype=np.float64)
+
 
 def boost(x, px, y, py, sigma, delta, parboost):
     
