@@ -53,12 +53,12 @@ for bb, ibb in zip(listBB6D, ind_BB6D):
 
     bb.track(ptemp)
 
-    bb.Dx_sub = ptemp.x - ptempin.x
-    bb.Dpx_sub = ptemp.px - ptempin.px
-    bb.Dy_sub = ptemp.y - ptempin.y
-    bb.Dpy_sub = ptemp.py - ptempin.py 
-    bb.Dsigma_sub = ptemp.zeta - ptempin.zeta
-    bb.Ddelta_sub = ptemp.delta - ptempin.delta  
+    bb.BB6D_data.Dx_sub = ptemp.x - ptempin.x
+    bb.BB6D_data.Dpx_sub = ptemp.px - ptempin.px
+    bb.BB6D_data.Dy_sub = ptemp.y - ptempin.y
+    bb.BB6D_data.Dpy_sub = ptemp.py - ptempin.py 
+    bb.BB6D_data.Dsigma_sub = ptemp.zeta - ptempin.zeta
+    bb.BB6D_data.Ddelta_sub = ptemp.delta - ptempin.delta  
 
 
 
@@ -79,7 +79,8 @@ print('Max C.O. discrepancy in y %.2e m'%np.max(np.abs(y_CO_at_st_ele-sixdump_CO
 
 
 # Compare tracking results
-sixdump = sixdump_all[1::2] # Particle with deviation from CO
+# sixdump = sixdump_all[1::2] # Particle with deviation from CO
+sixdump = sixdump_all[::2] # Particle on CO
 
 def compare(prun,pbench):
     out=[]

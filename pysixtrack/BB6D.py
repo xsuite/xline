@@ -102,12 +102,12 @@ def BB6D_track(x, px, y, py, sigma, delta, q0, p0, bb6ddata):
     # Inverse boost on the coordinates of the weak beam
     x_ret, px_ret, y_ret, py_ret, sigma_ret, delta_ret = boost.inv_boost(x_star, px_star, y_star, py_star, sigma_star, delta_star, parboost)
 
-    # Go back to original reference frame
-    x_out = x_ret + bb6ddata.x_CO + bb6ddata.delta_x
-    px_out = px_ret + bb6ddata.px_CO
-    y_out = y_ret + bb6ddata.y_CO + bb6ddata.delta_y
-    py_out = py_ret + bb6ddata.py_CO
-    sigma_out = sigma_ret + bb6ddata.sigma_CO
-    delta_out = delta_ret + bb6ddata.delta_CO
+    # Go back to original reference frame and remove dipolar effect
+    x_out = x_ret + bb6ddata.x_CO + bb6ddata.delta_x - bb6ddata.Dx_sub
+    px_out = px_ret + bb6ddata.px_CO - bb6ddata.Dpx_sub
+    y_out = y_ret + bb6ddata.y_CO + bb6ddata.delta_y - bb6ddata.Dy_sub
+    py_out = py_ret + bb6ddata.py_CO - bb6ddata.Dpy_sub
+    sigma_out = sigma_ret + bb6ddata.sigma_CO - bb6ddata.Dsigma_sub 
+    delta_out = delta_ret + bb6ddata.delta_CO - bb6ddata.Ddelta_sub 
 
     return x_ret, px_ret, y_ret, py_ret, sigma_ret, delta_ret
