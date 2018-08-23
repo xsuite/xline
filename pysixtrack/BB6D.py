@@ -17,6 +17,8 @@ from scipy.constants import c as c_light
     
 def BB6D_track(x, px, y, py, sigma, delta, q0, p0, bb6ddata):
 
+    #print('Input px',px)
+
     q_part = bb6ddata.q_part
     parboost = bb6ddata.parboost
     Sigmas_0_star = bb6ddata.Sigmas_0_star
@@ -29,15 +31,16 @@ def BB6D_track(x, px, y, py, sigma, delta, q0, p0, bb6ddata):
     threshold_singular = bb6ddata.threshold_singular
 
     # Change reference frame
-    x_subCO = x - bb6ddata.x_CO - bb6ddata.delta_x
-    px_subCO = px - bb6ddata.px_CO
-    y_subCO = y - bb6ddata.y_CO - bb6ddata.delta_y
-    py_subCO = py - bb6ddata.py_CO
+    x_subCO =     x     - bb6ddata.x_CO    - bb6ddata.delta_x
+    px_subCO =    px    - bb6ddata.px_CO
+    y_subCO =     y     - bb6ddata.y_CO    - bb6ddata.delta_y
+    py_subCO =    py    - bb6ddata.py_CO
     sigma_subCO = sigma - bb6ddata.sigma_CO
     delta_subCO = delta - bb6ddata.delta_CO
     
     # Boost coordinates of the weak beam
-    x_star, px_star, y_star, py_star, sigma_star, delta_star = boost.boost(x, px, y, py, sigma, delta, parboost)
+    x_star, px_star, y_star, py_star, sigma_star, delta_star = boost.boost(
+        x_subCO, px_subCO, y_subCO, py_subCO, sigma_subCO, delta_subCO, parboost)
     #~ x_star, px_star, y_star, py_star, sigma_star, delta_star = (x, px, y, py, sigma, delta)
     for i_slice in range(N_slices):
         sigma_slice_star = sigma_slices_star[i_slice]
@@ -103,11 +106,12 @@ def BB6D_track(x, px, y, py, sigma, delta, q0, p0, bb6ddata):
     x_ret, px_ret, y_ret, py_ret, sigma_ret, delta_ret = boost.inv_boost(x_star, px_star, y_star, py_star, sigma_star, delta_star, parboost)
 
     # Go back to original reference frame and remove dipolar effect
-    x_out = x_ret + bb6ddata.x_CO + bb6ddata.delta_x - bb6ddata.Dx_sub
-    px_out = px_ret + bb6ddata.px_CO - bb6ddata.Dpx_sub
-    y_out = y_ret + bb6ddata.y_CO + bb6ddata.delta_y - bb6ddata.Dy_sub
-    py_out = py_ret + bb6ddata.py_CO - bb6ddata.Dpy_sub
-    sigma_out = sigma_ret + bb6ddata.sigma_CO - bb6ddata.Dsigma_sub 
-    delta_out = delta_ret + bb6ddata.delta_CO - bb6ddata.Ddelta_sub 
+    x_out =     x_ret     + bb6ddata.x_CO   + bb6ddata.delta_x   - bb6ddata.Dx_sub
+    px_out =    px_ret    + bb6ddata.px_CO                       - bb6ddata.Dpx_sub
+    y_out =     y_ret     + bb6ddata.y_CO   + bb6ddata.delta_y   - bb6ddata.Dy_sub
+    py_out =    py_ret    + bb6ddata.py_CO                       - bb6ddata.Dpy_sub
+    sigma_out = sigma_ret + bb6ddata.sigma_CO                    - bb6ddata.Dsigma_sub 
+    delta_out = delta_ret + bb6ddata.delta_CO                    - bb6ddata.Ddelta_sub 
 
-    return x_ret, px_ret, y_ret, py_ret, sigma_ret, delta_ret
+    #print(x_ret, px_ret, y_ret, py_ret, sigma_ret, delta_ret)
+    return x_out, px_out, y_out, py_out, sigma_out, delta_out

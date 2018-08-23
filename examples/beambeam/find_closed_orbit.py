@@ -24,7 +24,7 @@ closed_orbit = ring.find_closed_orbit()
 
 # Re-enable beam-beam
 for bb in listBB4D: bb.enabled = True
-for bb in listBB6D: bb.enabled = True
+for bb in listBB6D: bb.BB6D_data.enabled = True
 
 # Add closed orbit to separation for BB4D (as assumed in sixtrack)
 for bb, ibb in zip(listBB4D, ind_BB4D):
@@ -45,13 +45,37 @@ for bb, ibb in zip(listBB4D, ind_BB4D):
     bb.Dpx_sub = Dpx
     bb.Dpy_sub = Dpy
 
+# Provide closed orbit to BB6D
+for bb, ibb in zip(listBB6D, ind_BB6D):
+
+    bb.BB6D_data.x_CO = closed_orbit[ibb].x
+    bb.BB6D_data.px_CO = closed_orbit[ibb].px
+    bb.BB6D_data.y_CO = closed_orbit[ibb].y
+    bb.BB6D_data.py_CO = closed_orbit[ibb].py
+    bb.BB6D_data.sigma_CO = closed_orbit[ibb].zeta
+    bb.BB6D_data.delta_CO = closed_orbit[ibb].delta
+
+
+
+
+
 # Evaluate kick at CO location BB6D
 for bb, ibb in zip(listBB6D, ind_BB6D):
+
+    # For debug
+    bb.BB6D_data.Dx_sub = 0.
+    bb.BB6D_data.Dpx_sub = 0.
+    bb.BB6D_data.Dy_sub = 0.
+    bb.BB6D_data.Dpy_sub = 0. 
+    bb.BB6D_data.Dsigma_sub = 0.
+    bb.BB6D_data.Ddelta_sub = 0.
+    ######
 
     ptemp = closed_orbit[ibb].copy()
     ptempin = ptemp.copy()
 
     bb.track(ptemp)
+    print('Estimated x orbit kick', ptemp.x - ptempin.x)
 
     bb.BB6D_data.Dx_sub = ptemp.x - ptempin.x
     bb.BB6D_data.Dpx_sub = ptemp.px - ptempin.px
@@ -60,6 +84,16 @@ for bb, ibb in zip(listBB6D, ind_BB6D):
     bb.BB6D_data.Dsigma_sub = ptemp.zeta - ptempin.zeta
     bb.BB6D_data.Ddelta_sub = ptemp.delta - ptempin.delta  
 
+# Check that the closed orbit is not kicked
+
+for bb, ibb in zip(listBB6D, ind_BB6D):
+
+    ptemp = closed_orbit[ibb].copy()
+    ptempin = ptemp.copy()
+
+    bb.track(ptemp)
+
+    print('Again kick', ptemp.x - ptempin.x)
 
 
 
@@ -102,6 +136,7 @@ for ii in range(1,len(iconv)):
     #print(f"pysixtr {jja}, x={prun.x}, px={prun.px}")
     for jj in range(jja+1, jjb+1):
         label,elem_type,elem=line[jj]
+        pin = prun.copy()
         elem.track(prun)
         print(f"{jj} {label},{str(elem)[:50]}")
     pbench=pysixtrack.Particles(**sixdump[ii].get_minimal_beam())
