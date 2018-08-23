@@ -79,8 +79,8 @@ print('Max C.O. discrepancy in y %.2e m'%np.max(np.abs(y_CO_at_st_ele-sixdump_CO
 
 
 # Compare tracking results
-# sixdump = sixdump_all[1::2] # Particle with deviation from CO
-sixdump = sixdump_all[::2] # Particle on CO
+sixdump = sixdump_all[1::2] # Particle with deviation from CO
+# sixdump = sixdump_all[::2] # Particle on CO
 
 def compare(prun,pbench):
     out=[]
