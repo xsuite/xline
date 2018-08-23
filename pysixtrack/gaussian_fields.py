@@ -11,7 +11,7 @@ def get_transv_field_gauss_round(sigma, Delta_x, Delta_y, x, y, mathlib):
     if (r2 < 1e-20):
         temp = sqrt(r2)/(2.*pi*epsilon_0*sigma)  # linearised
     else:
-        temp = (1-exp(-0.5*r2/(sigma*sigma)))/(2.*PI*epsilon_0*r2)
+        temp = (1-exp(-0.5*r2/(sigma*sigma)))/(2.*pi*epsilon_0*r2)
 
     Ex = temp * (x-Delta_x)
     Ey = temp * (y-Delta_y)
@@ -89,6 +89,7 @@ def get_Ex_Ey_Gx_Gy_gauss(x, y, sigma_x, sigma_y, min_sigma_diff, skip_Gs, mathl
     sqrt = mathlib.sqrt
     pi = mathlib.pi
     sqrt_pi=sqrt(pi)
+    exp = mathlib.exp
 
     if (abs(sigma_x-sigma_y) < min_sigma_diff):
 
@@ -102,7 +103,7 @@ def get_Ex_Ey_Gx_Gy_gauss(x, y, sigma_x, sigma_y, min_sigma_diff, skip_Gs, mathl
         if not skip_Gs:
             Gx = 1/(2.*(x*x+y*y))*(y*Ey-x*Ex+1./(2*pi*epsilon_0*sigma*sigma)
                                    * x*x*exp(-(x*x+y*y)/(2.*sigma*sigma)))
-            Gy = 1./(2*(x*x+y*y))*(x*Ex-y*Ey+1./(2*PI*epsilon_0*sigma*sigma)
+            Gy = 1./(2*(x*x+y*y))*(x*Ex-y*Ey+1./(2*pi*epsilon_0*sigma*sigma)
                                    * y*y*exp(-(x*x+y*y)/(2.*sigma*sigma)))
     else:
 

@@ -15,6 +15,8 @@ line, rest, iconv = six.expand_struct(convert=pysixtrack.element_types)
 # Disable BB elements
 ind_BB4D, namelistBB4D, listBB4D = hp.get_elems_of_type(line, 'BeamBeam4D')
 for bb in listBB4D: bb.enabled = False
+ind_BB6D, namelistBB6D, listBB6D = hp.get_elems_of_type(line, 'BeamBeam6D')
+for bb in listBB6D: bb.BB6D_data.enabled = False
 
 # Find closed orbit
 ring = hp.Ring(line, p0c=p0c_eV)
@@ -22,13 +24,14 @@ closed_orbit = ring.find_closed_orbit()
 
 # Re-enable beam-beam
 for bb in listBB4D: bb.enabled = True
+for bb in listBB6D: bb.enabled = True
 
-# Add closed orbit to separation (as assumed in sixtrack)
+# Add closed orbit to separation for BB4D (as assumed in sixtrack)
 for bb, ibb in zip(listBB4D, ind_BB4D):
     bb.Delta_x+=closed_orbit[ibb].x
     bb.Delta_y+=closed_orbit[ibb].y
 
-# Evaluate kick at CO location
+# Evaluate kick at CO location BB4D
 for bb, ibb in zip(listBB4D, ind_BB4D):
 
     ptemp = closed_orbit[ibb].copy()
@@ -42,6 +45,20 @@ for bb, ibb in zip(listBB4D, ind_BB4D):
     bb.Dpx_sub = Dpx
     bb.Dpy_sub = Dpy
 
+# Evaluate kick at CO location BB6D
+for bb, ibb in zip(listBB6D, ind_BB6D):
+
+    ptemp = closed_orbit[ibb].copy()
+    ptempin = ptemp.copy()
+
+    bb.track(ptemp)
+
+    bb.Dx_sub = ptemp.x - ptempin.x
+    bb.Dpx_sub = ptemp.px - ptempin.px
+    bb.Dy_sub = ptemp.y - ptempin.y
+    bb.Dpy_sub = ptemp.py - ptempin.py 
+    bb.Dsigma_sub = ptemp.zeta - ptempin.zeta
+    bb.Ddelta_sub = ptemp.delta - ptempin.delta  
 
 
 

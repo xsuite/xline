@@ -1,6 +1,7 @@
 import sixtracktools
 import pysixtrack
 
+
 import numpy as np
 
 six = sixtracktools.SixTrackInput('.')
@@ -48,11 +49,13 @@ for ibb, bb_ele in enumerate(bb_ele_list):
 
     bb.track(ptemp)
 
-    Dpx = ptemp.px - ptempin.px
-    Dpy = ptemp.py - ptempin.py
+    bb.Dx_sub = ptemp.x - ptempin.x
+    bb.Dpx_sub = ptemp.px - ptempin.px
+    bb.Dy_sub = ptemp.y - ptempin.y
+    bb.Dpy_sub = ptemp.py - ptempin.py 
+    bb.Dsigma_sub = ptemp.zeta - ptempin.zeta
+    bb.Ddelta_sub = ptemp.delta - ptempin.delta    
 
-    bb.Dpx_sub = Dpx
-    bb.Dpy_sub = Dpy
 
 
 

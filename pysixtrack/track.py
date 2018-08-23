@@ -3,8 +3,11 @@ import math
 import numba
 
 from scipy.constants import e as qe
+from scipy.constants import c as clight
 
 from .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
+
+from . import BB6D
 
 _factorial = np.array([1,
                        1,
@@ -239,8 +242,16 @@ class BeamBeam6D(Element):
     __slots__ = ('BB6D_data',)
     __units__ = tuple(len(__slots__)*[[]])
     __defaults__ = tuple(len(__slots__)*[0.])
-    def track(self, *args, **kwargs):
-        pass
+    def track(self, p):
+        if self.BB6D_data.enabled:
+            x_ret, px_ret, y_ret, py_ret, zeta_ret, delta_ret = BB6D.BB6D_track(p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0, p.p0c/clight, self.BB6D_data)
+            
+            p.x = x_ret
+            p.px = px_ret
+            p.y = y_ret
+            p.py = py_ret
+            p.zeta = zeta_ret
+            p.delta = delta_ret
 
 
 
