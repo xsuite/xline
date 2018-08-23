@@ -244,7 +244,7 @@ class BeamBeam6D(Element):
     __defaults__ = tuple(len(__slots__)*[0.])
     def track(self, p):
         if self.BB6D_data.enabled:
-            x_ret, px_ret, y_ret, py_ret, zeta_ret, delta_ret = BB6D.BB6D_track(p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0, p.p0c/clight, self.BB6D_data)
+            x_ret, px_ret, y_ret, py_ret, zeta_ret, delta_ret = BB6D.BB6D_track(p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0*qe, p.p0c/clight*qe, self.BB6D_data)
             
             p.x = x_ret
             p.px = px_ret
