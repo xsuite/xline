@@ -3,7 +3,7 @@ import pysixtrack
 
 import numpy as np
 
-six = sixtracktools.SixTrackInput('.')
+six = sixtracktools.SixInput('.')
 line, rest, iconv = six.expand_struct(convert=pysixtrack.element_types)
 sixdump_all = sixtracktools.SixDump101('res/dump3.dat')
 

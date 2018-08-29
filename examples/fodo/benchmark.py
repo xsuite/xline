@@ -3,7 +3,7 @@ import pysixtrack
 
 six = sixtracktools.SixInput('.')
 line, rest, iconv = six.expand_struct(convert=pysixtrack.element_types)
-sixdump = sixtracktools.SixDump101('res/dump3.dat')[::2]
+sixdump = sixtracktools.SixDump101('res/dump.dat')[1::2]
 
 def compare(prun,pbench):
     out=[]
