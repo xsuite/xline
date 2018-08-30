@@ -125,14 +125,19 @@ class Multipole(Element):
         hxl = self.hxl
         hyl = self.hyl
         delta = p.delta
-        if (length > 0):
+        if (hxl != 0 or hyl !=0):
             b1l = chi*knl[0]
             a1l = chi*ksl[0]
-            hxx = hxl/length*x
-            hyy = hyl/length*y
+            hxlx = hxl*x
+            hyly = hyl*y
+            if (length > 0):
+                hxx = hxlx/length
+                hyy = hyly/length
+            else:# non physical weak focusing disabled (SixTrack mode)
+                hxx=0; hyy=0
             dpx += hxl + hxl*delta - b1l*hxx
             dpy -= hyl + hyl*delta - a1l*hyy
-            p.zeta -= chi*(hxx-hyy)*length
+            p.zeta -= chi*(hxlx-hyly)
         p.px += dpx
         p.py += dpy
 
