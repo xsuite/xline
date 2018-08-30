@@ -1,6 +1,7 @@
 import sixtracktools
 import pysixtrack
 
+
 import numpy as np
 
 six = sixtracktools.SixInput('.')
@@ -35,10 +36,10 @@ for ibb, bb_ele in enumerate(bb_ele_list):
     bb = bb_ele[2]
 
     delta_x_st = bb.Delta_x
-    bb.Delta_x = st_CO_exit_BB4D.x[ibb]-delta_x_st
+    bb.Delta_x = st_CO_exit_BB4D.x[ibb]+delta_x_st
 
     delta_y_st = bb.Delta_y
-    bb.Delta_y = st_CO_exit_BB4D.y[ibb]-delta_y_st
+    bb.Delta_y = st_CO_exit_BB4D.y[ibb]+delta_y_st
 
 # Evaluate kick at CO location (using particle at exit, will not work or 6D)
 for ibb, bb_ele in enumerate(bb_ele_list):
@@ -47,12 +48,14 @@ for ibb, bb_ele in enumerate(bb_ele_list):
     ptempin = ptemp.copy()
 
     bb.track(ptemp)
-
+    
     Dpx = ptemp.px - ptempin.px
     Dpy = ptemp.py - ptempin.py
-
+  
     bb.Dpx_sub = Dpx
     bb.Dpy_sub = Dpy
+
+
 
 
 
@@ -87,5 +90,5 @@ for ii in range(1,len(iconv)):
         print("Too large discrepancy")
         break
 
-lattice = pysixtrack.Line(elememts=[elem for label,elem_type,elem in line])
+lattice = pysixtrack.Line(elements=[elem for label,elem_type,elem in line])
 

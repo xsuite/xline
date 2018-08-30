@@ -3,8 +3,11 @@ import math
 import numba
 
 from scipy.constants import e as qe
+from scipy.constants import c as clight
 
 from .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
+
+from . import BB6D
 
 _factorial = np.array([1,
                        1,
@@ -208,41 +211,54 @@ class Line(Element):
 
 class BeamBeam4D(Element):
     __slots__ = ('q_part', 'N_part', 'sigma_x', 'sigma_y', 'beta_s',
-                 'min_sigma_diff', 'Delta_x', 'Delta_y', 'Dpx_sub', 'Dpy_sub')
-    __units__ = tuple(len(__slots__)*[[]])
-    __defaults__ = tuple(len(__slots__)*[0.])
+                 'min_sigma_diff', 'Delta_x', 'Delta_y', 'Dpx_sub', 'Dpy_sub', 'enabled')
+    __units__ = ('C', [], 'm', 'm', [],
+                 'm', 'm', 'm', [], [], [])
+    __defaults__ = (0., 0., 0., 0., 0.,
+                 0., 0., 0., 0., 0., True)
 
     def track(self, p):
-        charge = p.qratio*p.q0*qe
-        x = p.x - self.Delta_x
-        px = p.px
-        y = p.y - self.Delta_y
-        py = p.py
+        if self.enabled:
+            charge = p.qratio*p.q0*qe
+            x = p.x - self.Delta_x
+            px = p.px
+            y = p.y - self.Delta_y
+            py = p.py
 
-        chi = p.chi
+            chi = p.chi
 
-        beta = p.beta0/p.rvv
-        p0c = p.p0c*qe
+            beta = p.beta0/p.rvv
+            p0c = p.p0c*qe
 
-        Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(x, y, self.sigma_x, self.sigma_y,
-                                       min_sigma_diff=1e-10, skip_Gs=True, mathlib=p._m)
+            Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(x, y, self.sigma_x, self.sigma_y,
+                                           min_sigma_diff=1e-10, skip_Gs=True, mathlib=p._m)
 
-        fact_kick = chi * self.N_part * self.q_part * charge * \
-            (1. + beta * self.beta_s)/(p0c*(beta + self.beta_s))
+            fact_kick = chi * self.N_part * self.q_part * charge * \
+                (1. + beta * self.beta_s)/(p0c*(beta + self.beta_s))
 
-        px += (fact_kick*Ex - self.Dpx_sub)
-        py += (fact_kick*Ey - self.Dpy_sub)
+            px += (fact_kick*Ex - self.Dpx_sub)
+            py += (fact_kick*Ey - self.Dpy_sub)
 
-        p.px = px
-        p.py = py
+            p.px = px
+            p.py = py
 
 
 class BeamBeam6D(Element):
-    __slots__ = tuple(('ibsix xang xplane h_sep v_sep ' +
-                       'sigma_xx sigma_xxp sigma_xpxp sigma_yy sigma_yyp ' +
-                       'sigma_ypyp sigma_xy sigma_xyp sigma_xpy sigma_xpyp strengthratio').split())
+    __slots__ = ('BB6D_data',)
     __units__ = tuple(len(__slots__)*[[]])
     __defaults__ = tuple(len(__slots__)*[0.])
+    def track(self, p):
+        if self.BB6D_data.enabled:
+            #import pdb; pdb.set_trace()
+            x_ret, px_ret, y_ret, py_ret, zeta_ret, delta_ret = BB6D.BB6D_track(p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0*qe, p.p0c/clight*qe, self.BB6D_data)
+            
+            p.x = x_ret
+            p.px = px_ret
+            p.y = y_ret
+            p.py = py_ret
+            p.zeta = zeta_ret
+            p.delta = delta_ret
+
 
 
 classes = [cls for cls in globals().values() if isinstance(cls, type)]
