@@ -137,7 +137,8 @@ p_out_st = pysixtrack.Particles(**sixdump[1].get_minimal_beam())
 p_in_pyst = p_in_st.copy()
 p_out_pyst = p_in_pyst.copy()
 
-listBB6D[0].track(p_out_pyst)
+if listBB6D:
+	listBB6D[0].track(p_out_pyst)
 
 
 for att in 'x px y py delta sigma'.split():
@@ -148,7 +149,6 @@ for att in 'x px y py delta sigma'.split():
     attin_pyst = getattr(p_in_pyst, att)
     attout_pyst = getattr(p_out_pyst, att)
     print('PyST: Change in '+att+': %e'%(attout_pyst-attin_pyst))
-
 
 
 def compare(prun,pbench):
