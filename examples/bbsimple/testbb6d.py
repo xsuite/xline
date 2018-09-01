@@ -153,14 +153,26 @@ for att in 'x px y py delta sigma'.split():
 
 def compare(prun,pbench):
     out=[]
+    out_rel = []
+    error = False
     for att in 'x px y py delta sigma'.split():
         vrun=getattr(prun,att)
         vbench=getattr(pbench,att)
         diff=vrun-vbench
+        diffrel = abs(diff)/abs(vbench)
         out.append(abs(diff))
-        print(f"{att:<5} {vrun:22.13e} {vbench:22.13e} {diff:22.13g}")
-    print(f"max {max(out):21.12e}")
-    return max(out)
+        out_rel.append(diffrel)
+        print(f"{att:<5} {vrun:22.13e} {vbench:22.13e} {diff:22.13g} {diffrel:22.13g}")
+        if diffrel>1e-7:
+            if diff>1e-13:
+                print('Too large discrepancy!')
+                error = True
+    print(f"\nmax {max(out):21.12e} maxrel {max(out_rel):22.12e}")
+    return error
+
+        
+        
+    
 
 print("")
 for ii in range(1,len(iconv)):
@@ -177,8 +189,9 @@ for ii in range(1,len(iconv)):
     pbench=pysixtrack.Particles(**sixdump[ii].get_minimal_beam())
     #print(f"sixdump {ii}, x={pbench.x}, px={pbench.px}")
     print("-----------------------")
-    out=compare(prun,pbench)
+    error=compare(prun,pbench)
     print("-----------------------\n\n")
-    if out>1e-11:
-        print("Too large discrepancy")
+    if error:
+        print('Error detected')
         break
+    
