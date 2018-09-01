@@ -16,7 +16,7 @@ line, rest, iconv = six.expand_struct(convert=pysixtrack.element_types)
 ind_BB4D, namelistBB4D, listBB4D = hp.get_elems_of_type(line, 'BeamBeam4D')
 for bb in listBB4D: bb.enabled = False
 ind_BB6D, namelistBB6D, listBB6D = hp.get_elems_of_type(line, 'BeamBeam6D')
-for bb in listBB6D: bb.BB6D_data.enabled = False
+for bb in listBB6D: bb.enabled = False
 
 # Load sixtrack tracking data
 sixdump_all = sixtracktools.SixDump101('res/dump3.dat')
@@ -56,7 +56,7 @@ plt.plot(sixdump_CO.s, sixdump_CO.x)
 
 # Re-enable beam-beam
 for bb in listBB4D: bb.enabled = True
-for bb in listBB6D: bb.BB6D_data.enabled = True
+for bb in listBB6D: bb.enabled = True
 
 # Add closed orbit to separation for BB4D (as assumed in sixtrack)
 for bb, ibb in zip(listBB4D, ind_BB4D):
@@ -80,12 +80,12 @@ for bb, ibb in zip(listBB4D, ind_BB4D):
 # Provide closed orbit to BB6D
 for bb, ibb in zip(listBB6D, ind_BB6D):
 
-    bb.BB6D_data.x_CO = closed_orbit[ibb].x
-    bb.BB6D_data.px_CO = closed_orbit[ibb].px
-    bb.BB6D_data.y_CO = closed_orbit[ibb].y
-    bb.BB6D_data.py_CO = closed_orbit[ibb].py
-    bb.BB6D_data.sigma_CO = closed_orbit[ibb].zeta
-    bb.BB6D_data.delta_CO = closed_orbit[ibb].delta
+    bb.x_CO = closed_orbit[ibb].x
+    bb.px_CO = closed_orbit[ibb].px
+    bb.y_CO = closed_orbit[ibb].y
+    bb.py_CO = closed_orbit[ibb].py
+    bb.sigma_CO = closed_orbit[ibb].zeta
+    bb.delta_CO = closed_orbit[ibb].delta
 
 
 
@@ -93,12 +93,12 @@ for bb, ibb in zip(listBB6D, ind_BB6D):
 for bb, ibb in zip(listBB6D, ind_BB6D):
 
     # For debug
-    bb.BB6D_data.Dx_sub = 0.
-    bb.BB6D_data.Dpx_sub = 0.
-    bb.BB6D_data.Dy_sub = 0.
-    bb.BB6D_data.Dpy_sub = 0. 
-    bb.BB6D_data.Dsigma_sub = 0.
-    bb.BB6D_data.Ddelta_sub = 0.
+    bb.Dx_sub = 0.
+    bb.Dpx_sub = 0.
+    bb.Dy_sub = 0.
+    bb.Dpy_sub = 0. 
+    bb.Dsigma_sub = 0.
+    bb.Ddelta_sub = 0.
     ######
 
     ptemp = closed_orbit[ibb].copy()
@@ -107,12 +107,12 @@ for bb, ibb in zip(listBB6D, ind_BB6D):
     bb.track(ptemp)
     print('Estimated x orbit kick', ptemp.x - ptempin.x)
 
-    bb.BB6D_data.Dx_sub = ptemp.x - ptempin.x
-    bb.BB6D_data.Dpx_sub = ptemp.px - ptempin.px
-    bb.BB6D_data.Dy_sub = ptemp.y - ptempin.y
-    bb.BB6D_data.Dpy_sub = ptemp.py - ptempin.py 
-    bb.BB6D_data.Dsigma_sub = ptemp.zeta - ptempin.zeta
-    bb.BB6D_data.Ddelta_sub = ptemp.delta - ptempin.delta  
+    bb.Dx_sub = ptemp.x - ptempin.x
+    bb.Dpx_sub = ptemp.px - ptempin.px
+    bb.Dy_sub = ptemp.y - ptempin.y
+    bb.Dpy_sub = ptemp.py - ptempin.py 
+    bb.Dsigma_sub = ptemp.zeta - ptempin.zeta
+    bb.Ddelta_sub = ptemp.delta - ptempin.delta  
 
 # Check that the closed orbit is not kicked
 for bb, ibb in zip(listBB6D, ind_BB6D):
@@ -123,6 +123,7 @@ for bb, ibb in zip(listBB6D, ind_BB6D):
     bb.track(ptemp)
 
     print('Again kick', ptemp.x - ptempin.x)
+
 
 
 
@@ -163,7 +164,7 @@ def compare(prun,pbench, pbench_prev):
         out.append(abs(diff))
         out_rel.append(diffrel)
         print(f"{att:<5} {vrun:22.13e} {vbench:22.13e} {diff:22.13g} {diffrel:22.13g}")
-        if diffrel>1e-9 or np.isnan(diffrel):
+        if diffrel>1e-8 or np.isnan(diffrel):
             if diff>1e-12:
                 print('Too large discrepancy!')
                 error = True
@@ -192,14 +193,9 @@ for ii in range(1,len(iconv)):
     print("-----------------------")
     error=compare(prun, pbench, pbench_prev)
     print("-----------------------\n\n")
-    
-    if label=='bb_ho1b1_0':
-        print('Debug stop')
-        break   
-        
-
-
+       
     if error:
         print('Error detected')
         break
-    
+
+ 
