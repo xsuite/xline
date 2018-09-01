@@ -164,7 +164,7 @@ def compare(prun,pbench):
         out_rel.append(diffrel)
         print(f"{att:<5} {vrun:22.13e} {vbench:22.13e} {diff:22.13g} {diffrel:22.13g}")
         if diffrel>1e-7:
-            if diff>1e-13:
+            if diff>1e-12:
                 print('Too large discrepancy!')
                 error = True
     print(f"\nmax {max(out):21.12e} maxrel {max(out_rel):22.12e}")
