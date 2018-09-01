@@ -126,7 +126,6 @@ for bb, ibb in zip(listBB6D, ind_BB6D):
 
 
 
-
 # Compare tracking results
 sixdump = sixdump_all[1::2] # Particle with deviation from CO
 #sixdump = sixdump_all[::2] # Particle on CO
@@ -193,6 +192,13 @@ for ii in range(1,len(iconv)):
     print("-----------------------")
     error=compare(prun, pbench, pbench_prev)
     print("-----------------------\n\n")
+    
+    if label=='bb_ho1b1_0':
+        print('Debug stop')
+        break   
+        
+
+
     if error:
         print('Error detected')
         break
