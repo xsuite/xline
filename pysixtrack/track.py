@@ -270,6 +270,8 @@ class BeamBeam6D(Element):
                                 self.enabled)
             x_ret, px_ret, y_ret, py_ret, zeta_ret, delta_ret = BB6D.BB6D_track(p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0*qe, p.p0c/clight*qe, bb6data)
             
+            self._last_bb6data = bb6data
+
             p.x = x_ret
             p.px = px_ret
             p.y = y_ret
