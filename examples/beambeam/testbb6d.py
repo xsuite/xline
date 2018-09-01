@@ -193,11 +193,7 @@ for ii in range(1,len(iconv)):
     print("-----------------------")
     error=compare(prun, pbench, pbench_prev)
     print("-----------------------\n\n")
-    
-    if label=='bb_ho1b1_0':
-        print('Debug stop')
-        break   
-        
+       
     if error:
         print('Error detected')
         break
