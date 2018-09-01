@@ -138,7 +138,7 @@ p_in_pyst = p_in_st.copy()
 p_out_pyst = p_in_pyst.copy()
 
 if listBB6D:
-	listBB6D[0].track(p_out_pyst)
+    listBB6D[0].track(p_out_pyst)
 
 
 for att in 'x px y py delta sigma'.split():
@@ -179,6 +179,6 @@ for ii in range(1,len(iconv)):
     print("-----------------------")
     out=compare(prun,pbench)
     print("-----------------------\n\n")
-    if out>1e-13:
+    if out>1e-11:
         print("Too large discrepancy")
         break
