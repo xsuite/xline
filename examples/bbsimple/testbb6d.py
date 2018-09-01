@@ -29,6 +29,10 @@ ring = hp.Ring(line, p0c=p0c_eV)
 guess = [getattr(sixdump_CO, att)[0] for att in 'x px y py sigma delta'.split()]
 closed_orbit = ring.find_closed_orbit(guess=guess, method='get_guess')
 
+print('Closed orbit at start machine:')
+print('x px y py sigma delta:',guess)
+
+
 # Check that closed orbit is closed
 pstart = closed_orbit[0].copy()
 pstart_st = pysixtrack.Particles(**sixdump_CO[0].get_minimal_beam())
@@ -144,7 +148,6 @@ for att in 'x px y py delta sigma'.split():
     attin_pyst = getattr(p_in_pyst, att)
     attout_pyst = getattr(p_out_pyst, att)
     print('PyST: Change in '+att+': %e'%(attout_pyst-attin_pyst))
-
 
 
 
