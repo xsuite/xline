@@ -106,7 +106,7 @@ class BB6D_Data(object):
         self.px_CO = px_CO
         self.y_CO = y_CO
         self.py_CO = py_CO
-        self.sigma_CO = py_CO
+        self.sigma_CO = sigma_CO
         self.delta_CO = delta_CO
         self.Dx_sub = Dx_sub
         self.Dpx_sub = Dpx_sub
