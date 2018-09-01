@@ -8,6 +8,7 @@ from scipy.constants import c as clight
 from .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
 
 from . import BB6D
+from . import BB6Ddata
 
 _factorial = np.array([1,
                        1,
@@ -244,13 +245,30 @@ class BeamBeam4D(Element):
 
 
 class BeamBeam6D(Element):
-    __slots__ = ('BB6D_data',)
+    __slots__ = ([  'q_part', 'N_part_tot', 'sigmaz', 'N_slices', 'min_sigma_diff', 'threshold_singular',
+                    'phi', 'alpha', 
+                    'Sig_11_0', 'Sig_12_0', 'Sig_13_0', 
+                    'Sig_14_0', 'Sig_22_0', 'Sig_23_0', 
+                    'Sig_24_0', 'Sig_33_0', 'Sig_34_0', 'Sig_44_0',
+                    'delta_x', 'delta_y',
+                    'x_CO', 'px_CO', 'y_CO', 'py_CO', 'sigma_CO', 'delta_CO',
+                    'Dx_sub', 'Dpx_sub', 'Dy_sub', 'Dpy_sub', 'Dsigma_sub', 'Ddelta_sub',
+                    'enabled'])
     __units__ = tuple(len(__slots__)*[[]])
     __defaults__ = tuple(len(__slots__)*[0.])
     def track(self, p):
-        if self.BB6D_data.enabled:
-            #import pdb; pdb.set_trace()
-            x_ret, px_ret, y_ret, py_ret, zeta_ret, delta_ret = BB6D.BB6D_track(p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0*qe, p.p0c/clight*qe, self.BB6D_data)
+        if self.enabled:
+            bb6data = BB6Ddata.BB6D_init(
+                                self.q_part, self.N_part_tot, self.sigmaz, self.N_slices, self.min_sigma_diff, self.threshold_singular,
+                                self.phi, self.alpha, 
+                                self.Sig_11_0, self.Sig_12_0, self.Sig_13_0, 
+                                self.Sig_14_0, self.Sig_22_0, self.Sig_23_0, 
+                                self.Sig_24_0, self.Sig_33_0, self.Sig_34_0, self.Sig_44_0,
+                                self.delta_x, self.delta_y,
+                                self.x_CO, self.px_CO, self.y_CO, self.py_CO, self.sigma_CO, self.delta_CO,
+                                self.Dx_sub, self.Dpx_sub, self.Dy_sub, self.Dpy_sub, self.Dsigma_sub, self.Ddelta_sub,
+                                self.enabled)
+            x_ret, px_ret, y_ret, py_ret, zeta_ret, delta_ret = BB6D.BB6D_track(p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0*qe, p.p0c/clight*qe, bb6data)
             
             p.x = x_ret
             p.px = px_ret
