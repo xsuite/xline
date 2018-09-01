@@ -151,19 +151,20 @@ for att in 'x px y py delta sigma'.split():
     print('PyST: Change in '+att+': %e'%(attout_pyst-attin_pyst))
 
 
-def compare(prun,pbench):
+def compare(prun,pbench, pbench_prev):
     out=[]
     out_rel = []
     error = False
     for att in 'x px y py delta sigma'.split():
         vrun=getattr(prun,att)
         vbench=getattr(pbench,att)
+        vbench_prev=getattr(pbench_prev,att)
         diff=vrun-vbench
-        diffrel = abs(diff)/abs(vbench)
+        diffrel = abs(1.-abs(vrun-vbench_prev)/abs(vbench-vbench_prev))
         out.append(abs(diff))
         out_rel.append(diffrel)
         print(f"{att:<5} {vrun:22.13e} {vbench:22.13e} {diff:22.13g} {diffrel:22.13g}")
-        if diffrel>1e-9:
+        if diffrel>1e-9 or np.isnan(diffrel):
             if diff>1e-12:
                 print('Too large discrepancy!')
                 error = True
@@ -179,6 +180,7 @@ for ii in range(1,len(iconv)):
     jja=iconv[ii-1]
     jjb=iconv[ii]
     prun=pysixtrack.Particles(**sixdump[ii-1].get_minimal_beam())
+    pbench_prev = prun.copy()
     print(f"\n-----sixtrack={ii} sixtracklib={jja} --------------")
     #print(f"pysixtr {jja}, x={prun.x}, px={prun.px}")
     for jj in range(jja+1, jjb+1):
@@ -189,7 +191,7 @@ for ii in range(1,len(iconv)):
     pbench=pysixtrack.Particles(**sixdump[ii].get_minimal_beam())
     #print(f"sixdump {ii}, x={pbench.x}, px={pbench.px}")
     print("-----------------------")
-    error=compare(prun,pbench)
+    error=compare(prun, pbench, pbench_prev)
     print("-----------------------\n\n")
     if error:
         print('Error detected')
