@@ -147,7 +147,7 @@ for att in 'x px y py delta sigma'.split():
 
 
 
-'''
+
 def compare(prun,pbench):
     out=[]
     for att in 'x px y py delta sigma'.split():
@@ -179,4 +179,3 @@ for ii in range(1,len(iconv)):
     if out>1e-13:
         print("Too large discrepancy")
         break
-'''
