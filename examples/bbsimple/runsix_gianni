@@ -1,0 +1,6 @@
+#!/bin/bash
+
+test -d res || mkdir res
+cp fort.2 fort.3 res
+(cd res; ../../../../sixtrack/build/SixTrack_cmakesix_defaultcompiler_defaultbuildtype/SixTrack_50000_stf_crlibm_rn_Linux_gfortran_static_x86_64_64bit_double>fort.6)
+#(cd res; ./sixtrack >fort.6)
