@@ -81,6 +81,8 @@ if  __name__ == '__main__':
         assert( len( p.q0 ) == num_particles )
 
         for jj in range( num_particles ):
+            if  elem_id == 78:
+                pdb.set_trace()
             kk = num_particles * ii + jj
             assert( kk < num_dumps )
 
