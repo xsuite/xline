@@ -20,12 +20,13 @@ if  __name__ == '__main__':
     # -------------------------------------------------------------------------
     # Dump beam elements:
 
-    six = sixtracktools.SixTrackInput('.')
+    six = sixtracktools.SixInput('.')
     line, rest, iconv = six.expand_struct(convert=pysixtrack.element_types)
 
     beam_elements = CBuffer()
 
     for label, elem_type, elem in line:
+
         if  elem_type == 'Drift':
             e = Drift( cbuffer=beam_elements, length=elem.length )
 
@@ -51,6 +52,8 @@ if  __name__ == '__main__':
         else:
             print( "Unknown/unhandled element type: {0}".format( elem_type, ) )
             pdb.set_trace()
+
+    beam_elements.to_file( './lhc_beam_elements.bin' )
 
     # -------------------------------------------------------------------------
     # Dump particles (element by element)
@@ -81,13 +84,11 @@ if  __name__ == '__main__':
         assert( len( p.q0 ) == num_particles )
 
         for jj in range( num_particles ):
-            if  elem_id == 78:
-                pdb.set_trace()
             kk = num_particles * ii + jj
             assert( kk < num_dumps )
 
             inp = pysixtrack.Particles( **sixdump[ kk ].get_minimal_beam() )
-            p.q0[ jj ]         = inp._q0
+            p.q0[ jj ]         = inp.q0
             p.mass0[ jj ]      = inp.mass0
             p.beta0[ jj ]      = inp.beta0
             p.gamma0[ jj ]     = inp.gamma0

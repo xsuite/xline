@@ -51,8 +51,9 @@ class MultiPole( CObject ):
             order = n - 1
 
             bal = np.zeros( 2 * order + 2 )
+            assert( len( knl ) == len( ksl ) )
 
-            for ii in range( order, 0, -1 ):
+            for ii in range( 0, len( knl ) ):
                 inv_factorial = 1.0 / float( self._factorial( ii ) )
                 jj = 2 * ii
                 bal[ jj     ] = knl[ ii ] * inv_factorial
