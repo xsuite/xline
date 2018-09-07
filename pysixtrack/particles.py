@@ -69,8 +69,10 @@ class Particles(object):
     def __init__ref(self, p0c, energy0, gamma0, beta0):
         not_none = count_not_none(beta0, gamma0, p0c, energy0)
         if not_none == 0:
-            raise ValueError("Particles defined without energy reference")
-        elif not_none == 1:
+            p0c=1e9
+            not_none =1
+            #raise ValueError("Particles defined without energy reference")
+        if not_none == 1:
             if p0c is not None:
                 self.p0c = p0c
             elif energy0 is not None:
@@ -157,7 +159,7 @@ class Particles(object):
                  delta=None, ptau=None, psigma=None, rvv=None,
                  zeta=None, tau=None, sigma=None,
                  mass0=pmass, q0=1.,
-                 p0c=1e9, energy0=None, gamma0=None, beta0=None,
+                 p0c=None, energy0=None, gamma0=None, beta0=None,
                  chi=None, mratio=None, qratio=None,
                  partid=None, turn=None, state=None, elemid=None,
                  mathlib=np, **args):
