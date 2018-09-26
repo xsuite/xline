@@ -103,7 +103,7 @@ ENDEDIT;
 
  use, sequence=sps;
  select, flag=makethin, slice=10, thick=false;
- makethin, sequence=sps, style=teapot;
+ makethin, sequence=sps, style=teapot, makedipedge=false;
  use, sequence=SPS;
 
  twiss;
@@ -122,7 +122,10 @@ ENDEDIT;
 
  save, beam, sequence=sps,file="SPS_Q20_thin.seq";
 
+ vacta31637= 4.5;
 
+use,sequence=sps; twiss;
+sixtrack, cavall, radius=0.017;
 
  stop;
 

@@ -114,8 +114,8 @@ class Particles(object):
         elif not_none == 1:
             if zeta is not None:
                 self.zeta = zeta
-            elif t is not None:
-                self.t = t
+            elif tau is not None:
+                self.tau = tau
             elif sigma is not None:
                 self.sigma = sigma
         else:
@@ -206,20 +206,20 @@ class Particles(object):
     psigma = property(lambda self: self._ptau/self.beta0)
 
     @psigma.setter
-    def set_psigma(self, psigma):
+    def psigma(self, psigma):
         self.ptau = psigma*self.beta0
 
     tau = property(lambda self: self.zeta/self.beta)
 
     @tau.setter
-    def set_tau(self, tau):
-        self._zeta = self.beta*tau
+    def tau(self, tau):
+        self.zeta = self.beta*tau
 
     sigma = property(lambda self: (self.beta0/self.beta)*self.zeta)
 
     @sigma.setter
-    def set_sigma(self, sigma):
-        self._zeta = self.beta/self.beta0*sigma
+    def sigma(self, sigma):
+        self.zeta = self.beta/self.beta0*sigma
 
     ptau = property(lambda self: self._ptau)
 
