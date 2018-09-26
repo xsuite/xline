@@ -19,7 +19,7 @@ def get_part(pbench,ii):
 
 def compare(prun,pbench):
     out=[]
-    for att in 'x px y py delta sigma'.split():
+    for att in 'x px y py tau ptau'.split():
         vrun=getattr(prun,att)
         vbench=getattr(pbench,att)
         diff=vrun-vbench
@@ -29,7 +29,7 @@ def compare(prun,pbench):
     return max(out)
 
 prun=get_part(pbench,0)
-for turn in range(1,2):
+for turn in range(1,30):
     sps.track(prun)
     compare(prun,get_part(pbench,turn))
 
