@@ -188,8 +188,11 @@ class Particles(object):
     Pc = property(lambda p: (p.delta*p.p0c+p.p0c)*p.mratio)
     mass = property(lambda p:  p.mass0*p.mratio)
     beta = property(lambda p:  (1+p.delta)/(1/p.beta0+p.ptau))
-    rvv = property(lambda self: self.beta/self.beta0)
-    rpp = property(lambda self: 1/(1+self.delta))
+    # rvv = property(lambda self: self.beta/self.beta0)
+    # rpp = property(lambda self: 1/(1+self.delta))
+
+    rvv = property(lambda self:  self._rvv)
+    rpp = property(lambda self:  self._rpp)
 
     def add_to_energy(self, energy):
         self.ptau += energy/self.p0c
@@ -202,6 +205,9 @@ class Particles(object):
         self._delta = delta
         self._ptau = sqrt(self.delta**2+2*self.delta +
                           1/self.beta0**2)-1/self.beta0
+        ptaubeta0 = self._ptau*self.beta0
+        self._rvv  = (1+self.delta)/(1+ptaubeta0)
+        self._rpp  =  1/(1+self.delta)
 
     psigma = property(lambda self: self._ptau/self.beta0)
 
@@ -228,6 +234,9 @@ class Particles(object):
         sqrt = self._m.sqrt
         self._ptau = ptau
         self._delta = sqrt(ptau**2+2*ptau/self.beta0+1)-1
+        ptaubeta0 = self._ptau*self.beta0
+        self._rvv  = (1+self.delta)/(1+ptaubeta0)
+        self._rpp  =  1/(1+self.delta)
 
     mass0 = property(lambda self: self._mass0)
 
