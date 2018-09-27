@@ -203,13 +203,13 @@ class Particles(object):
     def delta(self, delta):
         sqrt = self._m.sqrt
         self._delta = delta
-        self._ptau = sqrt(self.delta**2+2*self.delta +
+        ptau = sqrt(self.delta**2+2*self.delta +
                           1/self.beta0**2)-1/self.beta0
-        ptaubeta0 = self._ptau*self.beta0
+        ptaubeta0 = ptau*self.beta0
         self._rvv  = (1+self.delta)/(1+ptaubeta0)
         self._rpp  =  1/(1+self.delta)
 
-    psigma = property(lambda self: self._ptau/self.beta0)
+    psigma = property(lambda self: self.ptau/self.beta0)
 
     @psigma.setter
     def psigma(self, psigma):
@@ -227,14 +227,16 @@ class Particles(object):
     def sigma(self, sigma):
         self.zeta = self.beta/self.beta0*sigma
 
-    ptau = property(lambda self: self._ptau)
+    @property
+    def ptau(self):
+        sqrt = self._m.sqrt
+        return sqrt(self.delta**2+2*self.delta + 1/self.beta0**2)-1/self.beta0
 
     @ptau.setter
     def ptau(self, ptau):
         sqrt = self._m.sqrt
-        self._ptau = ptau
         self._delta = sqrt(ptau**2+2*ptau/self.beta0+1)-1
-        ptaubeta0 = self._ptau*self.beta0
+        ptaubeta0 = ptau*self.beta0
         self._rvv  = (1+self.delta)/(1+ptaubeta0)
         self._rpp  =  1/(1+self.delta)
 
