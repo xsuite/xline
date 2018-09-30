@@ -119,8 +119,6 @@ class BB6D_Data(object):
     
     def tobuffer(self):
 
-        raise ValueError('To be updated with Closed orbit and Deltas')
-
         buffer_list = []
         # Buffers corresponding to BB6D struct
         buffer_list.append(np.array([self.q_part], dtype=np.float64))
@@ -129,10 +127,30 @@ class BB6D_Data(object):
         buffer_list.append(np.array([self.min_sigma_diff], dtype=np.float64))
         buffer_list.append(np.array([self.threshold_singular], dtype=np.float64))
         buffer_list.append(int_to_float64arr(self.N_slices))
+        
+
+        buffer_list.append(np.array([self.delta_x], dtype=np.float64))
+        buffer_list.append(np.array([self.delta_y], dtype=np.float64))
+        buffer_list.append(np.array([self.x_CO], dtype=np.float64))
+        buffer_list.append(np.array([self.px_CO], dtype=np.float64))
+        buffer_list.append(np.array([self.y_CO], dtype=np.float64))
+        buffer_list.append(np.array([self.py_CO], dtype=np.float64))
+        buffer_list.append(np.array([self.sigma_CO], dtype=np.float64))
+        buffer_list.append(np.array([self.delta_CO], dtype=np.float64))
+        buffer_list.append(np.array([self.Dx_sub], dtype=np.float64))
+        buffer_list.append(np.array([self.Dpx_sub], dtype=np.float64))
+        buffer_list.append(np.array([self.Dy_sub], dtype=np.float64))
+        buffer_list.append(np.array([self.Dpy_sub], dtype=np.float64))
+        buffer_list.append(np.array([self.Dsigma_sub], dtype=np.float64))
+        buffer_list.append(np.array([self.Ddelta_sub], dtype=np.float64))        
+        buffer_list.append(int_to_float64arr({True:1, False:0}[self.enabled]))
+
         buffer_list.append(int_to_float64arr(3))# offset to N_part_per_slice
         buffer_list.append(int_to_float64arr(2+self.N_slices))# offset to x_slices_star
         buffer_list.append(int_to_float64arr(1+2*self.N_slices))# offset to y_slices_star
         buffer_list.append(int_to_float64arr(0+3*self.N_slices))# offset to sigma_slices_star
+
+
 
         # Buffers corresponding to arrays
         buffer_list.append(np.array(self.N_part_per_slice, dtype=np.float64))
