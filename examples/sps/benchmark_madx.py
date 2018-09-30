@@ -4,24 +4,46 @@ from pyoptics import madlang,optics
 mad=madlang.open('madx/SPS_Q20_thin.seq')
 mad.acta_31637.volt=4.5
 mad.acta_31637.lag=0.5
-out,rest=mad.sps.expand_struct()
 
 import pysixtrack
+elems,rest,iconv=mad.sps.expand_struct(pysixtrack.element_types)
 
-out,rest=mad.sps.expand_struct(pysixtrack.convert)
-elems=list(zip(*out))[1]
-sps=pysixtrack.Block(elems)
+pbench=optics.open('madx/track.obs0001.p0001')
+sps=pysixtrack.Line(elements= [e[2] for e in elems])
 
-import pickle
-pickle.dump(sps,open('sps.pickle','w'))
+def get_part(pbench,ii):
+    pstart=[pbench[n][ii] for n in 'x px y py t pt'.split()]
+    pstart=dict(zip('x px y py tau ptau'.split(),pstart))
+    prun=pysixtrack.Particles(energy0=pbench.e[ii]*1e9,**pstart)
+    return prun
 
-import numpy as np
+def compare(prun,pbench):
+    out=[]
+    for att in 'x px y py tau ptau'.split():
+        vrun=getattr(prun,att)
+        vbench=getattr(pbench,att)
+        diff=vrun-vbench
+        out.append(abs(diff))
+        print(f"{att:<5} {vrun:22.13e} {vbench:22.13e} {diff:22.13g}")
+    print(f"max {max(out):21.12e}")
+    return max(out)
 
-import time
-npart=10
+prun=get_part(pbench,0)
+for turn in range(1,30):
+    sps.track(prun)
+    compare(prun,get_part(pbench,turn))
+
+
+
+
+for ii in range(1,len(iconv)):
+    jja=iconv[ii-1]
+    jjb=iconv[ii]
+    prun=pysixtrack.Particles(
+
 
 def check_el(p):
-    madt=optics.open('sps/madx/track.obs0002.p0001')
+    madt=optics.open('madx/track.obs0001.p0001')
     out1=[madt[l][0] for l in 'x px y py y t pt'.split()]
     out2=[getattr(p,l) for l in 'x px y py y tau pt'.split()]
     diff=0

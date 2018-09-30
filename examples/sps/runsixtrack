@@ -1,0 +1,2 @@
+cp madx/fc.2 sixtrack/fort.2
+(cd sixtrack; sixtrack)
