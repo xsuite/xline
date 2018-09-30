@@ -123,6 +123,11 @@ for bb, ibb in zip(listBB6D, ind_BB6D):
     bb.track(ptemp)
 
     print('Again kick', ptemp.x - ptempin.x)
+    
+import pickle
+with open('line.pkl', 'wb') as fid:
+   pickle.dump(line, fid)
+
 
 
 
