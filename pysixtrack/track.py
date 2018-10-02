@@ -258,7 +258,7 @@ class BeamBeam4D(Element):
         buffer_list.append(np.array([self.Delta_y], dtype=np.float64))
         buffer_list.append(np.array([self.Dpx_sub], dtype=np.float64))
         buffer_list.append(np.array([self.Dpy_sub], dtype=np.float64))
-        buffer_list.append(int_to_float64arr({True:1, False:0}[self.enabled]))
+        buffer_list.append(BB6Ddata.int_to_float64arr({True:1, False:0}[self.enabled]))
 
         buf = np.concatenate(buffer_list)
         
