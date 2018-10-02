@@ -69,8 +69,10 @@ class Particles(object):
     def __init__ref(self, p0c, energy0, gamma0, beta0):
         not_none = count_not_none(beta0, gamma0, p0c, energy0)
         if not_none == 0:
-            raise ValueError("Particles defined without energy reference")
-        elif not_none == 1:
+            p0c=1e9
+            not_none =1
+            #raise ValueError("Particles defined without energy reference")
+        if not_none == 1:
             if p0c is not None:
                 self.p0c = p0c
             elif energy0 is not None:
@@ -112,8 +114,8 @@ class Particles(object):
         elif not_none == 1:
             if zeta is not None:
                 self.zeta = zeta
-            elif t is not None:
-                self.t = t
+            elif tau is not None:
+                self.tau = tau
             elif sigma is not None:
                 self.sigma = sigma
         else:
@@ -157,7 +159,7 @@ class Particles(object):
                  delta=None, ptau=None, psigma=None, rvv=None,
                  zeta=None, tau=None, sigma=None,
                  mass0=pmass, q0=1.,
-                 p0c=1e9, energy0=None, gamma0=None, beta0=None,
+                 p0c=None, energy0=None, gamma0=None, beta0=None,
                  chi=None, mratio=None, qratio=None,
                  partid=None, turn=None, state=None, elemid=None,
                  mathlib=np, **args):
@@ -186,11 +188,21 @@ class Particles(object):
     Pc = property(lambda p: (p.delta*p.p0c+p.p0c)*p.mratio)
     mass = property(lambda p:  p.mass0*p.mratio)
     beta = property(lambda p:  (1+p.delta)/(1/p.beta0+p.ptau))
-    rvv = property(lambda self: self.beta/self.beta0)
-    rpp = property(lambda self: 1/(1+self.delta))
+    # rvv = property(lambda self: self.beta/self.beta0)
+    # rpp = property(lambda self: 1/(1+self.delta))
+
+    rvv = property(lambda self:  self._rvv)
+    rpp = property(lambda self:  self._rpp)
 
     def add_to_energy(self, energy):
-        self.ptau += energy/self.p0c
+        sqrt = self._m.sqrt
+        deltabeta0 = self.delta*self.beta0
+        ptaubeta0 = sqrt(deltabeta0**2+2*deltabeta0*self.beta0 +1)-1
+        ptaubeta0 += energy/self.energy0
+        ptau=ptaubeta0/self.beta0
+        self._delta = sqrt(ptau**2+2*ptau/self.beta0+1)-1
+        self._rvv  = (1+self.delta)/(1+ptaubeta0)
+        self._rpp  =  1/(1+self.delta)
 
     delta = property(lambda self: self._delta)
 
@@ -198,34 +210,38 @@ class Particles(object):
     def delta(self, delta):
         sqrt = self._m.sqrt
         self._delta = delta
-        self._ptau = sqrt(self.delta**2+2*self.delta +
-                          1/self.beta0**2)-1/self.beta0
+        deltabeta0 = delta*self.beta0
+        ptaubeta0 = sqrt(deltabeta0**2+2*deltabeta0*self.beta0 + 1)-1
+        self._rvv  = (1+self.delta)/(1+ptaubeta0)
+        self._rpp  =  1/(1+self.delta)
 
-    psigma = property(lambda self: self._ptau/self.beta0)
+    psigma = property(lambda self: self.ptau/self.beta0)
 
     @psigma.setter
-    def set_psigma(self, psigma):
+    def psigma(self, psigma):
         self.ptau = psigma*self.beta0
 
     tau = property(lambda self: self.zeta/self.beta)
 
     @tau.setter
-    def set_tau(self, tau):
-        self._zeta = self.beta*tau
+    def tau(self, tau):
+        self.zeta = self.beta*tau
 
     sigma = property(lambda self: (self.beta0/self.beta)*self.zeta)
 
     @sigma.setter
-    def set_sigma(self, sigma):
-        self._zeta = self.beta/self.beta0*sigma
+    def sigma(self, sigma):
+        self.zeta = self.beta/self.beta0*sigma
 
-    ptau = property(lambda self: self._ptau)
+    @property
+    def ptau(self):
+        sqrt = self._m.sqrt
+        return sqrt(self.delta**2+2*self.delta + 1/self.beta0**2)-1/self.beta0
 
     @ptau.setter
     def ptau(self, ptau):
         sqrt = self._m.sqrt
-        self._ptau = ptau
-        self._delta = sqrt(ptau**2+2*ptau/self.beta0+1)-1
+        self.delta = sqrt(ptau**2+2*ptau/self.beta0+1)-1
 
     mass0 = property(lambda self: self._mass0)
 

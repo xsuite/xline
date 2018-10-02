@@ -40,8 +40,13 @@ class Ring(pysixtrack.Line):
     def _CO_error(self, coord):
         return np.sum((self.one_turn_map(coord)-coord)**2)
 
-    def find_closed_orbit(self, guess=np.array([0.,0.,0.,0.,0.,0.])):
-        res = so.minimize(self._CO_error, guess, tol=1e-20, method='Nelder-Mead')
+    def find_closed_orbit(self, guess=[0.,0.,0.,0.,0.,0.], method='Nelder-Mead'):
+        
+        if method=='get_guess':
+            res = type('', (), {})()
+            res.x = guess
+        else:
+            res = so.minimize(self._CO_error, np.array(guess), tol=1e-20, method=method)
 
         pcl=Particles(p0c=self.p0c)
 
