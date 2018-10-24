@@ -163,7 +163,6 @@ class SRotation(Element):
         deg2rag = p._m.pi/180
         cz = p._m.cos(self.angle*deg2rag)
         sz = p._m.sin(self.angle*deg2rag)
-        print(cz, sz)
         xn = cz*p.x + sz*p.y
         yn = -sz*p.x + cz*p.y
         p.x = xn
