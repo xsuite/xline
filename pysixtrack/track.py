@@ -8,6 +8,7 @@ from scipy.constants import c as clight
 from .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
 
 from . import BB6D
+from . import BB6Ddata
 
 _factorial = np.array([1,
                        1,
@@ -34,9 +35,9 @@ _factorial = np.array([1,
 
 class Element(object):
     def __init__(self, **nargs):
-        not_allowed=set(nargs.keys())-set(self.__slots__)
-        if len(not_allowed)>0:
-            cname=self.__class__.__name__
+        not_allowed = set(nargs.keys())-set(self.__slots__)
+        if len(not_allowed) > 0:
+            cname = self.__class__.__name__
             raise NameError(f"{not_allowed} not allowed by {cname}")
         for name, default in zip(self.__slots__, self.__defaults__):
             setattr(self, name, nargs.get(name, default))
@@ -78,12 +79,11 @@ class DriftExact(Element):
     def track(self, p):
         sqrt = p._m.sqrt
         length = self.length
-        rpp = p.rpp
-        xp = p.px*rpp
-        yp = p.py*rpp
-        p.x += xp*length
-        p.y += yp*length
-        p.zeta += length*(p.rvv+(xp**2+yp**2)/2)
+        opd = 1 + p.delta
+        lpzi = length / sqrt(opd**2- p.px**2 - p.py**2)
+        p.x += p.px*lpzi
+        p.y += p.py*lpzi
+        p.zeta  += p.rvv*length - opd*lpzi
         p.s += length
 
 
@@ -125,7 +125,7 @@ class Multipole(Element):
         hxl = self.hxl
         hyl = self.hyl
         delta = p.delta
-        if (hxl != 0 or hyl !=0):
+        if (hxl != 0 or hyl != 0):
             b1l = chi*knl[0]
             a1l = chi*ksl[0]
             hxlx = hxl*x
@@ -133,8 +133,9 @@ class Multipole(Element):
             if (length > 0):
                 hxx = hxlx/length
                 hyy = hyly/length
-            else:# non physical weak focusing disabled (SixTrack mode)
-                hxx=0; hyy=0
+            else:  # non physical weak focusing disabled (SixTrack mode)
+                hxx = 0
+                hyy = 0
             dpx += hxl + hxl*delta - b1l*hxx
             dpy -= hyl + hyl*delta - a1l*hyy
             p.zeta -= chi*(hxlx-hyly)
@@ -201,12 +202,13 @@ class Line(Element):
         for el in self.elements:
             el.track(p)
 
-    def track_elem_by_elem(self,p):
-        out=[]
+    def track_elem_by_elem(self, p):
+        out = []
         for el in self.elements:
             out.append(p.copy())
             el.track(p)
         return out
+
 
 class BeamBeam4D(Element):
     __slots__ = ('q_part', 'N_part', 'sigma_x', 'sigma_y', 'beta_s',
@@ -214,7 +216,7 @@ class BeamBeam4D(Element):
     __units__ = ('C', [], 'm', 'm', [],
                  'm', 'm', 'm', [], [], [])
     __defaults__ = (0., 0., 0., 0., 0.,
-                 0., 0., 0., 0., 0., True)
+                    0., 0., 0., 0., 0., True)
 
     def track(self, p):
         if self.enabled:
@@ -243,21 +245,39 @@ class BeamBeam4D(Element):
 
 
 class BeamBeam6D(Element):
-    __slots__ = ('BB6D_data',)
+    __slots__ = (['q_part', 'N_part_tot', 'sigmaz', 'N_slices', 'min_sigma_diff', 'threshold_singular',
+                  'phi', 'alpha',
+                  'Sig_11_0', 'Sig_12_0', 'Sig_13_0',
+                  'Sig_14_0', 'Sig_22_0', 'Sig_23_0',
+                  'Sig_24_0', 'Sig_33_0', 'Sig_34_0', 'Sig_44_0',
+                  'delta_x', 'delta_y',
+                  'x_CO', 'px_CO', 'y_CO', 'py_CO', 'sigma_CO', 'delta_CO',
+                  'Dx_sub', 'Dpx_sub', 'Dy_sub', 'Dpy_sub', 'Dsigma_sub', 'Ddelta_sub',
+                  'enabled'])
     __units__ = tuple(len(__slots__)*[[]])
     __defaults__ = tuple(len(__slots__)*[0.])
+
     def track(self, p):
-        if self.BB6D_data.enabled:
-            #import pdb; pdb.set_trace()
-            x_ret, px_ret, y_ret, py_ret, zeta_ret, delta_ret = BB6D.BB6D_track(p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0*qe, p.p0c/clight*qe, self.BB6D_data)
-            
+        if self.enabled:
+            bb6data = BB6Ddata.BB6D_init(
+                self.q_part, self.N_part_tot, self.sigmaz, self.N_slices, self.min_sigma_diff, self.threshold_singular,
+                self.phi, self.alpha,
+                self.Sig_11_0, self.Sig_12_0, self.Sig_13_0,
+                self.Sig_14_0, self.Sig_22_0, self.Sig_23_0,
+                self.Sig_24_0, self.Sig_33_0, self.Sig_34_0, self.Sig_44_0,
+                self.delta_x, self.delta_y,
+                self.x_CO, self.px_CO, self.y_CO, self.py_CO, self.sigma_CO, self.delta_CO,
+                self.Dx_sub, self.Dpx_sub, self.Dy_sub, self.Dpy_sub, self.Dsigma_sub, self.Ddelta_sub,
+                self.enabled)
+            x_ret, px_ret, y_ret, py_ret, zeta_ret, delta_ret = BB6D.BB6D_track(
+                p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0*qe, p.p0c/clight*qe, bb6data)
+            self._last_bb6data = bb6data
             p.x = x_ret
             p.px = px_ret
             p.y = y_ret
             p.py = py_ret
             p.zeta = zeta_ret
             p.delta = delta_ret
-
 
 
 classes = [cls for cls in globals().values() if isinstance(cls, type)]

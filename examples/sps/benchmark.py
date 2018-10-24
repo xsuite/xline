@@ -1,7 +1,7 @@
 from pyoptics import madlang,optics
 
 #see sps/madx/a001_track_thin.madx
-mad=madlang.open('sps/madx/SPS_Q20_thin.seq')
+mad=madlang.open('madx/SPS_Q20_thin.seq')
 mad.acta_31637.volt=4.5
 mad.acta_31637.lag=0.5
 out,rest=mad.sps.expand_struct()
