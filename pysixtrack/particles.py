@@ -196,6 +196,7 @@ class Particles(object):
 
     def add_to_energy(self, energy):
         sqrt = self._m.sqrt
+        oldrvv= self._rvv
         deltabeta0 = self.delta*self.beta0
         ptaubeta0 = sqrt(deltabeta0**2+2*deltabeta0*self.beta0 +1)-1
         ptaubeta0 += energy/self.energy0
@@ -203,6 +204,7 @@ class Particles(object):
         self._delta = sqrt(ptau**2+2*ptau/self.beta0+1)-1
         self._rvv  = (1+self.delta)/(1+ptaubeta0)
         self._rpp  =  1/(1+self.delta)
+        self.zeta  *=self._rvv/oldrvv
 
     delta = property(lambda self: self._delta)
 
