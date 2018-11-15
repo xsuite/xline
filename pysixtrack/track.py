@@ -243,6 +243,26 @@ class BeamBeam4D(Element):
             p.px = px
             p.py = py
 
+    def tobuffer(self):
+
+        buffer_list = []
+
+        buffer_list.append(np.array([self.q_part], dtype=np.float64))
+        buffer_list.append(np.array([self.N_part], dtype=np.float64))
+        buffer_list.append(np.array([self.sigma_x], dtype=np.float64))
+        buffer_list.append(np.array([self.sigma_y], dtype=np.float64))
+        buffer_list.append(np.array([self.beta_s], dtype=np.float64))
+        buffer_list.append(np.array([self.min_sigma_diff], dtype=np.float64))
+        buffer_list.append(np.array([self.Delta_x], dtype=np.float64))
+        buffer_list.append(np.array([self.Delta_y], dtype=np.float64))
+        buffer_list.append(np.array([self.Dpx_sub], dtype=np.float64))
+        buffer_list.append(np.array([self.Dpy_sub], dtype=np.float64))
+        buffer_list.append(BB6Ddata.int_to_float64arr({True:1, False:0}[self.enabled]))
+
+        buf = np.concatenate(buffer_list)
+        
+        return buf
+
 
 class BeamBeam6D(Element):
     __slots__ = (['q_part', 'N_part_tot', 'sigmaz', 'N_slices', 'min_sigma_diff', 'threshold_singular',
