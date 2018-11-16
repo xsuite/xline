@@ -51,7 +51,7 @@ class Element(object):
         args = ", ".join(args)
         return f"{self.__class__.__name__}({args})"
 
-    def as_dict(self):
+    def _asdict(self):
         return dict(self._slots())
 
 
