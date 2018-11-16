@@ -5,7 +5,7 @@ def get_transv_field_gauss_round(sigma, Delta_x, Delta_y, x, y, mathlib):
     exp = mathlib.exp
     sqrt = mathlib.sqrt
     pi = mathlib.pi
-    sqrt_pi=sqrt(pi)
+    sqrt_pi = sqrt(pi)
 
     r2 = (x-Delta_x)*(x-Delta_x)+(y-Delta_y)*(y-Delta_y)
     if (r2 < 1e-20):
@@ -26,7 +26,7 @@ def get_transv_field_gauss_ellip(sigmax, sigmay, Delta_x, Delta_y, x, y, mathlib
     wfun = mathlib.wfun
     sqrt = mathlib.sqrt
     pi = mathlib.pi
-    sqrt_pi=sqrt(pi)
+    sqrt_pi = sqrt(pi)
 
     # I always go to the first quadrant and then apply the signs a posteriori
     # numerically more stable (see http://inspirehep.net/record/316705/files/slac-pub-5582.pdf)
@@ -88,7 +88,7 @@ def get_Ex_Ey_Gx_Gy_gauss(x, y, sigma_x, sigma_y, min_sigma_diff, skip_Gs, mathl
     abs = mathlib.abs
     sqrt = mathlib.sqrt
     pi = mathlib.pi
-    sqrt_pi=sqrt(pi)
+    sqrt_pi = sqrt(pi)
     exp = mathlib.exp
 
     if (abs(sigma_x-sigma_y) < min_sigma_diff):

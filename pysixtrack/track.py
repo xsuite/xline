@@ -80,10 +80,10 @@ class DriftExact(Element):
         sqrt = p._m.sqrt
         length = self.length
         opd = 1 + p.delta
-        lpzi = length / sqrt(opd**2- p.px**2 - p.py**2)
+        lpzi = length / sqrt(opd**2 - p.px**2 - p.py**2)
         p.x += p.px*lpzi
         p.y += p.py*lpzi
-        p.zeta  += p.rvv*length - opd*lpzi
+        p.zeta += p.rvv*length - opd*lpzi
         p.s += length
 
 
@@ -210,6 +210,14 @@ class Line(Element):
         return out
 
 
+class Monitor(Element):
+    __slots__ = ('data',)
+    __defaults__ = ([],)
+
+    def track(self, p):
+        self.data.append(p.copy)
+
+
 class BeamBeam4D(Element):
     __slots__ = ('q_part', 'N_part', 'sigma_x', 'sigma_y', 'beta_s',
                  'min_sigma_diff', 'Delta_x', 'Delta_y', 'Dpx_sub', 'Dpy_sub', 'enabled')
@@ -257,10 +265,11 @@ class BeamBeam4D(Element):
         buffer_list.append(np.array([self.Delta_y], dtype=np.float64))
         buffer_list.append(np.array([self.Dpx_sub], dtype=np.float64))
         buffer_list.append(np.array([self.Dpy_sub], dtype=np.float64))
-        buffer_list.append(BB6Ddata.int_to_float64arr({True:1, False:0}[self.enabled]))
+        buffer_list.append(BB6Ddata.int_to_float64arr(
+            {True: 1, False: 0}[self.enabled]))
 
         buf = np.concatenate(buffer_list)
-        
+
         return buf
 
 
