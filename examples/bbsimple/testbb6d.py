@@ -123,6 +123,11 @@ for bb, ibb in zip(listBB6D, ind_BB6D):
     bb.track(ptemp)
 
     print('Again kick', ptemp.x - ptempin.x)
+    
+import pickle
+with open('line.pkl', 'wb') as fid:
+   pickle.dump(line, fid)
+
 
 
 
@@ -164,8 +169,8 @@ def compare(prun,pbench, pbench_prev):
         out.append(abs(diff))
         out_rel.append(diffrel)
         print(f"{att:<5} {vrun:22.13e} {vbench:22.13e} {diff:22.13g} {diffrel:22.13g}")
-        if diffrel>1e-8 or np.isnan(diffrel):
-            if diff>1e-12:
+        if diffrel>1e-5 or np.isnan(diffrel):
+            if np.abs(diff)>9e-10:
                 print('Too large discrepancy!')
                 error = True
     print(f"\nmax {max(out):21.12e} maxrel {max(out_rel):22.12e}")
