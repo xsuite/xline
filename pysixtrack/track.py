@@ -210,6 +210,14 @@ class Line(Element):
         return out
 
 
+class Monitor(Element):
+    __slots__ = ('data',)
+    __defaults__ = ([],)
+
+    def track(self,p):
+        self.data.append(p.copy)
+
+
 class BeamBeam4D(Element):
     __slots__ = ('q_part', 'N_part', 'sigma_x', 'sigma_y', 'beta_s',
                  'min_sigma_diff', 'Delta_x', 'Delta_y', 'Dpx_sub', 'Dpy_sub', 'enabled')
