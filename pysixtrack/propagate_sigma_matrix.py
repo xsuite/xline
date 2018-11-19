@@ -162,6 +162,7 @@ def _propagate_Sigma_matrix(Sigmas_at_0, S, threshold_singular=1e-16, handle_sin
         dS_Sig_33_hat = 0.5*(dS_W - signR*0.5/sqrtT*dS_T)
 
     # This will not be exposed in C
+    '''
     extra_data = {}
     extra_data['Sig_11'] = Sig_11
     extra_data['Sig_13'] = Sig_13
@@ -169,6 +170,8 @@ def _propagate_Sigma_matrix(Sigmas_at_0, S, threshold_singular=1e-16, handle_sin
     extra_data['cos2theta'] = cos2theta
     extra_data['T'] = T
     extra_data['R'] = R
+    '''
+    extra_data = -1.
 
     #~ if dS_sintheta>1e10:
     #~ import pdb; pdb.set_trace()
@@ -177,26 +180,28 @@ def _propagate_Sigma_matrix(Sigmas_at_0, S, threshold_singular=1e-16, handle_sin
         dS_Sig_11_hat, dS_Sig_33_hat, dS_costheta, dS_sintheta,\
         extra_data
 
+        
+propagate_Sigma_matrix = np.vectorize(_propagate_Sigma_matrix)
 
-def propagate_Sigma_matrix(Sigmas_at_0,
-                                      S, threshold_singular=1e-16, handle_singularities=True):
-
-    Sig_11_hat, Sig_33_hat, costheta, sintheta,\
-        dS_Sig_11_hat, dS_Sig_33_hat, dS_costheta, dS_sintheta,\
-        extra_data_list = np.vectorize(_propagate_Sigma_matrix,
-                                       excluded=['Sigmas_at_0', 'threshold_singular', 'handle_singularities'])(
-            Sigmas_at_0, S, threshold_singular, handle_singularities)
-
-    extra_data = {}
-    for kk in extra_data_list[0].keys():
-        extra_data[kk] = []
-        for ele in extra_data_list:
-            extra_data[kk].append(ele[kk])
-
-    return Sig_11_hat, Sig_33_hat, costheta, sintheta,\
-        dS_Sig_11_hat, dS_Sig_33_hat, dS_costheta, dS_sintheta,\
-        extra_data
-
+# def propagate_Sigma_matrix(Sigmas_at_0,
+#                                       S, threshold_singular=1e-16, handle_singularities=True):
+#
+#     Sig_11_hat, Sig_33_hat, costheta, sintheta,\
+#         dS_Sig_11_hat, dS_Sig_33_hat, dS_costheta, dS_sintheta,\
+#         extra_data_list = np.vectorize(_propagate_Sigma_matrix,
+#                                        excluded=['Sigmas_at_0', 'threshold_singular', 'handle_singularities'])(
+#             Sigmas_at_0, S, threshold_singular, handle_singularities)
+#
+#     extra_data = {}
+#     for kk in extra_data_list[0].keys():
+#         extra_data[kk] = []
+#         for ele in extra_data_list:
+#             extra_data[kk].append(ele[kk])
+#
+#     return Sig_11_hat, Sig_33_hat, costheta, sintheta,\
+#         dS_Sig_11_hat, dS_Sig_33_hat, dS_costheta, dS_sintheta,\
+#         extra_data
+#
 
 def propagate_full_Sigma_matrix_in_drift(Sig_11_0, Sig_12_0, Sig_13_0,
                                          Sig_14_0, Sig_22_0, Sig_23_0, Sig_24_0,
