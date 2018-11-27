@@ -1,6 +1,5 @@
 import numpy as np
 import math
-import numba
 
 from scipy.constants import e as qe
 from scipy.constants import c as clight
