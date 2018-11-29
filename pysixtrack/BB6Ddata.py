@@ -183,7 +183,8 @@ def BB6D_init(q_part, N_part_tot, sigmaz, N_slices, min_sigma_diff, threshold_si
     Sigmas_0_star = boost_sigmas(Sigmas_0, parboost.cphi)
 
     if sixtrack_slicing:
-        table = np.txtread('z_centroids_from_sixtrack.txt')
+        print('Sixtrack slicing')
+        from .sixtrack_slicing_table import table
         z_centroids = table[N_slices,:N_slices+1]
         N_part_per_slice = z_centroids*0.+N_part_tot/float(N_slices)
     else:

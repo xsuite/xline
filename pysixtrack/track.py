@@ -285,6 +285,8 @@ class BeamBeam6D(Element):
     __units__ = tuple(len(__slots__)*[[]])
     __defaults__ = tuple(len(__slots__)*[0.])
 
+    _sixtrack_slicing = False
+
     def track(self, p):
         if self.enabled:
             bb6data = BB6Ddata.BB6D_init(
@@ -296,7 +298,7 @@ class BeamBeam6D(Element):
                 self.delta_x, self.delta_y,
                 self.x_CO, self.px_CO, self.y_CO, self.py_CO, self.sigma_CO, self.delta_CO,
                 self.Dx_sub, self.Dpx_sub, self.Dy_sub, self.Dpy_sub, self.Dsigma_sub, self.Ddelta_sub,
-                self.enabled)
+                self.enabled, self._sixtrack_slicing)
             x_ret, px_ret, y_ret, py_ret, zeta_ret, delta_ret = BB6D.BB6D_track(
                 p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0*qe, p.p0c/clight*qe, bb6data)
             self._last_bb6data = bb6data
