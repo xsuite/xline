@@ -169,7 +169,7 @@ def BB6D_init(q_part, N_part_tot, sigmaz, N_slices, min_sigma_diff, threshold_si
               delta_x, delta_y,
               x_CO, px_CO, y_CO, py_CO, sigma_CO, delta_CO,
               Dx_sub, Dpx_sub, Dy_sub, Dpy_sub, Dsigma_sub, Ddelta_sub,
-              enabled):
+              enabled, sixtrack_slicing=False):
 
     # Prepare data for Lorentz transformation
     parboost = ParBoost(phi=phi, alpha=alpha)
@@ -182,9 +182,14 @@ def BB6D_init(q_part, N_part_tot, sigmaz, N_slices, min_sigma_diff, threshold_si
     # Boost strong beam shape
     Sigmas_0_star = boost_sigmas(Sigmas_0, parboost.cphi)
 
-    # Generate info about slices
-    z_centroids, _, N_part_per_slice = slicing.constant_charge_slicing_gaussian(
-        N_part_tot, sigmaz, N_slices)
+    if sixtrack_slicing:
+        table = np.txtread('z_centroids_from_sixtrack.txt')
+        z_centroids = table[N_slices,:N_slices+1]
+        N_part_per_slice = z_centroids*0.+N_part_tot/float(N_slices)
+    else:
+        # Generate info about slices
+        z_centroids, _, N_part_per_slice = slicing.constant_charge_slicing_gaussian(
+            N_part_tot, sigmaz, N_slices)
 
     # Sort according to z, head at the first position in the arrays
     ind_sorted = np.argsort(z_centroids)[::-1]
