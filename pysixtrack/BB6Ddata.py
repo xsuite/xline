@@ -185,7 +185,7 @@ def BB6D_init(q_part, N_part_tot, sigmaz, N_slices, min_sigma_diff, threshold_si
     if sixtrack_slicing:
         print('Sixtrack slicing')
         from .sixtrack_slicing_table import table
-        z_centroids = table[N_slices,:N_slices+1]
+        z_centroids = table[N_slices,:N_slices]*sigmaz
         N_part_per_slice = z_centroids*0.+N_part_tot/float(N_slices)
     else:
         # Generate info about slices
