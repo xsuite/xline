@@ -161,15 +161,17 @@ class BB6D_Data(object):
         return buf
 
 
-def BB6D_init(q_part, N_part_tot, sigmaz, N_slices, min_sigma_diff, threshold_singular,
-              phi, alpha,
-              Sig_11_0, Sig_12_0, Sig_13_0,
-              Sig_14_0, Sig_22_0, Sig_23_0,
-              Sig_24_0, Sig_33_0, Sig_34_0, Sig_44_0,
-              delta_x, delta_y,
-              x_CO, px_CO, y_CO, py_CO, sigma_CO, delta_CO,
-              Dx_sub, Dpx_sub, Dy_sub, Dpy_sub, Dsigma_sub, Ddelta_sub,
-              enabled):
+def BB6D_init(q_part, phi, alpha, delta_x, delta_y, 
+                N_part_per_slice, z_slices, 
+                Sig_11_0, Sig_12_0, Sig_13_0, 
+                Sig_14_0, Sig_22_0, Sig_23_0, 
+                Sig_24_0, Sig_33_0, Sig_34_0, Sig_44_0, 
+                x_CO, px_CO, y_CO, py_CO, sigma_CO, delta_CO, 
+                min_sigma_diff, threshold_singular, 
+                Dx_sub, Dpx_sub, Dy_sub, Dpy_sub, Dsigma_sub, Ddelta_sub, 
+                enabled):
+
+    assert(len(N_part_per_slice) == len(z_slices))
 
     # Prepare data for Lorentz transformation
     parboost = ParBoost(phi=phi, alpha=alpha)
@@ -182,19 +184,17 @@ def BB6D_init(q_part, N_part_tot, sigmaz, N_slices, min_sigma_diff, threshold_si
     # Boost strong beam shape
     Sigmas_0_star = boost_sigmas(Sigmas_0, parboost.cphi)
 
-    # Generate info about slices
-    z_centroids, _, N_part_per_slice = slicing.constant_charge_slicing_gaussian(
-        N_part_tot, sigmaz, N_slices)
-
     # Sort according to z, head at the first position in the arrays
-    ind_sorted = np.argsort(z_centroids)[::-1]
-    z_centroids = np.take(z_centroids, ind_sorted)
+    ind_sorted = np.argsort(z_slices)[::-1]
+    z_slices = np.take(z_slices, ind_sorted)
     N_part_per_slice = np.take(N_part_per_slice, ind_sorted)
 
     # By boosting the strong z and all zeros, I get the transverse coordinates of the strong beam in the ref system of the weak
     boost_vect = np.vectorize(boost.boost, excluded='parboost')
-    x_slices_star, px_slices_star, y_slices_star, py_slices_star, sigma_slices_star, delta_slices_star = boost_vect(x=0*z_centroids, px=0*z_centroids,
-                                                                                                                    y=0*z_centroids, py=0*z_centroids, sigma=z_centroids, delta=0*z_centroids, parboost=parboost)
+    x_slices_star, px_slices_star, y_slices_star, py_slices_star, sigma_slices_star, delta_slices_star = boost_vect(x=0*z_slices, px=0*z_slices,
+                                                                                                                 y=0*z_slices, py=0*z_slices, sigma=z_slices, delta=0*z_slices, parboost=parboost)
+
+    N_slices = len(z_slices)
 
     bb6d_data = BB6D_Data(q_part, parboost, Sigmas_0_star, N_slices,
                           N_part_per_slice, x_slices_star, y_slices_star, sigma_slices_star, min_sigma_diff, threshold_singular,
