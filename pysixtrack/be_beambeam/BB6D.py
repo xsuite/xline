@@ -8,8 +8,6 @@ from . import gaussian_fields as gf
 
 import numpy as np
 
-from .pyfaddeeva import wfun
-np.wfun = wfun
 
 from scipy.constants import c as c_light
 
