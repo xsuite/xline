@@ -4,10 +4,10 @@ import math
 from scipy.constants import e as qe
 from scipy.constants import c as clight
 
-from .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
+from .be_beambeam.gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
 
-from . import BB6D
-from . import BB6Ddata
+from .be_beambeam import BB6D
+from .be_beambeam import BB6Ddata
 
 _factorial = np.array([1,
                        1,
