@@ -217,6 +217,40 @@ class Monitor(Element):
         self.data.append(p.copy)
 
 
+class SpaceChargeCoast(Element):
+    __slots__ = ('line_density', 'sigma_x', 'sigma_y', 'length',
+                 'min_sigma_diff', 'Delta_x', 'Delta_y', 'enabled')
+    __units__ = ('1/m', 'm', 'm', 'm',
+                 'm', 'm', 'm', [])
+    __defaults__ = (0., 0., 0., 0.,
+                    0., 0., 0., True)
+
+    def track(self, p):
+        if self.enabled:
+            charge = p.qratio*p.q0*qe
+            x = p.x - self.Delta_x
+            px = p.px
+            y = p.y - self.Delta_y
+            py = p.py
+
+            chi = p.chi
+
+            beta = p.beta0/p.rvv
+            p0c = p.p0c*qe
+
+            Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(x, y, self.sigma_x, self.sigma_y,
+                                           min_sigma_diff=1e-10, skip_Gs=True, mathlib=p._m)
+
+            fact_kick = chi * self.line_density * charge * charge \
+                (1-beta*beta)/p0c * length
+
+            px += (fact_kick*Ex)
+            py += (fact_kick*Ey)
+
+            p.px = px
+            p.py = py
+
+
 class BeamBeam4D(Element):
     __slots__ = ('q_part', 'N_part', 'sigma_x', 'sigma_y', 'beta_s',
                  'min_sigma_diff', 'Delta_x', 'Delta_y', 'Dpx_sub', 'Dpy_sub', 'enabled')
