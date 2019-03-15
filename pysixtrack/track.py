@@ -241,8 +241,8 @@ class SpaceChargeCoast(Element):
             Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(x, y, self.sigma_x, self.sigma_y,
                                            min_sigma_diff=1e-10, skip_Gs=True, mathlib=p._m)
 
-            fact_kick = chi * self.line_density * charge * charge \
-                (1-beta*beta)/p0c * length
+            fact_kick = chi * self.line_density * charge * charge * \
+                (1-beta*beta)/p0c * self.length
 
             px += (fact_kick*Ex)
             py += (fact_kick*Ey)
