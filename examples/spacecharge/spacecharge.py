@@ -1,18 +1,18 @@
 from pyoptics import madlang,optics
 import pyoptics.tfsdata as tfs
 import pysixtrack
+from pysixtrack.particles import Particles
 import pysixtrack.helpers as hp 
 import numpy as np
+import matplotlib.pylab as plt
 
 #see sps/madx/a001_track_thin.madx
 mad=madlang.open('madx/SPS_Q20_thin.seq')
-mad.acta_31637.volt=4.5
+mad.acta_31637.volt=0 #4.5
 mad.acta_31637.lag=0.5
 
 
 elems,rest,iconv=mad.sps.expand_struct(pysixtrack.element_types)
-
-pbench=optics.open('madx/track.obs0001.p0001')
 sps=pysixtrack.Line(elements= [e[2] for e in elems])
 spstwiss=tfs.open('madx/twiss_SPS_Q20_thin.tfs')
 
@@ -21,7 +21,7 @@ beta = np.sqrt(1.-1./gamma**2)
 betagamma = beta*gamma
 
 
-
+# remove beg. and end. markers in twiss table
 for k in spstwiss:
     try:
         spstwiss[k] = spstwiss[k][1:-1]
@@ -30,14 +30,15 @@ for k in spstwiss:
 assert (len(spstwiss['s']) == len(elems))
 
 
-s_lastSCkick = 0
-s_SCkicks = [0]
-min_distance = 6.
-new_element_list = []
 line_density = 1
 epsn_x = 2e-6
 epsn_y = 2e-6
 dpp_rms = 1.5e-3
+
+s_lastSCkick = 0
+s_SCkicks = [0]
+min_distance = 60.
+new_element_list = []
 SC_elements_list = []
 for i, e in enumerate(elems):
     s = spstwiss['s'][i]
@@ -63,22 +64,37 @@ for i, e in enumerate(elems):
         s_lastSCkick = s
 
 # to verify that integrated length of SC kicks corresponds to circumference
-print(sum([sc[2].length for sc in SC_elements_list]))
-
+print("\n  installed %d space charge kicks"%len(SC_elements_list))
+print("\n  integrated length of space charge kicks: %1.2f m"%(sum([sc[2].length for sc in SC_elements_list])))
 
 
 
 p0c_eV=25.92
+
+ring = hp.Ring(new_element_list, p0c=p0c_eV)
+p=Particles(e0=26.01692438e9, m0=0.93827205e9)#p0c=ring.p0c)
 n_part = 10
 zeros = np.zeros(n_part)
-p=pysixtrack.Particles(x=np.linspace(0.,0.01,n_part),px=zeros,y=zeros,py=zeros,tau=zeros,pt=zeros)
-ring = hp.Ring(new_element_list, p0c=p0c_eV)
+p.x=0.001
 
-print('start tracking')
-for t in range(1000):
+
+
+
+x = [np.copy(p.x)]
+px = [np.copy(p.px)]
+print('\nstart tracking')
+for t in range(30):
     print('turn: %03d'%t)
     ring.track(p)
+    x.append(p.x)
+    px.append(p.px)
 
+f, ax = plt.subplots(1)
+ax.plot(x, px, '.')
+ax.set_xlabel('x (m)')
+ax.set_ylabel('px')
+plt.tight_layout()
+plt.show()
 
 # spstwiss['s'] 
 # print(len(iconv), len(spstwiss['s']))
