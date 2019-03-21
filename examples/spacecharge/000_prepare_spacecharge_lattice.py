@@ -5,6 +5,7 @@ from pysixtrack.particles import Particles
 import pysixtrack.helpers as hp 
 import numpy as np
 import matplotlib.pylab as plt
+import pickle
 
 #see sps/madx/a001_track_thin.madx
 mad=madlang.open('madx/SPS_Q20_thin.seq')
@@ -30,6 +31,7 @@ for k in spstwiss:
 assert (len(spstwiss['s']) == len(elems))
 
 
+p0c = 25.92e9
 line_density = 1
 epsn_x = 2e-6
 epsn_y = 2e-6
@@ -56,9 +58,9 @@ for i, e in enumerate(elems):
             length=s-s_lastSCkick,
             min_sigma_diff=1e-10,
             Delta_x=spstwiss['x'][i],
-            Delta_y=spstwiss['x'][i],
+            Delta_y=spstwiss['y'][i],
             enabled=True))
-        # new_element_list.append(newSC)
+        new_element_list.append(newSC)
         SC_elements_list.append(newSC)
         s_SCkicks.append(s)
         s_lastSCkick = s
@@ -69,10 +71,23 @@ print("\n  integrated length of space charge kicks: %1.2f m"%(sum([sc[2].length 
 
 
 # prepare a particle on the closed orbit
-p0c = 25.92e9
+for sc in SC_elements_list:
+    sc[-1].enabled = False
 p=Particles(p0c=p0c)
 ring = hp.Ring(new_element_list, p0c=p0c)
+print("\n  starting closed orbit search ... ")
 closed_orbit = ring.find_closed_orbit() #method='get_guess')
+for sc in SC_elements_list:
+    sc[-1].enabled = True
+
+with open('particle_on_CO.pkl', 'wb') as fid:
+    closed_orbit[0]._m = None # to be sorted out 
+    pickle.dump(closed_orbit[0], fid)
+with open('line.pkl', 'wb') as fid:
+    pickle.dump(ring, fid)
+
+
+
 
 '''
 
