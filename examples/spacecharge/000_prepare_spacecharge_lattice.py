@@ -58,7 +58,7 @@ for i, e in enumerate(elems):
             Delta_x=spstwiss['x'][i],
             Delta_y=spstwiss['x'][i],
             enabled=True))
-        new_element_list.append(newSC)
+        # new_element_list.append(newSC)
         SC_elements_list.append(newSC)
         s_SCkicks.append(s)
         s_lastSCkick = s
@@ -68,8 +68,15 @@ print("\n  installed %d space charge kicks"%len(SC_elements_list))
 print("\n  integrated length of space charge kicks: %1.2f m"%(sum([sc[2].length for sc in SC_elements_list])))
 
 
+# prepare a particle on the closed orbit
+p0c = 25.92e9
+p=Particles(p0c=p0c)
+ring = hp.Ring(new_element_list, p0c=p0c)
+closed_orbit = ring.find_closed_orbit() #method='get_guess')
 
-p0c_eV=25.92
+'''
+
+
 
 ring = hp.Ring(new_element_list, p0c=p0c_eV)
 p=Particles(e0=26.01692438e9, m0=0.93827205e9)#p0c=ring.p0c)
@@ -98,7 +105,7 @@ plt.show()
 
 # spstwiss['s'] 
 # print(len(iconv), len(spstwiss['s']))
-
+'''
 '''
 def get_part(pbench,ii):
     pstart=[pbench[n][ii] for n in 'x px y py t pt'.split()]

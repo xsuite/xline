@@ -100,11 +100,11 @@ ENDEDIT;
  * Build thin model
  ***************************************************/
  
+ /***
  USE, period=SPS, range=#S/#E;
  select, flag=seqedit, class=instrument;
  select, flag=seqedit, class=marker;
  seqedit, sequence=SPS;
-	remove, element=BEGI.10010;		!zero length element
 	remove, element=VVFB.21801;		!zero length element
 	remove, element=VVFB.21877;		!zero length element
 	remove, element=QSPL.31809;		!zero length element
@@ -115,13 +115,15 @@ ENDEDIT;
 	flatten;
  endedit;
  USE, period=SPS, range=#S/#E;
- 
+ ***/
+
  use, sequence=sps;
- select, flag=makethin, slice=10, thick=false;
+ select, flag=makethin, slice=1, thick=false;
  makethin, sequence=sps, style=teapot, makedipedge=false;
  use, sequence=SPS;
  twiss;
 
+ /***
  ! install markers at locations of sc kicks
  option, -info;
  n_kicks_target = 997.; ! might not be reached exactly with randomization
@@ -141,6 +143,7 @@ ENDEDIT;
  flatten;
  option, info;
  endedit;
+ ***/
 
  use, period=SPS, range=#S/#E;
  twiss;
