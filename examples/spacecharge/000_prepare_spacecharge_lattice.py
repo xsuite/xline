@@ -32,7 +32,7 @@ assert (len(spstwiss['s']) == len(elems))
 
 
 p0c = 25.92e9
-line_density = 1
+line_density = 1e11
 epsn_x = 2e-6
 epsn_y = 2e-6
 dpp_rms = 1.5e-3
@@ -84,7 +84,7 @@ with open('particle_on_CO.pkl', 'wb') as fid:
     closed_orbit[0]._m = None # to be sorted out 
     pickle.dump(closed_orbit[0], fid)
 with open('line.pkl', 'wb') as fid:
-    pickle.dump(ring, fid)
+    pickle.dump(new_element_list, fid)
 
 
 

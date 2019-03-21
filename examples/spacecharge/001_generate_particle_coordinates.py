@@ -2,7 +2,7 @@ import pickle
 import pysixtrack
 import numpy as np
 
-import helpers as hp
+import example_helpers as hp
 import footprint
 
 
@@ -20,7 +20,10 @@ with open('line.pkl', 'rb') as fid:
 with open('particle_on_CO.pkl', 'rb') as fid:
     partCO = pickle.load(fid)
 
-part = pysixtrack.Particles(**partCO)
+
+part = partCO.copy() # pysixtrack.Particles(**partCO)
+part._m = pysixtrack.Particles()._m # to be sorted out later
+
 
 # Track a particle to get betas
 part.x += 1e-5
