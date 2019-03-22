@@ -66,4 +66,7 @@ footprint.draw_footprint(Qxy_fp, axis_object=axFP, linewidth = 1)
 # axFP.set_xlim(right=np.max(Qxy_fp[:, :, 0]))
 # axFP.set_ylim(top=np.max(Qxy_fp[:, :, 1]))
 # fig4.suptitle(info)
+axFP.set_xlabel('Qx')
+axFP.set_ylabel('Qy')
 plt.show()
+

@@ -32,16 +32,16 @@ assert (len(spstwiss['s']) == len(elems))
 
 
 p0c = 25.92e9
-line_density = 1e11
+line_density = 2e11
 epsn_x = 2e-6
 epsn_y = 2e-6
 dpp_rms = 1.5e-3
 
 s_lastSCkick = 0
 s_SCkicks = [0]
-min_distance = 60.
+min_distance = 25. #5.
 new_element_list = []
-SC_elements_list = []
+listSC = []
 for i, e in enumerate(elems):
     s = spstwiss['s'][i]
     new_element_list.append(e)
@@ -50,7 +50,7 @@ for i, e in enumerate(elems):
         beta_y = spstwiss['bety'][i]
         d_x = spstwiss['dx'][i]*beta
         d_y = spstwiss['dy'][i]*beta
-        newSC = ('SC%i'%(len(SC_elements_list)), 'SpaceChargeCoast', 
+        newSC = ('SC%i'%(len(listSC)), 'SpaceChargeCoast', 
             pysixtrack.SpaceChargeCoast(
             line_density=line_density,
             sigma_x=np.sqrt(beta_x*epsn_x/betagamma + d_x**2*dpp_rms**2),
@@ -61,23 +61,29 @@ for i, e in enumerate(elems):
             Delta_y=spstwiss['y'][i],
             enabled=True))
         new_element_list.append(newSC)
-        SC_elements_list.append(newSC)
+        listSC.append(newSC)
         s_SCkicks.append(s)
         s_lastSCkick = s
 
+
+lengthsSC = [sc[-1].length for sc in listSC]
+
 # to verify that integrated length of SC kicks corresponds to circumference
-print("\n  installed %d space charge kicks"%len(SC_elements_list))
-print("\n  integrated length of space charge kicks: %1.2f m"%(sum([sc[2].length for sc in SC_elements_list])))
+print("\n  installed %d space charge kicks"%len(listSC))
+print("\n  maximum length of space charge kicks: %1.2f m"%(max(lengthsSC)))
+print("\n  average length of space charge kicks: %1.2f m"%(np.mean(lengthsSC)))
+print("\n  integrated length of space charge kicks: %1.2f m"%(sum(lengthsSC)))
 
 
 # prepare a particle on the closed orbit
-for sc in SC_elements_list:
+for sc in listSC:
     sc[-1].enabled = False
 p=Particles(p0c=p0c)
 ring = hp.Ring(new_element_list, p0c=p0c)
-print("\n  starting closed orbit search ... ")
-closed_orbit = ring.find_closed_orbit() #method='get_guess')
-for sc in SC_elements_list:
+# print("\n  starting closed orbit search ... ")
+closed_orbit = ring.find_closed_orbit(guess=[spstwiss['x'][0], spstwiss['px'][0], 
+    spstwiss['y'][0], spstwiss['py'][0], 0., 0.], method='get_guess')
+for sc in listSC:
     sc[-1].enabled = True
 
 with open('particle_on_CO.pkl', 'wb') as fid:
@@ -87,6 +93,25 @@ with open('line.pkl', 'wb') as fid:
     pickle.dump(new_element_list, fid)
 
 
+plt.close('all')
+
+f, ax = plt.subplots()
+ax.hist(lengthsSC, 100)
+ax.set_xlabel('length of SC kick')
+ax.set_ylabel('counts')
+plt.show()
+
+
+f, ax = plt.subplots(figsize=(14,5))
+ax.plot(spstwiss['s'], spstwiss['betx'], 'b', label='x')
+ax.plot(spstwiss['s'], spstwiss['bety'], 'g', label='y')
+for s in s_SCkicks: ax.axvline(s, linewidth=0.5, color='r')
+ax.set_xlim(0,1100)
+ax.set_ylim(0,120)
+ax.set_xlabel('s (m)')
+ax.set_ylabel('beta functions (m)')
+ax.legend(loc=3)
+plt.show()
 
 
 '''

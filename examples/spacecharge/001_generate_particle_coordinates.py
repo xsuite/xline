@@ -1,17 +1,17 @@
 import pickle
 import pysixtrack
 import numpy as np
+import pyoptics.tfsdata as tfs
 
 import example_helpers as hp
 import footprint
 
 
-epsn_x = 3.5e-6
-epsn_y = 3.5e-6
-r_max_sigma = 6.
+epsn_x = 2.e-6
+epsn_y = 2.e-6
+r_max_sigma = 10.
 N_r_footp = 10.
 N_theta_footp = 10.
-n_turns_beta = 150
 
 
 with open('line.pkl', 'rb') as fid:
@@ -20,10 +20,12 @@ with open('line.pkl', 'rb') as fid:
 with open('particle_on_CO.pkl', 'rb') as fid:
     partCO = pickle.load(fid)
 
-
 part = partCO.copy() # pysixtrack.Particles(**partCO)
 part._m = pysixtrack.Particles()._m # to be sorted out later
 
+'''
+# get beta functions from tracking
+n_turns_beta = 150
 
 # Track a particle to get betas
 part.x += 1e-5
@@ -37,6 +39,34 @@ x_tbt, px_tbt, y_tbt, py_tbt, sigma_tbt, delta_tbt = hp.track_particle_pysixtrac
 
 beta_x, x_max, px_cut = hp.betafun_from_ellip(x_tbt, px_tbt)
 beta_y, y_max, py_cut = hp.betafun_from_ellip(y_tbt, py_tbt)
+
+import matplotlib.pyplot as plt
+plt.close('all')
+fig1 = plt.figure(1)
+spx = fig1.add_subplot(2, 1, 1)
+spy = fig1.add_subplot(2, 1, 2, sharex=spx)
+
+spx.plot(x_tbt)
+spy.plot(y_tbt)
+
+fig2 = plt.figure(2)
+spex = fig2.add_subplot(2, 1, 1)
+spey = fig2.add_subplot(2, 1, 2)
+
+spex.plot(x_tbt, px_tbt, '.')
+spey.plot(y_tbt, py_tbt, '.')
+
+spex.plot(0, px_cut, 'xr')
+spey.plot(0, py_cut, 'xr')
+
+plt.show()
+
+'''
+
+# get beta functions from twiss table
+spstwiss=tfs.open('madx/twiss_SPS_Q20_thin.tfs')
+beta_x = spstwiss['betx'][0]
+beta_y = spstwiss['bety'][0]
 
 sigmax = np.sqrt(beta_x * epsn_x / part.beta0 / part.gamma0)
 sigmay = np.sqrt(beta_y * epsn_y / part.beta0 / part.gamma0)
@@ -59,23 +89,3 @@ with open('DpxDpy_for_footprint.pkl', 'wb') as fid:
                 'xy_norm': xy_norm,
                 }, fid)
 
-import matplotlib.pyplot as plt
-plt.close('all')
-fig1 = plt.figure(1)
-spx = fig1.add_subplot(2, 1, 1)
-spy = fig1.add_subplot(2, 1, 2, sharex=spx)
-
-spx.plot(x_tbt)
-spy.plot(y_tbt)
-
-fig2 = plt.figure(2)
-spex = fig2.add_subplot(2, 1, 1)
-spey = fig2.add_subplot(2, 1, 2)
-
-spex.plot(x_tbt, px_tbt, '.')
-spey.plot(y_tbt, py_tbt, '.')
-
-spex.plot(0, px_cut, 'xr')
-spey.plot(0, py_cut, 'xr')
-
-plt.show()
