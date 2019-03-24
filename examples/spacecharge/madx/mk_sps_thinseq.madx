@@ -99,10 +99,31 @@ ENDEDIT;
 /***************************************************
  * Build thin model
  ***************************************************/ 
+ myvalue(xx,yy,zz): macro = {myval = table(xx,yy,zz);};
+
+
+ ! remove markers and instruments
+ USE, period=SPS, range=#S/#E;
+ select, flag=seqedit, class=instrument;
+ select, flag=seqedit, class=marker;
+ seqedit, sequence=SPS;
+	remove, element=BEGI.10010;		!zero length element
+	remove, element=VVFB.21801;		!zero length element
+	remove, element=VVFB.21877;		!zero length element
+	remove, element=QSPL.31809;		!zero length element
+	remove, element=VVFB.61801;		!zero length element
+	remove, element=QSPL.61809;		!zero length element
+	remove, element=VVFB.61877;		!zero length element
+	remove, element=selected;
+	flatten;
+ endedit;
+ USE, period=SPS, range=#S/#E;
+
+
  ! START AT BWS51995 (original s=5243.0323)
  mystart: marker;
  SEQEDIT, sequence=SPS;
-	install, element=mystart, at=BWSA.51995->l/2, from=BWSA.51995;
+	install, element=mystart, at=5243.0323; !equivalent to: at=BWSA.51995->l/2, from=BWSA.51995;
 	flatten;
 	cycle,start=mystart;
 	remove, element=SPS$START;
@@ -119,13 +140,12 @@ ENDEDIT;
  use, sequence=SPS;
  twiss;
 
-
-! split long drift sections into equidistant pieces of given length
+ !/***
+ ! split long drift sections into equidistant pieces of given length
  sc_placeholder : Marker; 
- myvalue(xx,yy,zz): macro = {myval = table(xx,yy,zz);};
  option, -info;
- l_target = 7.;
- l_fuzz = 2.;
+ l_target = 5.;! 6.; !7.
+ l_fuzz = l_target/2.; !3.; !2.
  rows = table(twiss,tablelength);
  seqedit, sequence=SPS;
  while(i<rows){
@@ -141,7 +161,6 @@ ENDEDIT;
 	 		s = s + l_target;
 	 		value, s;
 	 		install, element=sc_placeholder, at=s;
-	 		flatten;
 	 		l_remaining = l_remaining - l_target;
 	 	}
 	 }
@@ -149,6 +168,29 @@ ENDEDIT;
  flatten;
  option, info;
  endedit;
+ !***/
+
+ /***
+ ! install markers at locations of sc kicks
+ option, -info;
+ n_kicks = 997.; 
+ length = table(summ,length);
+ sc_length = length/(n_kicks);
+ sc_placeholder : Marker; 
+ s = 0; !sc_length;
+
+ seqedit, sequence=SPS;
+ while(s <= length - sc_length/2.){
+ 	install, element=sc_placeholder, at=s;
+  	value, s;
+  	s = s + sc_length;
+ };
+ !install, element=sc_placeholder, at=length;
+ flatten;
+ option, info;
+ endedit;
+ ***/
+
 
  use, period=SPS, range=#S/#E;
  twiss;
