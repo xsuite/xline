@@ -10,12 +10,12 @@ import pickle
 class SC_controller(object):
 
     def __init__(self,type,intensity,eps_x,eps_y,dpp_rms,
-                    min_sigma_diff=1e-1,bunchlength=None):
-        assert(type in ['SpaceChargeCoast'])
+                    bunchlength_rms=None,min_sigma_diff=1e-1):
+        assert(type in ['SpaceChargeCoast', 'SpaceChargeBunched'])
         self._listSCnodes = []
         self._min_sigma_diff = min_sigma_diff
         self._type = type
-        self.setBunchParameters(intensity,eps_x,eps_y,dpp_rms,bunchlength)
+        self.setBunchParameters(intensity,eps_x,eps_y,dpp_rms,bunchlength_rms)
     
     def installSCnodes(self,lattice,twiss,min_distance):
         assert (len(twiss['s']) == len(lattice))
@@ -28,7 +28,7 @@ class SC_controller(object):
         eps_x = self._eps_x
         eps_y = self._eps_y
         dpp_rms = self._dpp_rms
-        bunchlength = self._bunchlength
+        bunchlength_rms = self._bunchlength_rms
 
         new_lattice = []
         s_lastSCkick = 0
@@ -56,7 +56,18 @@ class SC_controller(object):
                         Delta_x=CO_x,
                         Delta_y=CO_y,
                         enabled=True)
-                new_lattice.append(('SC%i'%(len(self._listSCnodes)), 'SpaceChargeCoast', scNode))
+                if self._type == 'SpaceChargeBunched':
+                    scNode = pysixtrack.SpaceChargeBunched(
+                        number_of_particles=intensity,
+                        bunchlength_rms=bunchlength_rms,
+                        sigma_x=sigma_x,
+                        sigma_y=sigma_y,
+                        length=length,
+                        min_sigma_diff=self._min_sigma_diff,
+                        Delta_x=CO_x,
+                        Delta_y=CO_y,
+                        enabled=True)
+                new_lattice.append(('SC%i'%(len(self._listSCnodes)), self._type, scNode))
                 s_lastSCkick = s
 
                 optics = {}
@@ -73,7 +84,7 @@ class SC_controller(object):
         print("\n  installed %d space charge kicks"%len(self._listSCnodes))
         print("\n  maximum length of space charge kicks: %1.2f m"%(max(lengthsSCndodes)))
         print("\n  average length of space charge kicks: %1.2f m"%(np.mean(lengthsSCndodes)))
-        print("\n  integrated length of space charge kicks: %1.2f m"%(sum(lengthsSCndodes)))
+        print("\n  integrated length of space charge kicks: %1.4f m"%(sum(lengthsSCndodes)))
 
         return new_lattice
 
@@ -112,12 +123,12 @@ class SC_controller(object):
         nodes, _ = self.getSCnodes()
         for n in nodes: n.enabled = True
     
-    def setBunchParameters(self,intensity,eps_x,eps_y,dpp_rms,bunchlength=None):
+    def setBunchParameters(self,intensity,eps_x,eps_y,dpp_rms,bunchlength_rms=None):
         self._intensity = intensity
         self._eps_x = eps_x
         self._eps_y = eps_y
         self._dpp_rms = dpp_rms
-        self._bunchlength = bunchlength
+        self._bunchlength_rms = bunchlength_rms
         if self._listSCnodes:
             for node, optics in zip(self.getSCnodes()):
                 beta_x = optics['beta_x']
@@ -129,6 +140,9 @@ class SC_controller(object):
                 node.sigma_y = self._sigma(beta_y, eps_y, D_y, dpp_rms)
                 if self._type == 'SpaceChargeCoast':
                     node.line_density = intensity/self._circumference
+                if self._type == 'SpaceChargeBunched':
+                    node.number_of_particles = intensity
+                    node.bunchlength_rms = bunchlength_rms
 
 
 
@@ -155,12 +169,14 @@ beta = np.sqrt(1.-1./gamma**2)
 betagamma = beta*gamma
 
 p0c = 25.92e9
-intensity=2e11 * spstwiss['param']['length'] # for a coasting beam with a line density of 2e11/m
+intensity=2e11 #* spstwiss['param']['length'] # for a coasting beam with a line density of 2e11/m
 eps_x=2e-6/betagamma
 eps_y=2e-6/betagamma
 dpp_rms=1.5e-3
+bunchlength_rms = 0.22
 
-my_SC_controller = SC_controller('SpaceChargeCoast',intensity,eps_x,eps_y,dpp_rms)
+# my_SC_controller = SC_controller('SpaceChargeCoast',intensity * spstwiss['param']['length'],eps_x,eps_y,dpp_rms)
+my_SC_controller = SC_controller('SpaceChargeBunched',intensity,eps_x,eps_y,dpp_rms,bunchlength_rms)
 new_elems = my_SC_controller.installSCnodes(elems,spstwiss,min_distance=25.)
 
 # prepare a particle on the closed orbit
