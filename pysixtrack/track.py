@@ -227,6 +227,10 @@ class SpaceChargeCoast(Element):
 
     def track(self, p):
         if self.enabled:
+            length = self.length
+            sigma_x = self.sigma_x
+            sigma_y = self.sigma_y
+
             charge = p.qratio*p.q0*qe
             x = p.x - self.Delta_x
             px = p.px
@@ -238,11 +242,56 @@ class SpaceChargeCoast(Element):
             beta = p.beta0/p.rvv
             p0c = p.p0c*qe
 
-            Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(x, y, self.sigma_x, self.sigma_y,
+            Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(x, y, sigma_x, sigma_y,
                                            min_sigma_diff=1e-10, skip_Gs=True, mathlib=p._m)
 
             fact_kick = chi * self.line_density * charge * charge * \
                 (1-beta*beta)/p0c * self.length
+
+            px += (fact_kick*Ex)
+            py += (fact_kick*Ey)
+
+            p.px = px
+            p.py = py
+
+
+class SpaceChargeBunched(Element):
+    __slots__ = ('number_of_particles', 'bunchlength_rms','sigma_x', 'sigma_y', 'length',
+                 'min_sigma_diff', 'Delta_x', 'Delta_y', 'enabled')
+    __units__ = ([], 'm', 'm', 'm', 'm',
+                 'm', 'm', 'm', [])
+    __defaults__ = (0., 0., 0., 0., 0.,
+                    0., 0., 0., True)
+
+    def track(self, p):
+        if self.enabled:
+            pi = p._m.pi
+            exp = p._m.exp
+            sqrt = p._m.sqrt
+            bunchlength_rms = self.bunchlength_rms
+            length = self.length
+            sigma_x = self.sigma_x
+            sigma_y = self.sigma_y
+
+            charge = p.qratio*p.q0*qe
+            x = p.x - self.Delta_x
+            px = p.px
+            y = p.y - self.Delta_y
+            py = p.py
+            sigma = p.sigma
+
+            chi = p.chi
+
+            beta = p.beta0/p.rvv
+            p0c = p.p0c*qe
+
+            Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(x, y, sigma_x, sigma_y,
+                                           min_sigma_diff=1e-10, skip_Gs=True, mathlib=p._m)
+
+            fact_kick = chi * charge * charge * (1-beta*beta)/p0c * length
+
+            fact_kick *= self.number_of_particles / (bunchlength_rms*sqrt(2*pi)) * \
+                                    exp(-0.5*(sigma/bunchlength_rms)*(sigma/bunchlength_rms))
 
             px += (fact_kick*Ex)
             py += (fact_kick*Ey)
