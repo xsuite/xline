@@ -17,7 +17,7 @@ class SC_controller(object):
         self._type = type
         self.setBunchParameters(intensity,eps_x,eps_y,dpp_rms,bunchlength_rms)
     
-    def installSCnodes(self,lattice,twiss,min_distance,centered=False):
+    def installSCnodes(self,lattice,twiss,max_distance,centered=False):
         assert (len(twiss['s']) == len(lattice))
         gamma = twiss['param']['gamma']
         beta = np.sqrt(1.-1./gamma**2)
@@ -35,7 +35,16 @@ class SC_controller(object):
         for i, e in enumerate(lattice):
             s = twiss['s'][i]
             new_lattice.append(e)
-            if s-s_lastSCkick >= min_distance or i==(len(elems)-1):
+
+            # check what the next length would be
+            j = i
+            s_next = s
+            while (j<len(lattice) and s_next==s):
+                s_next = twiss['s'][j]
+                j += 1
+            predicted_length = s_next - s_lastSCkick
+            if predicted_length>max_distance or i==(len(elems)-1):
+            # if s-s_lastSCkick>=min_distance or i==(len(elems)-1):
                 beta_x = twiss['betx'][i]
                 beta_y = twiss['bety'][i]
                 D_x = twiss['dx'][i]
@@ -46,6 +55,8 @@ class SC_controller(object):
                 sigma_x = self._sigma(beta_x, eps_x, D_x, dpp_rms)
                 sigma_y = self._sigma(beta_y, eps_y, D_y, dpp_rms)
                 length = s-s_lastSCkick
+                if length > max_distance:
+                    print("Warning: length of space charge node bigger than max_distance")
                 if self._type == 'SpaceChargeCoast':
                     scNode = pysixtrack.SpaceChargeCoast(
                         line_density=intensity/circumference,
@@ -183,10 +194,10 @@ eps_y=2e-6/betagamma
 dpp_rms=1.5e-3
 bunchlength_rms = 0.22
 
-min_distance = 5. #6.9 #25.
+max_distance = 35. #6.9 #25.
 # my_SC_controller = SC_controller('SpaceChargeCoast',intensity * spstwiss['param']['length'],eps_x,eps_y,dpp_rms)
 my_SC_controller = SC_controller('SpaceChargeBunched',intensity,eps_x,eps_y,dpp_rms,bunchlength_rms)
-new_elems = my_SC_controller.installSCnodes(elems,spstwiss,min_distance=min_distance,centered=False) #25.
+new_elems = my_SC_controller.installSCnodes(elems,spstwiss,max_distance=max_distance,centered=False) #25.
 
 # prepare a particle on the closed orbit
 p=Particles(p0c=p0c)
@@ -207,13 +218,14 @@ with open('SCcontroller.pkl', 'wb') as fid:
     pickle.dump(my_SC_controller, fid)
 
 
-plot = 1 #False
+
 import matplotlib.patches as patches
-if plot:
+if 1:
     plt.close('all')
 
     f, ax = plt.subplots()
-    ax.hist(my_SC_controller.getSCnodesLengths(), 100)
+    sc_lengths = my_SC_controller.getSCnodesLengths()
+    ax.hist(sc_lengths, bins=np.linspace(0,max(sc_lengths)+0.1,100))
     ax.set_xlabel('length of SC kick (m)')
     ax.set_ylabel('counts')
     ax.set_xlim(left=0)
