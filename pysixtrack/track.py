@@ -164,7 +164,6 @@ class SRotation(Element):
         deg2rag = p._m.pi/180
         cz = p._m.cos(self.angle*deg2rag)
         sz = p._m.sin(self.angle*deg2rag)
-        print(cz, sz)
         xn = cz*p.x + sz*p.y
         yn = -sz*p.x + cz*p.y
         p.x = xn
@@ -193,6 +192,42 @@ class RFMultipole(Element):
     __slots__ = ('voltage', 'frequency', 'knl', 'ksl', 'pn', 'ps')
     __units__ = ('volt', 'hertz', [], [], [], [])
     __defaults__ = (0, 0, 0, 0, 0)
+
+
+
+class BeamMonitor(Element):
+    __slots__    = ( 'num_stores', 'start', 'skip', 'max_particle_id',
+                     'min_particle_id', 'is_rolling', 'is_turn_ordered' )
+    __units__    = ( '', 'turn', 'turn', '', '', '', '' )
+    __defaults__ = ( 0, 0, 1, 0, 0, False, True )
+
+    def offset( self, particle ):
+        _offset = -1
+        nn = self.max_particle_id >= self.min_particle_id \
+             and ( self.max_particle_id - self.min_particle_id + 1 ) or -1
+        assert( self.is_turn_ordered )
+
+        if particle.turn >= self.start and nn > 0 and \
+            particle.partid >= self.min_particle_id and \
+            particle.partid <= self.max_particle_id:
+            turns_since_start = particle.turns - self.start
+            store_index = turns_since_start // self.skip
+            if store_index < self.num_stores:
+                pass
+            elif self.is_rolling:
+                store_index = store_index % self.num_stores
+            else:
+                store_index = -1
+
+            if  store_index >= 0:
+                _offset = store_index * nn + particle.partid
+
+        return _offset
+
+    def track( self, particle ):
+        pass
+
+
 
 
 class Line(Element):
@@ -261,7 +296,7 @@ class BeamBeam4D(Element):
         buffer_list.append(BB6Ddata.int_to_float64arr({True:1, False:0}[self.enabled]))
 
         buf = np.concatenate(buffer_list)
-        
+
         return buf
 
 
@@ -307,3 +342,5 @@ __all__ = [cls.__name__ for cls in elements]
 __all__.append('element_types')
 
 element_types = dict((cls.__name__, cls) for cls in elements)
+
+
