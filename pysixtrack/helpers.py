@@ -40,9 +40,18 @@ class Ring(pysixtrack.Line):
         return coord_out
 
     def _CO_error(self, coord):
-        return np.sum((self.one_turn_map(coord)-coord)**2)
+        return np.sum((self.one_turn_map(coord) - coord)**2)
 
-    def find_closed_orbit(self, guess=[0., 0., 0., 0., 0., 0.], method='Nelder-Mead'):
+    def find_closed_orbit(
+            self,
+            guess=[
+                0.,
+                0.,
+                0.,
+                0.,
+                0.,
+                0.],
+            method='Nelder-Mead'):
 
         if method == 'get_guess':
             res = type('', (), {})()
