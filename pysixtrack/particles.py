@@ -5,9 +5,13 @@ import numpy as np
 
 # attaching faddeeva to np
 from scipy.special import wofz
+
+
 def wfun(z_re, z_im):
     w = wofz(z_re+1j*z_im)
     return w.real, w.imag
+
+
 np.wfun = wfun
 
 
@@ -69,8 +73,8 @@ class Particles(object):
     def __init__ref(self, p0c, energy0, gamma0, beta0):
         not_none = count_not_none(beta0, gamma0, p0c, energy0)
         if not_none == 0:
-            p0c=1e9
-            not_none =1
+            p0c = 1e9
+            not_none = 1
             #raise ValueError("Particles defined without energy reference")
         if not_none == 1:
             if p0c is not None:
@@ -163,6 +167,7 @@ class Particles(object):
                  chi=None, mratio=None, qratio=None,
                  partid=None, turn=None, state=None, elemid=None,
                  mathlib=np, **args):
+
         self._m = mathlib
         self.s = s
         self.x = x
@@ -195,7 +200,16 @@ class Particles(object):
     rpp = property(lambda self:  self._rpp)
 
     def add_to_energy(self, energy):
-        self.ptau += energy/self.p0c
+        sqrt = self._m.sqrt
+        oldrvv = self._rvv
+        deltabeta0 = self.delta*self.beta0
+        ptaubeta0 = sqrt(deltabeta0**2+2*deltabeta0*self.beta0 + 1)-1
+        ptaubeta0 += energy/self.energy0
+        ptau = ptaubeta0/self.beta0
+        self._delta = sqrt(ptau**2+2*ptau/self.beta0+1)-1
+        self._rvv = (1+self.delta)/(1+ptaubeta0)
+        self._rpp = 1/(1+self.delta)
+        self.zeta *= self._rvv/oldrvv
 
     delta = property(lambda self: self._delta)
 
@@ -204,10 +218,9 @@ class Particles(object):
         sqrt = self._m.sqrt
         self._delta = delta
         deltabeta0 = delta*self.beta0
-        ptaubeta0 = sqrt(deltabeta0**2+2*deltabeta0*self.beta0 +
-                          1)-1
-        self._rvv  = (1+self.delta)/(1+ptaubeta0)
-        self._rpp  =  1/(1+self.delta)
+        ptaubeta0 = sqrt(deltabeta0**2+2*deltabeta0*self.beta0 + 1)-1
+        self._rvv = (1+self.delta)/(1+ptaubeta0)
+        self._rpp = 1/(1+self.delta)
 
     psigma = property(lambda self: self.ptau/self.beta0)
 
