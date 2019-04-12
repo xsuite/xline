@@ -282,7 +282,8 @@ class BeamBeam4D(Element):
             p0c = p.p0c * qe
 
             Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(
-                x, y, self.sigma_x, self.sigma_y, min_sigma_diff=1e-10, skip_Gs=True, mathlib=p._m)
+                x, y, self.sigma_x, self.sigma_y, min_sigma_diff=1e-10,
+                skip_Gs=True, mathlib=p._m)
 
             fact_kick = chi * self.N_part * self.q_part * charge * \
                 (1. + beta * self.beta_s) / (p0c * (beta + self.beta_s))
@@ -365,7 +366,8 @@ class BeamBeam6D(Element):
                 self.Ddelta_sub,
                 self.enabled)
             x_ret, px_ret, y_ret, py_ret, zeta_ret, delta_ret = BB6D.BB6D_track(
-                p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0 * qe, p.p0c / clight * qe, bb6data)
+                p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0 * qe,
+                p.p0c / clight * qe, bb6data)
             self._last_bb6data = bb6data
             p.x = x_ret
             p.px = px_ret
