@@ -1,14 +1,13 @@
 import numpy as np
 import math
-import numba
 
 from scipy.constants import e as qe
 from scipy.constants import c as clight
 
-from .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
+from .be_beambeam.gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
 
-from . import BB6D
-from . import BB6Ddata
+from .be_beambeam import BB6D
+from .be_beambeam import BB6Ddata
 
 _factorial = np.array([1,
                        1,
@@ -51,7 +50,7 @@ class Element(object):
         args = ", ".join(args)
         return f"{self.__class__.__name__}({args})"
 
-    def as_dict(self):
+    def _asdict(self):
         return dict(self._slots())
 
 
@@ -80,10 +79,10 @@ class DriftExact(Element):
         sqrt = p._m.sqrt
         length = self.length
         opd = 1 + p.delta
-        lpzi = length / sqrt(opd**2- p.px**2 - p.py**2)
+        lpzi = length / sqrt(opd**2 - p.px**2 - p.py**2)
         p.x += p.px*lpzi
         p.y += p.py*lpzi
-        p.zeta  += p.rvv*length - opd*lpzi
+        p.zeta += p.rvv*length - opd*lpzi
         p.s += length
 
 
@@ -246,6 +245,14 @@ class Line(Element):
         return out
 
 
+class Monitor(Element):
+    __slots__ = ('data',)
+    __defaults__ = ([],)
+
+    def track(self, p):
+        self.data.append(p.copy)
+
+
 class BeamBeam4D(Element):
     __slots__ = ('q_part', 'N_part', 'sigma_x', 'sigma_y', 'beta_s',
                  'min_sigma_diff', 'Delta_x', 'Delta_y', 'Dpx_sub', 'Dpy_sub', 'enabled')
@@ -293,7 +300,8 @@ class BeamBeam4D(Element):
         buffer_list.append(np.array([self.Delta_y], dtype=np.float64))
         buffer_list.append(np.array([self.Dpx_sub], dtype=np.float64))
         buffer_list.append(np.array([self.Dpy_sub], dtype=np.float64))
-        buffer_list.append(BB6Ddata.int_to_float64arr({True:1, False:0}[self.enabled]))
+        buffer_list.append(BB6Ddata.int_to_float64arr(
+            {True: 1, False: 0}[self.enabled]))
 
         buf = np.concatenate(buffer_list)
 
@@ -301,29 +309,30 @@ class BeamBeam4D(Element):
 
 
 class BeamBeam6D(Element):
-    __slots__ = (['q_part', 'N_part_tot', 'sigmaz', 'N_slices', 'min_sigma_diff', 'threshold_singular',
-                  'phi', 'alpha',
-                  'Sig_11_0', 'Sig_12_0', 'Sig_13_0',
-                  'Sig_14_0', 'Sig_22_0', 'Sig_23_0',
-                  'Sig_24_0', 'Sig_33_0', 'Sig_34_0', 'Sig_44_0',
-                  'delta_x', 'delta_y',
-                  'x_CO', 'px_CO', 'y_CO', 'py_CO', 'sigma_CO', 'delta_CO',
-                  'Dx_sub', 'Dpx_sub', 'Dy_sub', 'Dpy_sub', 'Dsigma_sub', 'Ddelta_sub',
-                  'enabled'])
+    __slots__ = ([
+        'q_part', 'phi', 'alpha', 'delta_x', 'delta_y',
+        'N_part_per_slice', 'z_slices',
+        'Sig_11_0', 'Sig_12_0', 'Sig_13_0',
+        'Sig_14_0', 'Sig_22_0', 'Sig_23_0',
+        'Sig_24_0', 'Sig_33_0', 'Sig_34_0', 'Sig_44_0',
+        'x_CO', 'px_CO', 'y_CO', 'py_CO', 'sigma_CO', 'delta_CO',
+        'min_sigma_diff', 'threshold_singular',
+        'Dx_sub', 'Dpx_sub', 'Dy_sub', 'Dpy_sub', 'Dsigma_sub', 'Ddelta_sub',
+        'enabled'])
     __units__ = tuple(len(__slots__)*[[]])
     __defaults__ = tuple(len(__slots__)*[0.])
 
     def track(self, p):
         if self.enabled:
             bb6data = BB6Ddata.BB6D_init(
-                self.q_part, self.N_part_tot, self.sigmaz, self.N_slices, self.min_sigma_diff, self.threshold_singular,
-                self.phi, self.alpha,
-                self.Sig_11_0, self.Sig_12_0, self.Sig_13_0,
-                self.Sig_14_0, self.Sig_22_0, self.Sig_23_0,
-                self.Sig_24_0, self.Sig_33_0, self.Sig_34_0, self.Sig_44_0,
-                self.delta_x, self.delta_y,
-                self.x_CO, self.px_CO, self.y_CO, self.py_CO, self.sigma_CO, self.delta_CO,
-                self.Dx_sub, self.Dpx_sub, self.Dy_sub, self.Dpy_sub, self.Dsigma_sub, self.Ddelta_sub,
+                self.q_part, self.phi, self.alpha, self.delta_x, self.delta_y, 
+                self.N_part_per_slice, self.z_slices, 
+                self.Sig_11_0, self.Sig_12_0, self.Sig_13_0, 
+                self.Sig_14_0, self.Sig_22_0, self.Sig_23_0, 
+                self.Sig_24_0, self.Sig_33_0, self.Sig_34_0, self.Sig_44_0, 
+                self.x_CO, self.px_CO, self.y_CO, self.py_CO, self.sigma_CO, self.delta_CO, 
+                self.min_sigma_diff, self.threshold_singular, 
+                self.Dx_sub, self.Dpx_sub, self.Dy_sub, self.Dpy_sub, self.Dsigma_sub, self.Ddelta_sub, 
                 self.enabled)
             x_ret, px_ret, y_ret, py_ret, zeta_ret, delta_ret = BB6D.BB6D_track(
                 p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0*qe, p.p0c/clight*qe, bb6data)
