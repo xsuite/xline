@@ -34,7 +34,7 @@ _factorial = np.array([1,
 
 class Element(object):
     def __init__(self, **nargs):
-        not_allowed = set(nargs.keys())-set(self.__slots__)
+        not_allowed = set(nargs.keys()) - set(self.__slots__)
         if len(not_allowed) > 0:
             cname = self.__class__.__name__
             raise NameError(f"{not_allowed} not allowed by {cname}")
@@ -62,11 +62,11 @@ class Drift(Element):
     def track(self, p):
         length = self.length
         rpp = p.rpp
-        xp = p.px*rpp
-        yp = p.py*rpp
-        p.x += xp*length
-        p.y += yp*length
-        p.zeta += length*(p.rvv-(1+(xp**2+yp**2)/2))
+        xp = p.px * rpp
+        yp = p.py * rpp
+        p.x += xp * length
+        p.y += yp * length
+        p.zeta += length * (p.rvv - (1 + (xp**2 + yp**2) / 2))
         p.s += length
 
 
@@ -80,9 +80,9 @@ class DriftExact(Element):
         length = self.length
         opd = 1 + p.delta
         lpzi = length / sqrt(opd**2 - p.px**2 - p.py**2)
-        p.x += p.px*lpzi
-        p.y += p.py*lpzi
-        p.zeta += p.rvv*length - opd*lpzi
+        p.x += p.px * lpzi
+        p.y += p.py * lpzi
+        p.zeta += p.rvv * length - opd * lpzi
         p.s += length
 
 
@@ -93,7 +93,7 @@ class Multipole(Element):
 
     @property
     def order(self):
-        return max(len(self.knl), len(self.ksl))-1
+        return max(len(self.knl), len(self.ksl)) - 1
 
     def track(self, p):
         order = self.order
@@ -101,11 +101,11 @@ class Multipole(Element):
         knl = np.array(self.knl)
         ksl = np.array(self.ksl)
         if len(knl) < len(ksl):
-            nknl = np.zeros(order+1, dtype=knl.dtype)
+            nknl = np.zeros(order + 1, dtype=knl.dtype)
             nknl[:len(knl)] = knl
             knl = nknl
         elif len(knl) > len(ksl):
-            nksl = np.zeros(order+1, dtype=ksl.dtype)
+            nksl = np.zeros(order + 1, dtype=ksl.dtype)
             nksl[:len(ksl)] = ksl
             ksl = nksl
         x = p.x
@@ -114,30 +114,30 @@ class Multipole(Element):
         dpx = knl[order]
         dpy = ksl[order]
         for ii in range(order, 0, -1):
-            zre = (dpx*x-dpy*y)/ii
-            zim = (dpx*y+dpy*x)/ii
-            dpx = knl[ii-1]+zre
-            dpy = ksl[ii-1]+zim
-        dpx = -chi*dpx
-        dpy = chi*dpy
+            zre = (dpx * x - dpy * y) / ii
+            zim = (dpx * y + dpy * x) / ii
+            dpx = knl[ii - 1] + zre
+            dpy = ksl[ii - 1] + zim
+        dpx = -chi * dpx
+        dpy = chi * dpy
         # curvature effect kick
         hxl = self.hxl
         hyl = self.hyl
         delta = p.delta
         if (hxl != 0 or hyl != 0):
-            b1l = chi*knl[0]
-            a1l = chi*ksl[0]
-            hxlx = hxl*x
-            hyly = hyl*y
+            b1l = chi * knl[0]
+            a1l = chi * ksl[0]
+            hxlx = hxl * x
+            hyly = hyl * y
             if (length > 0):
-                hxx = hxlx/length
-                hyy = hyly/length
+                hxx = hxlx / length
+                hyy = hyly / length
             else:  # non physical weak focusing disabled (SixTrack mode)
                 hxx = 0
                 hyy = 0
-            dpx += hxl + hxl*delta - b1l*hxx
-            dpy -= hyl + hyl*delta - a1l*hyy
-            p.zeta -= chi*(hxlx-hyly)
+            dpx += hxl + hxl * delta - b1l * hxx
+            dpy -= hyl + hyl * delta - a1l * hyy
+            p.zeta -= chi * (hxlx - hyly)
         p.px += dpx
         p.py += dpy
 
@@ -160,15 +160,15 @@ class SRotation(Element):
     __defaults__ = (0,)
 
     def track(self, p):
-        deg2rag = p._m.pi/180
-        cz = p._m.cos(self.angle*deg2rag)
-        sz = p._m.sin(self.angle*deg2rag)
-        xn = cz*p.x + sz*p.y
-        yn = -sz*p.x + cz*p.y
+        deg2rag = p._m.pi / 180
+        cz = p._m.cos(self.angle * deg2rag)
+        sz = p._m.sin(self.angle * deg2rag)
+        xn = cz * p.x + sz * p.y
+        yn = -sz * p.x + cz * p.y
         p.x = xn
         p.y = yn
-        xn = cz*p.px + sz*p.py
-        yn = -sz*p.px + cz*p.py
+        xn = cz * p.px + sz * p.py
+        yn = -sz * p.px + cz * p.py
         p.px = xn
         p.py = yn
 
@@ -181,16 +181,49 @@ class Cavity(Element):
     def track(self, p):
         sin = p._m.sin
         pi = p._m.pi
-        k = 2*pi*self.frequency/p.clight
-        tau = p.zeta/p.rvv/p.beta0
-        phase = self.lag*pi/180-k*tau
-        p.add_to_energy(p.chi*self.voltage*sin(phase))
+        k = 2 * pi * self.frequency / p.clight
+        tau = p.zeta / p.rvv / p.beta0
+        phase = self.lag * pi / 180 - k * tau
+        p.add_to_energy(p.chi * self.voltage * sin(phase))
 
 
 class RFMultipole(Element):
     __slots__ = ('voltage', 'frequency', 'knl', 'ksl', 'pn', 'ps')
     __units__ = ('volt', 'hertz', [], [], [], [])
     __defaults__ = (0, 0, 0, 0, 0)
+
+
+class BeamMonitor(Element):
+    __slots__ = ('num_stores', 'start', 'skip', 'max_particle_id',
+                 'min_particle_id', 'is_rolling', 'is_turn_ordered')
+    __units__ = ('', 'turn', 'turn', '', '', '', '')
+    __defaults__ = (0, 0, 1, 0, 0, False, True)
+
+    def offset(self, particle):
+        _offset = -1
+        nn = self.max_particle_id >= self.min_particle_id \
+            and (self.max_particle_id - self.min_particle_id + 1) or -1
+        assert(self.is_turn_ordered)
+
+        if particle.turn >= self.start and nn > 0 and \
+                particle.partid >= self.min_particle_id and \
+                particle.partid <= self.max_particle_id:
+            turns_since_start = particle.turns - self.start
+            store_index = turns_since_start // self.skip
+            if store_index < self.num_stores:
+                pass
+            elif self.is_rolling:
+                store_index = store_index % self.num_stores
+            else:
+                store_index = -1
+
+            if store_index >= 0:
+                _offset = store_index * nn + particle.partid
+
+        return _offset
+
+    def track(self, particle):
+        pass
 
 
 class Line(Element):
@@ -218,8 +251,18 @@ class Monitor(Element):
 
 
 class BeamBeam4D(Element):
-    __slots__ = ('q_part', 'N_part', 'sigma_x', 'sigma_y', 'beta_s',
-                 'min_sigma_diff', 'Delta_x', 'Delta_y', 'Dpx_sub', 'Dpy_sub', 'enabled')
+    __slots__ = (
+        'q_part',
+        'N_part',
+        'sigma_x',
+        'sigma_y',
+        'beta_s',
+        'min_sigma_diff',
+        'Delta_x',
+        'Delta_y',
+        'Dpx_sub',
+        'Dpy_sub',
+        'enabled')
     __units__ = ('C', [], 'm', 'm', [],
                  'm', 'm', 'm', [], [], [])
     __defaults__ = (0., 0., 0., 0., 0.,
@@ -227,7 +270,7 @@ class BeamBeam4D(Element):
 
     def track(self, p):
         if self.enabled:
-            charge = p.qratio*p.q0*qe
+            charge = p.qratio * p.q0 * qe
             x = p.x - self.Delta_x
             px = p.px
             y = p.y - self.Delta_y
@@ -235,17 +278,18 @@ class BeamBeam4D(Element):
 
             chi = p.chi
 
-            beta = p.beta0/p.rvv
-            p0c = p.p0c*qe
+            beta = p.beta0 / p.rvv
+            p0c = p.p0c * qe
 
-            Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(x, y, self.sigma_x, self.sigma_y,
-                                           min_sigma_diff=1e-10, skip_Gs=True, mathlib=p._m)
+            Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(
+                x, y, self.sigma_x, self.sigma_y, min_sigma_diff=1e-10,
+                skip_Gs=True, mathlib=p._m)
 
             fact_kick = chi * self.N_part * self.q_part * charge * \
-                (1. + beta * self.beta_s)/(p0c*(beta + self.beta_s))
+                (1. + beta * self.beta_s) / (p0c * (beta + self.beta_s))
 
-            px += (fact_kick*Ex - self.Dpx_sub)
-            py += (fact_kick*Ey - self.Dpy_sub)
+            px += (fact_kick * Ex - self.Dpx_sub)
+            py += (fact_kick * Ey - self.Dpy_sub)
 
             p.px = px
             p.py = py
@@ -283,23 +327,47 @@ class BeamBeam6D(Element):
         'min_sigma_diff', 'threshold_singular',
         'Dx_sub', 'Dpx_sub', 'Dy_sub', 'Dpy_sub', 'Dsigma_sub', 'Ddelta_sub',
         'enabled'])
-    __units__ = tuple(len(__slots__)*[[]])
-    __defaults__ = tuple(len(__slots__)*[0.])
+    __units__ = tuple(len(__slots__) * [[]])
+    __defaults__ = tuple(len(__slots__) * [0.])
 
     def track(self, p):
         if self.enabled:
             bb6data = BB6Ddata.BB6D_init(
-                self.q_part, self.phi, self.alpha, self.delta_x, self.delta_y, 
-                self.N_part_per_slice, self.z_slices, 
-                self.Sig_11_0, self.Sig_12_0, self.Sig_13_0, 
-                self.Sig_14_0, self.Sig_22_0, self.Sig_23_0, 
-                self.Sig_24_0, self.Sig_33_0, self.Sig_34_0, self.Sig_44_0, 
-                self.x_CO, self.px_CO, self.y_CO, self.py_CO, self.sigma_CO, self.delta_CO, 
-                self.min_sigma_diff, self.threshold_singular, 
-                self.Dx_sub, self.Dpx_sub, self.Dy_sub, self.Dpy_sub, self.Dsigma_sub, self.Ddelta_sub, 
+                self.q_part,
+                self.phi,
+                self.alpha,
+                self.delta_x,
+                self.delta_y,
+                self.N_part_per_slice,
+                self.z_slices,
+                self.Sig_11_0,
+                self.Sig_12_0,
+                self.Sig_13_0,
+                self.Sig_14_0,
+                self.Sig_22_0,
+                self.Sig_23_0,
+                self.Sig_24_0,
+                self.Sig_33_0,
+                self.Sig_34_0,
+                self.Sig_44_0,
+                self.x_CO,
+                self.px_CO,
+                self.y_CO,
+                self.py_CO,
+                self.sigma_CO,
+                self.delta_CO,
+                self.min_sigma_diff,
+                self.threshold_singular,
+                self.Dx_sub,
+                self.Dpx_sub,
+                self.Dy_sub,
+                self.Dpy_sub,
+                self.Dsigma_sub,
+                self.Ddelta_sub,
                 self.enabled)
             x_ret, px_ret, y_ret, py_ret, zeta_ret, delta_ret = BB6D.BB6D_track(
-                p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0*qe, p.p0c/clight*qe, bb6data)
+                p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0 * qe,
+                p.p0c / clight * qe, bb6data)
             self._last_bb6data = bb6data
             p.x = x_ret
             p.px = px_ret

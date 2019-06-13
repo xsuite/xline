@@ -8,7 +8,7 @@ from scipy.special import wofz
 
 
 def wfun(z_re, z_im):
-    w = wofz(z_re+1j*z_im)
+    w = wofz(z_re + 1j * z_im)
     return w.real, w.imag
 
 
@@ -16,7 +16,7 @@ np.wfun = wfun
 
 
 def count_not_none(*lst):
-    return len(lst)-sum(p is None for p in lst)
+    return len(lst) - sum(p is None for p in lst)
 
 
 class Particles(object):
@@ -24,42 +24,44 @@ class Particles(object):
     pi = 3.141592653589793238
     echarge = 1.602176565e-19
     emass = 0.510998928e6
-    pmass = 938.272046e6
+    # Was: 938.272046e6;
+    # correct value acc. to PDG 2018 938.2720813(58)e6 MeV/c²
+    pmass = 938.272081e6
     epsilon0 = 8.854187817e-12
-    mu0 = 4e-7*pi
-    eradius = echarge**2/(4*pi*epsilon0*emass*clight**2)
-    pradius = echarge**2/(4*pi*epsilon0*pmass*clight**2)
+    mu0 = 4e-7 * pi
+    eradius = echarge**2 / (4 * pi * epsilon0 * emass * clight**2)
+    pradius = echarge**2 / (4 * pi * epsilon0 * pmass * clight**2)
     anumber = 6.02214129e23
     kboltz = 1.3806488e-23
 
     def _g1(self, mass0, p0c, energy0):
-        beta0 = p0c/energy0
-        gamma0 = energy0/mass0
+        beta0 = p0c / energy0
+        gamma0 = energy0 / mass0
         return mass0, beta0, gamma0, p0c, energy0
 
     def _g2(self, mass0, beta0, gamma0):
-        energy0 = mass0*gamma0
-        p0c = energy0*beta0
+        energy0 = mass0 * gamma0
+        p0c = energy0 * beta0
         return mass0, beta0, gamma0, p0c, energy0
 
     def _f1(self, mass0, p0c):
         sqrt = self._m.sqrt
-        energy0 = sqrt(p0c**2+mass0**2)
+        energy0 = sqrt(p0c**2 + mass0**2)
         return self._g1(mass0, p0c, energy0)
 
     def _f2(self, mass0, energy0):
         sqrt = self._m.sqrt
-        p0c = sqrt(energy0**2-mass0**2)
+        p0c = sqrt(energy0**2 - mass0**2)
         return self._g1(mass0, p0c, energy0)
 
     def _f3(self, mass0, beta0):
         sqrt = self._m.sqrt
-        gamma0 = 1/sqrt(1-beta0**2)
+        gamma0 = 1 / sqrt(1 - beta0**2)
         return self._g2(mass0, beta0, gamma0)
 
     def _f4(self, mass0, gamma0):
         sqrt = self._m.sqrt
-        beta0 = sqrt(1-1/gamma0**2)
+        beta0 = sqrt(1 - 1 / gamma0**2)
         return self._g2(mass0, beta0, gamma0)
 
     def copy(self):
@@ -187,29 +189,29 @@ class Particles(object):
         self.turn = turn
         self.state = state
 
-    Px = property(lambda p: p.px*p.p0c*p.mratio)
-    Py = property(lambda p: p.py*p.p0c*p.mratio)
-    Energy = property(lambda p: (p.ptau*p.p0c+p.energy0)*p.mratio)
-    Pc = property(lambda p: (p.delta*p.p0c+p.p0c)*p.mratio)
-    mass = property(lambda p:  p.mass0*p.mratio)
-    beta = property(lambda p:  (1+p.delta)/(1/p.beta0+p.ptau))
+    Px = property(lambda p: p.px * p.p0c * p.mratio)
+    Py = property(lambda p: p.py * p.p0c * p.mratio)
+    Energy = property(lambda p: (p.ptau * p.p0c + p.energy0) * p.mratio)
+    Pc = property(lambda p: (p.delta * p.p0c + p.p0c) * p.mratio)
+    mass = property(lambda p: p.mass0 * p.mratio)
+    beta = property(lambda p: (1 + p.delta) / (1 / p.beta0 + p.ptau))
     # rvv = property(lambda self: self.beta/self.beta0)
     # rpp = property(lambda self: 1/(1+self.delta))
 
-    rvv = property(lambda self:  self._rvv)
-    rpp = property(lambda self:  self._rpp)
+    rvv = property(lambda self: self._rvv)
+    rpp = property(lambda self: self._rpp)
 
     def add_to_energy(self, energy):
         sqrt = self._m.sqrt
         oldrvv = self._rvv
-        deltabeta0 = self.delta*self.beta0
-        ptaubeta0 = sqrt(deltabeta0**2+2*deltabeta0*self.beta0 + 1)-1
-        ptaubeta0 += energy/self.energy0
-        ptau = ptaubeta0/self.beta0
-        self._delta = sqrt(ptau**2+2*ptau/self.beta0+1)-1
-        self._rvv = (1+self.delta)/(1+ptaubeta0)
-        self._rpp = 1/(1+self.delta)
-        self.zeta *= self._rvv/oldrvv
+        deltabeta0 = self.delta * self.beta0
+        ptaubeta0 = sqrt(deltabeta0**2 + 2 * deltabeta0 * self.beta0 + 1) - 1
+        ptaubeta0 += energy / self.energy0
+        ptau = ptaubeta0 / self.beta0
+        self._delta = sqrt(ptau**2 + 2 * ptau / self.beta0 + 1) - 1
+        self._rvv = (1 + self.delta) / (1 + ptaubeta0)
+        self._rpp = 1 / (1 + self.delta)
+        self.zeta *= self._rvv / oldrvv
 
     delta = property(lambda self: self._delta)
 
@@ -217,38 +219,39 @@ class Particles(object):
     def delta(self, delta):
         sqrt = self._m.sqrt
         self._delta = delta
-        deltabeta0 = delta*self.beta0
-        ptaubeta0 = sqrt(deltabeta0**2+2*deltabeta0*self.beta0 + 1)-1
-        self._rvv = (1+self.delta)/(1+ptaubeta0)
-        self._rpp = 1/(1+self.delta)
+        deltabeta0 = delta * self.beta0
+        ptaubeta0 = sqrt(deltabeta0**2 + 2 * deltabeta0 * self.beta0 + 1) - 1
+        self._rvv = (1 + self.delta) / (1 + ptaubeta0)
+        self._rpp = 1 / (1 + self.delta)
 
-    psigma = property(lambda self: self.ptau/self.beta0)
+    psigma = property(lambda self: self.ptau / self.beta0)
 
     @psigma.setter
     def psigma(self, psigma):
-        self.ptau = psigma*self.beta0
+        self.ptau = psigma * self.beta0
 
-    tau = property(lambda self: self.zeta/self.beta)
+    tau = property(lambda self: self.zeta / self.beta)
 
     @tau.setter
     def tau(self, tau):
-        self.zeta = self.beta*tau
+        self.zeta = self.beta * tau
 
-    sigma = property(lambda self: (self.beta0/self.beta)*self.zeta)
+    sigma = property(lambda self: (self.beta0 / self.beta) * self.zeta)
 
     @sigma.setter
     def sigma(self, sigma):
-        self.zeta = self.beta/self.beta0*sigma
+        self.zeta = self.beta / self.beta0 * sigma
 
     @property
     def ptau(self):
         sqrt = self._m.sqrt
-        return sqrt(self.delta**2+2*self.delta + 1/self.beta0**2)-1/self.beta0
+        return sqrt(self.delta**2 + 2 * self.delta +
+                    1 / self.beta0**2) - 1 / self.beta0
 
     @ptau.setter
     def ptau(self, ptau):
         sqrt = self._m.sqrt
-        self.delta = sqrt(ptau**2+2*ptau/self.beta0+1)-1
+        self.delta = sqrt(ptau**2 + 2 * ptau / self.beta0 + 1) - 1
 
     mass0 = property(lambda self: self._mass0)
 
@@ -292,23 +295,23 @@ class Particles(object):
     @mratio.setter
     def mratio(self, mratio):
         Px, Py, Energy, Pc = self.Px, self.Py, self.Energy, self.Pc
-        self._ptau = Energy/(mratio*energy0)-1
-        self._delta = Energy/(delta*energy0)-1
-        self.px = Px/(p0c*mratio)
-        self.py = Py/(p0c*mratio)
-        self._chi = self._qratio/mratio
+        self._ptau = Energy / (mratio * energy0) - 1
+        self._delta = Energy / (delta * energy0) - 1
+        self.px = Px / (p0c * mratio)
+        self.py = Py / (p0c * mratio)
+        self._chi = self._qratio / mratio
         self._mratio = mratio
     qratio = property(lambda self: self._qratio)
 
     @qratio.setter
     def qratio(self, qratio):
-        self._chi = qratio/self._mratio
+        self._chi = qratio / self._mratio
         self._qratio = qratio
     chi = property(lambda self: self._chi)
 
     @chi.setter
     def chi(self, chi):
-        self._qratio = self._chi*self._mratio
+        self._qratio = self._chi * self._mratio
         self._chi = chi
 
     def _update_ref(self, mass0, beta0, gamma0, p0c, energy0):
@@ -324,13 +327,13 @@ class Particles(object):
             Py = self.Py
             Energy = self.Energy
             Pc = self.Pc
-            mratio = mass/mass0
+            mratio = mass / mass0
             self._mratio = mratio
-            self._chi = self._qratio/mratio
-            self._ptau = Energy/(mratio*energy0)-1
-            self._delta = Energy/(delta*energy0)-1
-            self.px = Px/(p0c*mratio)
-            self.py = Py/(p0c*mratio)
+            self._chi = self._qratio / mratio
+            self._ptau = Energy / (mratio * energy0) - 1
+            self._delta = Energy / (delta * energy0) - 1
+            self.px = Px / (p0c * mratio)
+            self.py = Py / (p0c * mratio)
 
     def __repr__(self):
         out = f"""\
