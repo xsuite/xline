@@ -3,7 +3,6 @@ import math
 
 from scipy.constants import e as qe
 from scipy.constants import c as clight
-
 from .be_beambeam.gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
 
 from .be_beambeam import BB6D
@@ -297,16 +296,16 @@ class BeamBeam4D(Element):
 
         buffer_list = []
 
-        buffer_list.append(np.array([self.q_part], dtype=np.float64))
-        buffer_list.append(np.array([self.N_part], dtype=np.float64))
+        buffer_list.append(np.array([qe], dtype=np.float64))
+        buffer_list.append(np.array([self.cherge], dtype=np.float64))
         buffer_list.append(np.array([self.sigma_x], dtype=np.float64))
         buffer_list.append(np.array([self.sigma_y], dtype=np.float64))
-        buffer_list.append(np.array([self.beta_s], dtype=np.float64))
+        buffer_list.append(np.array([self.beta_r], dtype=np.float64))
         buffer_list.append(np.array([self.min_sigma_diff], dtype=np.float64))
-        buffer_list.append(np.array([self.Delta_x], dtype=np.float64))
-        buffer_list.append(np.array([self.Delta_y], dtype=np.float64))
-        buffer_list.append(np.array([self.Dpx_sub], dtype=np.float64))
-        buffer_list.append(np.array([self.Dpy_sub], dtype=np.float64))
+        buffer_list.append(np.array([self.x_bb], dtype=np.float64))
+        buffer_list.append(np.array([self.y_bb], dtype=np.float64))
+        buffer_list.append(np.array([self.d_px], dtype=np.float64))
+        buffer_list.append(np.array([self.d_py], dtype=np.float64))
         buffer_list.append(BB6Ddata.int_to_float64arr(
             {True: 1, False: 0}[self.enabled]))
 
