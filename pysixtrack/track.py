@@ -252,20 +252,19 @@ class Monitor(Element):
 
 class BeamBeam4D(Element):
     __slots__ = (
-        'q_part',
-        'N_part',
+        'charge',
         'sigma_x',
         'sigma_y',
-        'beta_s',
+        'beta_r',
         'min_sigma_diff',
-        'Delta_x',
-        'Delta_y',
-        'Dpx_sub',
-        'Dpy_sub',
+        'x_bb',
+        'y_bb',
+        'd_px',
+        'd_py',
         'enabled')
-    __units__ = ('C', [], 'm', 'm', [],
+    __units__ = ('e', 'm', 'm', [],
                  'm', 'm', 'm', [], [], [])
-    __defaults__ = (0., 0., 0., 0., 0.,
+    __defaults__ = (0., 0., 0., 0.,
                     0., 0., 0., 0., 0., True)
 
     def track(self, p):
