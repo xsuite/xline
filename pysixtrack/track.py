@@ -286,7 +286,7 @@ class BeamBeam4D(Element):
 
             fact_kick = chi * self.charge * qe * charge * qe\
                 * (1. + beta * self.beta_r) / (p0c * (beta + self.beta_r))
-
+            
             px += (fact_kick * Ex - self.d_px)
             py += (fact_kick * Ey - self.d_py)
 
@@ -343,7 +343,7 @@ class BeamBeam6D(Element):
         'd_px',
         'd_y',
         'd_py',
-        'd_sigma',
+        'd_zeta',
         'd_delta',
         'min_sigma_diff',
         'threshold_singular',
@@ -355,37 +355,37 @@ class BeamBeam6D(Element):
     def track(self, p):
         if self.enabled:
             bb6data = BB6Ddata.BB6D_init(
-                self.q_part,
+                qe,
                 self.phi,
                 self.alpha,
-                self.delta_x,
-                self.delta_y,
-                self.N_part_per_slice,
-                self.z_slices,
-                self.Sig_11_0,
-                self.Sig_12_0,
-                self.Sig_13_0,
-                self.Sig_14_0,
-                self.Sig_22_0,
-                self.Sig_23_0,
-                self.Sig_24_0,
-                self.Sig_33_0,
-                self.Sig_34_0,
-                self.Sig_44_0,
-                self.x_CO,
-                self.px_CO,
-                self.y_CO,
-                self.py_CO,
-                self.sigma_CO,
-                self.delta_CO,
+                self.x_bb_co,
+                self.y_bb_co,
+                self.charge_slices,
+                self.zeta_slices,
+                self.sigma_11,
+                self.sigma_12,
+                self.sigma_13,
+                self.sigma_14,
+                self.sigma_22,
+                self.sigma_23,
+                self.sigma_24,
+                self.sigma_33,
+                self.sigma_34,
+                self.sigma_44,
+                self.x_co,
+                self.px_co,
+                self.y_co,
+                self.py_co,
+                self.zeta_co,
+                self.delta_co,
                 self.min_sigma_diff,
                 self.threshold_singular,
-                self.Dx_sub,
-                self.Dpx_sub,
-                self.Dy_sub,
-                self.Dpy_sub,
-                self.Dsigma_sub,
-                self.Ddelta_sub,
+                self.d_x,
+                self.d_px,
+                self.d_y,
+                self.d_py,
+                self.d_zeta,
+                self.d_delta,
                 self.enabled)
             x_ret, px_ret, y_ret, py_ret, zeta_ret, delta_ret = BB6D.BB6D_track(
                 p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0 * qe,
