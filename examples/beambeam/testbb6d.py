@@ -60,8 +60,8 @@ for bb in listBB6D: bb.enabled = True
 
 # Add closed orbit to separation for BB4D (as assumed in sixtrack)
 for bb, ibb in zip(listBB4D, ind_BB4D):
-    bb.Delta_x+=closed_orbit[ibb].x
-    bb.Delta_y+=closed_orbit[ibb].y
+    bb.x_bb+=closed_orbit[ibb].x
+    bb.y_bb+=closed_orbit[ibb].y
 
 # Evaluate kick at CO location BB4D
 for bb, ibb in zip(listBB4D, ind_BB4D):

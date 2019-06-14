@@ -265,14 +265,14 @@ class BeamBeam4D(Element):
     __units__ = ('e', 'm', 'm', [],
                  'm', 'm', 'm', [], [], [])
     __defaults__ = (0., 0., 0., 0.,
-                    0., 0., 0., 0., 0., True)
+                    1e-28, 0., 0., 0., 0., True)
 
     def track(self, p):
         if self.enabled:
-            charge = p.qratio * p.q0 * qe
-            x = p.x - self.Delta_x
+            charge = p.qratio * p.q0
+            x = p.x - self.x_bb
             px = p.px
-            y = p.y - self.Delta_y
+            y = p.y - self.y_bb
             py = p.py
 
             chi = p.chi
@@ -284,11 +284,11 @@ class BeamBeam4D(Element):
                 x, y, self.sigma_x, self.sigma_y, min_sigma_diff=1e-10,
                 skip_Gs=True, mathlib=p._m)
 
-            fact_kick = chi * self.N_part * self.q_part * charge * \
-                (1. + beta * self.beta_s) / (p0c * (beta + self.beta_s))
+            fact_kick = chi * self.charge * qe * charge * qe\
+                * (1. + beta * self.beta_r) / (p0c * (beta + self.beta_r))
 
-            px += (fact_kick * Ex - self.Dpx_sub)
-            py += (fact_kick * Ey - self.Dpy_sub)
+            px += (fact_kick * Ex - self.d_px)
+            py += (fact_kick * Ey - self.d_py)
 
             p.px = px
             p.py = py
@@ -317,17 +317,40 @@ class BeamBeam4D(Element):
 
 class BeamBeam6D(Element):
     __slots__ = ([
-        'q_part', 'phi', 'alpha', 'delta_x', 'delta_y',
-        'N_part_per_slice', 'z_slices',
-        'Sig_11_0', 'Sig_12_0', 'Sig_13_0',
-        'Sig_14_0', 'Sig_22_0', 'Sig_23_0',
-        'Sig_24_0', 'Sig_33_0', 'Sig_34_0', 'Sig_44_0',
-        'x_CO', 'px_CO', 'y_CO', 'py_CO', 'sigma_CO', 'delta_CO',
-        'min_sigma_diff', 'threshold_singular',
-        'Dx_sub', 'Dpx_sub', 'Dy_sub', 'Dpy_sub', 'Dsigma_sub', 'Ddelta_sub',
+        'phi',
+        'alpha',
+        'x_bb_co',
+        'y_bb_co',
+        'charge_slices',
+        'zeta_slices',
+        'sigma_11',
+        'sigma_12',
+        'sigma_13',
+        'sigma_14',
+        'sigma_22',
+        'sigma_23',
+        'sigma_24',
+        'sigma_33',
+        'sigma_34',
+        'sigma_44',
+        'x_co',
+        'px_co',
+        'y_co',
+        'py_co',
+        'zeta_co',
+        'delta_co',
+        'd_x',
+        'd_px',
+        'd_y',
+        'd_py',
+        'd_sigma',
+        'd_delta',
+        'min_sigma_diff',
+        'threshold_singular',
         'enabled'])
+
     __units__ = tuple(len(__slots__) * [[]])
-    __defaults__ = tuple(len(__slots__) * [0.])
+    __defaults__ = tuple((len(__slots__)-3) * [0.] + [1e-28, 1e-28, True])
 
     def track(self, p):
         if self.enabled:
