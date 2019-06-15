@@ -248,15 +248,9 @@ class Line(Element):
             # got a different type of line (e.g. pybplep)
             for ee in line.elements:
                 type_name = ee.__class__.__name__
-                
-                # build an object initialized with defaulf values
-                newele = element_types[type_name]()
-                
-                # set fields
-                for ff in ee._fields:
-                    setattr(newele, ff, getattr(ee, ff))
-                
+                newele = element_types[type_name](**ee._asdict())
                 self.elements.append(newele)
+        
         return self
 
     @classmethod
