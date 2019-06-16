@@ -1,6 +1,8 @@
 import numpy as np
 import math
 
+from copy import deepcopy
+
 from scipy.constants import e as qe
 from scipy.constants import c as clight
 from .be_beambeam.gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
@@ -38,7 +40,7 @@ class Element(object):
             cname = self.__class__.__name__
             raise NameError(f"{not_allowed} not allowed by {cname}")
         for name, default in zip(self.__slots__, self.__defaults__):
-            setattr(self, name, nargs.get(name, default))
+            setattr(self, name, deepcopy(nargs.get(name, default)))
 
     def _slots(self):
         names = self.__slots__
@@ -243,7 +245,7 @@ class Line(Element):
     def append_line(self, line):
         if type(line) is Line:
             # got a pysixtrack line
-            self.elements += line.element_types
+            self.elements += line.elements
         else:
             # got a different type of line (e.g. pybplep)
             for ee in line.elements:
