@@ -266,6 +266,19 @@ class Line(Element):
     def fromline(cls, line):
         return cls().append_line(line)
 
+    def to_pyblep_line(self):
+        import pyblep
+        elements = []
+        element_names = []
+        for ee, nn in zip(self.elements, self.element_names):
+            etype = ee.__class__.__name__
+            pyblep_class = getattr(pyblep.elements, etype)
+            config = {kk: getattr(ee, kk) for kk in pyblep_class._fields}
+            elements.append(pyblep_class(**config))
+            element_names.append(nn)
+
+        return pyblep.elements.Line(elements, element_names)
+
     def find_closed_orbit(self, p0c, guess=[0.,0.,0.,0.,0.,0.],
             method='Nelder-Mead'):
 
