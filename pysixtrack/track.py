@@ -228,8 +228,8 @@ class BeamMonitor(Element):
 
 
 class Line(Element):
-    __slots__ = ('elements',)
-    __defaults__ = ([],)
+    __slots__ = ('elements', 'element_names' )
+    __defaults__ = ([], [])
 
     def track(self, p):
         for el in self.elements:
@@ -243,6 +243,7 @@ class Line(Element):
         return out
 
     def append_line(self, line):
+        # Append the elements
         if type(line) is Line:
             # got a pysixtrack line
             self.elements += line.elements
@@ -253,6 +254,12 @@ class Line(Element):
                 newele = element_types[type_name](**ee._asdict())
                 self.elements.append(newele)
         
+        # Append the names
+        self.element_names += line.element_names
+
+        assert(len(self.elements) == len(self.element_names))
+
+
         return self
 
     @classmethod
