@@ -80,13 +80,17 @@ class Particles(object):
             #raise ValueError("Particles defined without energy reference")
         if not_none == 1:
             if p0c is not None:
-                self.p0c = p0c
+               new = self._f1(self.mass0, p0c)
+               self._update_ref(*new)
             elif energy0 is not None:
-                self.energy0 = energy0
+               new = self._f2(self.mass0, energy0)
+               self._update_ref(*new)
             elif gamma0 is not None:
-                self.gamma0 = gamma0
+               new = self._f4(self.mass0, gamma0)
+               self._update_ref(*new)
             elif beta0 is not None:
-                self.beta0 = beta0
+               new = self._f3(self.mass0, beta0)
+               self._update_ref(*new)
         else:
             raise ValueError(f"""\
             Particles defined with multiple energy references:
@@ -264,32 +268,37 @@ class Particles(object):
     @beta0.setter
     def beta0(self, beta0):
         new = self._f3(self.mass0, beta0)
+        _abs = self._get_absolute()
         self._update_ref(*new)
-        self._update_particles(*new)
+        self._update_particles_from_absolute(*_abs)
 
     gamma0 = property(lambda self: self._gamma0)
 
     @gamma0.setter
     def gamma0(self, gamma0):
         new = self._f4(self.mass0, gamma0)
+        _abs = self._get_absolute()
         self._update_ref(*new)
-        self._update_particles(*new)
+        self._update_particles_from_absolute(*_abs)
 
     p0c = property(lambda self: self._p0c)
 
     @p0c.setter
     def p0c(self, p0c):
         new = self._f1(self.mass0, p0c)
+        _abs = self._get_absolute()
         self._update_ref(*new)
-        self._update_particles(*new)
+        self._update_particles_from_absolute(*_abs)
 
     energy0 = property(lambda self: self._energy0)
 
     @energy0.setter
     def energy0(self, energy0):
         new = self._f2(self.mass0, energy0)
+        _abs = self._get_absolute()
         self._update_ref(*new)
-        self._update_particles(*new)
+        self._update_particles_from_absolute(*_abs)
+
     mratio = property(lambda self: self._mratio)
 
     @mratio.setter
@@ -301,18 +310,23 @@ class Particles(object):
         self.py = Py / (p0c * mratio)
         self._chi = self._qratio / mratio
         self._mratio = mratio
+
     qratio = property(lambda self: self._qratio)
 
     @qratio.setter
     def qratio(self, qratio):
         self._chi = qratio / self._mratio
         self._qratio = qratio
+
     chi = property(lambda self: self._chi)
 
     @chi.setter
     def chi(self, chi):
         self._qratio = self._chi * self._mratio
         self._chi = chi
+
+    def _get_absolute(self):
+        return self.Px, self.Py, self.Pc, self.Energy
 
     def _update_ref(self, mass0, beta0, gamma0, p0c, energy0):
         self._mass0 = mass0
@@ -321,19 +335,16 @@ class Particles(object):
         self._p0c = p0c
         self._energy0 = energy0
 
-    def _update_particles(self, mass0, beta0, gamma0, p0c, energy0):
+    def _update_particles_from_absolute(self, Px, Py, Pc, Energy):
         if self._update_coordinates:
-            Px = self.Px
-            Py = self.Py
-            Energy = self.Energy
-            Pc = self.Pc
-            mratio = mass / mass0
+            mratio = self.mass / self.mass0
+            norm = mratio*self.p0c
             self._mratio = mratio
             self._chi = self._qratio / mratio
-            self._ptau = Energy / (mratio * energy0) - 1
-            self._delta = Energy / (delta * energy0) - 1
-            self.px = Px / (p0c * mratio)
-            self.py = Py / (p0c * mratio)
+            self._ptau = Energy / norm - 1
+            self._delta = Pc/ norm - 1
+            self.px = Px / norm
+            self.py = Py / norm
 
     def __repr__(self):
         out = f"""\
