@@ -356,8 +356,8 @@ class Line(Element):
                 ee.d_px = ptemp.px - ptempin.px
                 ee.d_py = ptemp.py - ptempin.py
 
-            elif ee.__class__.__name__ == 'BeamBeam4D':
-                if separation_given_wrt_closed_orbit_6D:
+            elif ee.__class__.__name__ == 'BeamBeam6D':
+                if not separation_given_wrt_closed_orbit_6D:
                     raise ValueError('Not implemented!')
 
                 # Store closed orbit
