@@ -1,9 +1,10 @@
 import numpy as np
 import math
 
+from copy import deepcopy
+
 from scipy.constants import e as qe
 from scipy.constants import c as clight
-
 from .be_beambeam.gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
 
 from .be_beambeam import BB6D
@@ -39,7 +40,7 @@ class Element(object):
             cname = self.__class__.__name__
             raise NameError(f"{not_allowed} not allowed by {cname}")
         for name, default in zip(self.__slots__, self.__defaults__):
-            setattr(self, name, nargs.get(name, default))
+            setattr(self, name, deepcopy(nargs.get(name, default)))
 
     def _slots(self):
         names = self.__slots__
@@ -241,6 +242,23 @@ class Line(Element):
             el.track(p)
         return out
 
+    def append_line(self, line):
+        if type(line) is Line:
+            # got a pysixtrack line
+            self.elements += line.elements
+        else:
+            # got a different type of line (e.g. pybplep)
+            for ee in line.elements:
+                type_name = ee.__class__.__name__
+                newele = element_types[type_name](**ee._asdict())
+                self.elements.append(newele)
+        
+        return self
+
+    @classmethod
+    def fromline(cls, line):
+        return cls().append_line(line)
+
 
 class Monitor(Element):
     __slots__ = ('data',)
@@ -252,28 +270,27 @@ class Monitor(Element):
 
 class BeamBeam4D(Element):
     __slots__ = (
-        'q_part',
-        'N_part',
+        'charge',
         'sigma_x',
         'sigma_y',
-        'beta_s',
+        'beta_r',
         'min_sigma_diff',
-        'Delta_x',
-        'Delta_y',
-        'Dpx_sub',
-        'Dpy_sub',
+        'x_bb',
+        'y_bb',
+        'd_px',
+        'd_py',
         'enabled')
-    __units__ = ('C', [], 'm', 'm', [],
+    __units__ = ('e', 'm', 'm', [],
                  'm', 'm', 'm', [], [], [])
-    __defaults__ = (0., 0., 0., 0., 0.,
-                    0., 0., 0., 0., 0., True)
+    __defaults__ = (0., 0., 0., 0.,
+                    1e-28, 0., 0., 0., 0., True)
 
     def track(self, p):
         if self.enabled:
-            charge = p.qratio * p.q0 * qe
-            x = p.x - self.Delta_x
+            charge = p.qratio * p.q0
+            x = p.x - self.x_bb
             px = p.px
-            y = p.y - self.Delta_y
+            y = p.y - self.y_bb
             py = p.py
 
             chi = p.chi
@@ -285,85 +302,87 @@ class BeamBeam4D(Element):
                 x, y, self.sigma_x, self.sigma_y, min_sigma_diff=1e-10,
                 skip_Gs=True, mathlib=p._m)
 
-            fact_kick = chi * self.N_part * self.q_part * charge * \
-                (1. + beta * self.beta_s) / (p0c * (beta + self.beta_s))
-
-            px += (fact_kick * Ex - self.Dpx_sub)
-            py += (fact_kick * Ey - self.Dpy_sub)
+            fact_kick = chi * self.charge * qe * charge * qe\
+                * (1. + beta * self.beta_r) / (p0c * (beta + self.beta_r))
+            
+            px += (fact_kick * Ex - self.d_px)
+            py += (fact_kick * Ey - self.d_py)
 
             p.px = px
             p.py = py
 
-    def tobuffer(self):
-
-        buffer_list = []
-
-        buffer_list.append(np.array([self.q_part], dtype=np.float64))
-        buffer_list.append(np.array([self.N_part], dtype=np.float64))
-        buffer_list.append(np.array([self.sigma_x], dtype=np.float64))
-        buffer_list.append(np.array([self.sigma_y], dtype=np.float64))
-        buffer_list.append(np.array([self.beta_s], dtype=np.float64))
-        buffer_list.append(np.array([self.min_sigma_diff], dtype=np.float64))
-        buffer_list.append(np.array([self.Delta_x], dtype=np.float64))
-        buffer_list.append(np.array([self.Delta_y], dtype=np.float64))
-        buffer_list.append(np.array([self.Dpx_sub], dtype=np.float64))
-        buffer_list.append(np.array([self.Dpy_sub], dtype=np.float64))
-        buffer_list.append(BB6Ddata.int_to_float64arr(
-            {True: 1, False: 0}[self.enabled]))
-
-        buf = np.concatenate(buffer_list)
-
-        return buf
-
 
 class BeamBeam6D(Element):
     __slots__ = ([
-        'q_part', 'phi', 'alpha', 'delta_x', 'delta_y',
-        'N_part_per_slice', 'z_slices',
-        'Sig_11_0', 'Sig_12_0', 'Sig_13_0',
-        'Sig_14_0', 'Sig_22_0', 'Sig_23_0',
-        'Sig_24_0', 'Sig_33_0', 'Sig_34_0', 'Sig_44_0',
-        'x_CO', 'px_CO', 'y_CO', 'py_CO', 'sigma_CO', 'delta_CO',
-        'min_sigma_diff', 'threshold_singular',
-        'Dx_sub', 'Dpx_sub', 'Dy_sub', 'Dpy_sub', 'Dsigma_sub', 'Ddelta_sub',
+        'phi',
+        'alpha',
+        'x_bb_co',
+        'y_bb_co',
+        'charge_slices',
+        'zeta_slices',
+        'sigma_11',
+        'sigma_12',
+        'sigma_13',
+        'sigma_14',
+        'sigma_22',
+        'sigma_23',
+        'sigma_24',
+        'sigma_33',
+        'sigma_34',
+        'sigma_44',
+        'x_co',
+        'px_co',
+        'y_co',
+        'py_co',
+        'zeta_co',
+        'delta_co',
+        'd_x',
+        'd_px',
+        'd_y',
+        'd_py',
+        'd_zeta',
+        'd_delta',
+        'min_sigma_diff',
+        'threshold_singular',
         'enabled'])
+
     __units__ = tuple(len(__slots__) * [[]])
-    __defaults__ = tuple(len(__slots__) * [0.])
+    __defaults__ = tuple((len(__slots__)-3) * [0.] + [1e-28, 1e-28, True])
 
     def track(self, p):
         if self.enabled:
             bb6data = BB6Ddata.BB6D_init(
-                self.q_part,
+                qe,
                 self.phi,
                 self.alpha,
-                self.delta_x,
-                self.delta_y,
-                self.N_part_per_slice,
-                self.z_slices,
-                self.Sig_11_0,
-                self.Sig_12_0,
-                self.Sig_13_0,
-                self.Sig_14_0,
-                self.Sig_22_0,
-                self.Sig_23_0,
-                self.Sig_24_0,
-                self.Sig_33_0,
-                self.Sig_34_0,
-                self.Sig_44_0,
-                self.x_CO,
-                self.px_CO,
-                self.y_CO,
-                self.py_CO,
-                self.sigma_CO,
-                self.delta_CO,
+                self.x_bb_co,
+                self.y_bb_co,
+                self.charge_slices,
+                self.zeta_slices,
+                self.sigma_11,
+                self.sigma_12,
+                self.sigma_13,
+                self.sigma_14,
+                self.sigma_22,
+                self.sigma_23,
+                self.sigma_24,
+                self.sigma_33,
+                self.sigma_34,
+                self.sigma_44,
+                self.x_co,
+                self.px_co,
+                self.y_co,
+                self.py_co,
+                self.zeta_co,
+                self.delta_co,
                 self.min_sigma_diff,
                 self.threshold_singular,
-                self.Dx_sub,
-                self.Dpx_sub,
-                self.Dy_sub,
-                self.Dpy_sub,
-                self.Dsigma_sub,
-                self.Ddelta_sub,
+                self.d_x,
+                self.d_px,
+                self.d_y,
+                self.d_py,
+                self.d_zeta,
+                self.d_delta,
                 self.enabled)
             x_ret, px_ret, y_ret, py_ret, zeta_ret, delta_ret = BB6D.BB6D_track(
                 p.x, p.px, p.y, p.py, p.zeta, p.delta, p.q0 * qe,
