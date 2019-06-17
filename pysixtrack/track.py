@@ -269,7 +269,7 @@ class Line(Element):
     def find_closed_orbit(self, p0c, guess=[0.,0.,0.,0.,0.,0.],
             method='Nelder-Mead'):
 
-        def _one_turn_map(self, coord):
+        def _one_turn_map(coord):
             pcl = Particles(p0c=p0c)
             pcl.x = coord[0]
             pcl.px = coord[1]
@@ -284,13 +284,14 @@ class Line(Element):
 
             return coord_out
       
-        def _CO_error(self, coord):
-            return np.sum((one_turn_map(coord) - coord)**2)
+        def _CO_error(coord):
+            return np.sum((_one_turn_map(coord) - coord)**2)
 
         if method == 'get_guess':
             res = type('', (), {})()
             res.x = guess
         else:
+            import scipy.optimize as so
             res = so.minimize(_CO_error, np.array(
                 guess), tol=1e-20, method=method)
 
