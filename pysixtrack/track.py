@@ -6,7 +6,7 @@ from copy import deepcopy
 from scipy.constants import e as qe
 from scipy.constants import c as clight
 from .be_beambeam.gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
-
+from .particles import Particles
 from .be_beambeam import BB6D
 from .be_beambeam import BB6Ddata
 
@@ -265,6 +265,47 @@ class Line(Element):
     @classmethod
     def fromline(cls, line):
         return cls().append_line(line)
+
+    def find_closed_orbit(self, p0c, guess=[0.,0.,0.,0.,0.,0.],
+            method='Nelder-Mead'):
+
+        def _one_turn_map(self, coord):
+            pcl = Particles(p0c=p0c)
+            pcl.x = coord[0]
+            pcl.px = coord[1]
+            pcl.y = coord[2]
+            pcl.py = coord[3]
+            pcl.zeta = coord[4]
+            pcl.delta = coord[5]
+
+            self.track(pcl)
+            coord_out = np.array(
+                [pcl.x, pcl.px, pcl.y, pcl.py, pcl.sigma, pcl.delta])
+
+            return coord_out
+      
+        def _CO_error(self, coord):
+            return np.sum((one_turn_map(coord) - coord)**2)
+
+        if method == 'get_guess':
+            res = type('', (), {})()
+            res.x = guess
+        else:
+            res = so.minimize(_CO_error, np.array(
+                guess), tol=1e-20, method=method)
+
+        pcl = Particles(p0c=p0c)
+
+        pcl.x = res.x[0]
+        pcl.px = res.x[1]
+        pcl.y = res.x[2]
+        pcl.py = res.x[3]
+        pcl.zeta = res.x[4]
+        pcl.delta = res.x[5]
+
+        CO = self.track_elem_by_elem(pcl)
+
+        return CO
 
 
 class Monitor(Element):
