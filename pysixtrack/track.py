@@ -6,7 +6,7 @@ from copy import deepcopy
 from scipy.constants import e as qe
 from scipy.constants import c as clight
 from .be_beambeam.gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
-
+from .particles import Particles
 from .be_beambeam import BB6D
 from .be_beambeam import BB6Ddata
 
@@ -228,8 +228,8 @@ class BeamMonitor(Element):
 
 
 class Line(Element):
-    __slots__ = ('elements',)
-    __defaults__ = ([],)
+    __slots__ = ('elements', 'element_names' )
+    __defaults__ = ([], [])
 
     def track(self, p):
         for el in self.elements:
@@ -243,6 +243,7 @@ class Line(Element):
         return out
 
     def append_line(self, line):
+        # Append the elements
         if type(line) is Line:
             # got a pysixtrack line
             self.elements += line.elements
@@ -253,11 +254,132 @@ class Line(Element):
                 newele = element_types[type_name](**ee._asdict())
                 self.elements.append(newele)
         
+        # Append the names
+        self.element_names += line.element_names
+
+        assert(len(self.elements) == len(self.element_names))
+
+
         return self
 
     @classmethod
     def fromline(cls, line):
         return cls().append_line(line)
+
+    def to_pyblep_line(self):
+        import pyblep
+        elements = []
+        element_names = []
+        for ee, nn in zip(self.elements, self.element_names):
+            etype = ee.__class__.__name__
+            pyblep_class = getattr(pyblep.elements, etype)
+            config = {kk: getattr(ee, kk) for kk in pyblep_class._fields}
+            elements.append(pyblep_class(**config))
+            element_names.append(nn)
+
+        return pyblep.elements.Line(elements, element_names)
+
+    def find_closed_orbit(self, p0c, guess=[0.,0.,0.,0.,0.,0.],
+            method='Nelder-Mead'):
+
+        def _one_turn_map(coord):
+            pcl = Particles(p0c=p0c)
+            pcl.x = coord[0]
+            pcl.px = coord[1]
+            pcl.y = coord[2]
+            pcl.py = coord[3]
+            pcl.zeta = coord[4]
+            pcl.delta = coord[5]
+
+            self.track(pcl)
+            coord_out = np.array(
+                [pcl.x, pcl.px, pcl.y, pcl.py, pcl.sigma, pcl.delta])
+
+            return coord_out
+      
+        def _CO_error(coord):
+            return np.sum((_one_turn_map(coord) - coord)**2)
+
+        if method == 'get_guess':
+            res = type('', (), {})()
+            res.x = guess
+        else:
+            import scipy.optimize as so
+            res = so.minimize(_CO_error, np.array(
+                guess), tol=1e-20, method=method)
+
+        pcl = Particles(p0c=p0c)
+
+        pcl.x = res.x[0]
+        pcl.px = res.x[1]
+        pcl.y = res.x[2]
+        pcl.py = res.x[3]
+        pcl.zeta = res.x[4]
+        pcl.delta = res.x[5]
+        
+        return pcl
+
+    def enable_beambeam(self):
+
+        for ee in self.elements:
+            if ee.__class__.__name__ in ['BeamBeam4D', 'BeamBeam6D']:
+                ee.enabled = True
+
+    def disable_beambeam(self):
+
+        for ee in self.elements:
+            if ee.__class__.__name__ in ['BeamBeam4D', 'BeamBeam6D']:
+                ee.enabled = False
+
+    def beambeam_store_closed_orbit_and_dipolar_kicks(self, particle_on_CO,
+            separation_given_wrt_closed_orbit_4D=True, 
+            separation_given_wrt_closed_orbit_6D=True):
+
+        self.disable_beambeam()
+        closed_orbit = self.track_elem_by_elem(particle_on_CO)
+
+        self.enable_beambeam()
+        
+        for ie, ee in enumerate(self.elements):
+
+            if ee.__class__.__name__ == 'BeamBeam4D':
+                if separation_given_wrt_closed_orbit_4D:
+                    ee.x_bb += closed_orbit[ie].x
+                    ee.y_bb += closed_orbit[ie].y
+
+                # Evaluate dipolar kick
+                ptemp = closed_orbit[ie].copy()
+                ptempin = ptemp.copy()
+            
+                ee.track(ptemp)
+            
+                ee.d_px = ptemp.px - ptempin.px
+                ee.d_py = ptemp.py - ptempin.py
+
+            elif ee.__class__.__name__ == 'BeamBeam6D':
+                if not separation_given_wrt_closed_orbit_6D:
+                    raise ValueError('Not implemented!')
+
+                # Store closed orbit
+                ee.x_co = closed_orbit[ie].x
+                ee.px_co = closed_orbit[ie].px
+                ee.y_co = closed_orbit[ie].y
+                ee.py_co = closed_orbit[ie].py
+                ee.zeta_co = closed_orbit[ie].zeta
+                ee.delta_co = closed_orbit[ie].delta
+
+                # Evaluate 6d kick on closed orbit
+                ptemp = closed_orbit[ie].copy()
+                ptempin = ptemp.copy()
+            
+                ee.track(ptemp)
+            
+                ee.d_x = ptemp.x - ptempin.x
+                ee.d_px = ptemp.px - ptempin.px
+                ee.d_y = ptemp.y - ptempin.y
+                ee.d_py = ptemp.py - ptempin.py
+                ee.d_zeta = ptemp.zeta - ptempin.zeta
+                ee.d_delta = ptemp.delta - ptempin.delta
 
 
 class Monitor(Element):
