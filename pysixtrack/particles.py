@@ -1,6 +1,3 @@
-from collections import namedtuple
-from copy import deepcopy
-
 import numpy as np
 
 # attaching faddeeva to np
@@ -80,17 +77,17 @@ class Particles(object):
             #raise ValueError("Particles defined without energy reference")
         if not_none == 1:
             if p0c is not None:
-               new = self._f1(self.mass0, p0c)
-               self._update_ref(*new)
+                new = self._f1(self.mass0, p0c)
+                self._update_ref(*new)
             elif energy0 is not None:
-               new = self._f2(self.mass0, energy0)
-               self._update_ref(*new)
+                new = self._f2(self.mass0, energy0)
+                self._update_ref(*new)
             elif gamma0 is not None:
-               new = self._f4(self.mass0, gamma0)
-               self._update_ref(*new)
+                new = self._f4(self.mass0, gamma0)
+                self._update_ref(*new)
             elif beta0 is not None:
-               new = self._f3(self.mass0, beta0)
-               self._update_ref(*new)
+                new = self._f3(self.mass0, beta0)
+                self._update_ref(*new)
         else:
             raise ValueError(f"""\
             Particles defined with multiple energy references:
@@ -262,6 +259,9 @@ class Particles(object):
     @mass0.setter
     def mass0(self, mass0):
         new = self._f1(mass0, self.p0c)
+        _abs = self._get_absolute()
+        self._update_ref(*new)
+        self._update_particles_from_absolute(*_abs)
 
     beta0 = property(lambda self: self._beta0)
 
@@ -303,20 +303,15 @@ class Particles(object):
 
     @mratio.setter
     def mratio(self, mratio):
-        Px, Py, Energy, Pc = self.Px, self.Py, self.Energy, self.Pc
-        self._ptau = Energy / (mratio * energy0) - 1
-        self._delta = Energy / (delta * energy0) - 1
-        self.px = Px / (p0c * mratio)
-        self.py = Py / (p0c * mratio)
-        self._chi = self._qratio / mratio
         self._mratio = mratio
+        self._chi = self._qratio / self._mratio
 
     qratio = property(lambda self: self._qratio)
 
     @qratio.setter
     def qratio(self, qratio):
-        self._chi = qratio / self._mratio
         self._qratio = qratio
+        self._chi = qratio / self._mratio
 
     chi = property(lambda self: self._chi)
 
@@ -342,7 +337,7 @@ class Particles(object):
             self._mratio = mratio
             self._chi = self._qratio / mratio
             self._ptau = Energy / norm - 1
-            self._delta = Pc/ norm - 1
+            self._delta = Pc / norm - 1
             self.px = Px / norm
             self.py = Py / norm
 
@@ -365,15 +360,14 @@ class Particles(object):
         qratio  = {self.qratio}
         chi     = {self.chi}"""
         return out
-    
+
     _dict_vars = 's x px y py delta zeta'.split() +\
-            'mass0 q0 p0c chi mratio'.split() +\
-            'partid turn state'.split()
-    
+        'mass0 q0 p0c chi mratio'.split() +\
+        'partid turn state'.split()
+
     def to_dict(self):
         return {kk: getattr(self, kk) for kk in self._dict_vars}
 
     @classmethod
     def from_dict(cls, dct):
         return cls(**dct)
-

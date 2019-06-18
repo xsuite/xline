@@ -1,8 +1,6 @@
 import numpy as np
 
-from . import slicing
 from . import boost
-
 
 class ParBoost(object):
     # it is practically a struct
@@ -161,15 +159,15 @@ class BB6D_Data(object):
         return buf
 
 
-def BB6D_init(q_part, phi, alpha, delta_x, delta_y, 
-                N_part_per_slice, z_slices, 
-                Sig_11_0, Sig_12_0, Sig_13_0, 
-                Sig_14_0, Sig_22_0, Sig_23_0, 
-                Sig_24_0, Sig_33_0, Sig_34_0, Sig_44_0, 
-                x_CO, px_CO, y_CO, py_CO, sigma_CO, delta_CO, 
-                min_sigma_diff, threshold_singular, 
-                Dx_sub, Dpx_sub, Dy_sub, Dpy_sub, Dsigma_sub, Ddelta_sub, 
-                enabled):
+def BB6D_init(q_part, phi, alpha, delta_x, delta_y,
+              N_part_per_slice, z_slices,
+              Sig_11_0, Sig_12_0, Sig_13_0,
+              Sig_14_0, Sig_22_0, Sig_23_0,
+              Sig_24_0, Sig_33_0, Sig_34_0, Sig_44_0,
+              x_CO, px_CO, y_CO, py_CO, sigma_CO, delta_CO,
+              min_sigma_diff, threshold_singular,
+              Dx_sub, Dpx_sub, Dy_sub, Dpy_sub, Dsigma_sub, Ddelta_sub,
+              enabled):
 
     assert(len(N_part_per_slice) == len(z_slices))
 
@@ -192,7 +190,7 @@ def BB6D_init(q_part, phi, alpha, delta_x, delta_y,
     # By boosting the strong z and all zeros, I get the transverse coordinates of the strong beam in the ref system of the weak
     boost_vect = np.vectorize(boost.boost, excluded='parboost')
     x_slices_star, px_slices_star, y_slices_star, py_slices_star, sigma_slices_star, delta_slices_star = boost_vect(x=0*z_slices, px=0*z_slices,
-                                                                                                                 y=0*z_slices, py=0*z_slices, sigma=z_slices, delta=0*z_slices, parboost=parboost)
+                                                                                                                    y=0*z_slices, py=0*z_slices, sigma=z_slices, delta=0*z_slices, parboost=parboost)
 
     N_slices = len(z_slices)
 
