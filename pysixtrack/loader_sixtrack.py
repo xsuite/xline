@@ -8,6 +8,7 @@ from . import elements
 clight = 299792458
 pi = np.pi
 
+
 def bn_mad(bn_mad, n, sign):
     return sign*bn_mad*factorial(n-1)
 
@@ -19,6 +20,7 @@ def bn_rel(bn16, bn3, r0, d0, sign):
         sixval = d0*a*b*r0**(1-n)*10**(3*n-6)
         out.append(bn_mad(sixval, n, sign))
     return out
+
 
 def _expand_struct(sixinput, convert=elements):
     elems = []
@@ -38,7 +40,8 @@ def _expand_struct(sixinput, convert=elements):
     exclude = False
     # add special elenents
     if 'CAV' in sixinput.iter_struct():
-        sixinput.single['CAV'] = [12*sixinput.ition, sixinput.u0, sixinput.harm, 0]
+        sixinput.single['CAV'] = [
+            12*sixinput.ition, sixinput.u0, sixinput.harm, 0]
     for nnn in sixinput.iter_struct():
         exclude = False
         ccc = count.setdefault(nnn, 0)
@@ -103,9 +106,9 @@ def _expand_struct(sixinput, convert=elements):
             elem = Cavity(voltage=v, frequency=freq, lag=180-d3)
         elif etype == 20:
             thisbb = sixinput.bbelements[nnn]
-            if hasattr(thisbb,"sigma_x"):
+            if hasattr(thisbb, "sigma_x"):
                 elem = BeamBeam4D(**thisbb._asdict())
-            elif hasattr(thisbb,"phi"):
+            elif hasattr(thisbb, "phi"):
                 elem = BeamBeam6D(**thisbb._asdict())
             else:
                 raise ValueError('What?!')

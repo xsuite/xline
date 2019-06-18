@@ -61,8 +61,6 @@ class DriftExact(Drift):
         p.s += length
 
 
-
-
 class Multipole(Element):
     """ Multipole """
     _description = [
@@ -141,7 +139,6 @@ class Cavity(Element):
         p.add_to_energy(p.chi * self.voltage * sin(phase))
 
 
-
 class XYShift(Element):
     """shift of the reference"""
     _description = [
@@ -172,6 +169,3 @@ class SRotation(Element):
         yn = -sz * p.px + cz * p.py
         p.px = xn
         p.py = yn
-
-
-

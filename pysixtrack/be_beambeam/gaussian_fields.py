@@ -19,7 +19,8 @@ def _get_transv_field_gauss_round(sigma, Delta_x, Delta_y, x, y, mathlib):
     return Ex, Ey
 
 
-get_transv_field_gauss_round = np.vectorize(_get_transv_field_gauss_round, excluded = ['mathlib'])
+get_transv_field_gauss_round = np.vectorize(
+    _get_transv_field_gauss_round, excluded=['mathlib'])
 
 
 def _get_transv_field_gauss_ellip(sigmax, sigmay, Delta_x, Delta_y, x, y, mathlib):
@@ -85,7 +86,9 @@ def _get_transv_field_gauss_ellip(sigmax, sigmay, Delta_x, Delta_y, x, y, mathli
 
     return Ex, Ey
 
-get_transv_field_gauss_ellip = np.vectorize(_get_transv_field_gauss_ellip, excluded = ['mathlib'])
+
+get_transv_field_gauss_ellip = np.vectorize(
+    _get_transv_field_gauss_ellip, excluded=['mathlib'])
 
 
 def _get_Ex_Ey_Gx_Gy_gauss(x, y, sigma_x, sigma_y, min_sigma_diff, skip_Gs, mathlib):
@@ -132,4 +135,5 @@ def _get_Ex_Ey_Gx_Gy_gauss(x, y, sigma_x, sigma_y, min_sigma_diff, skip_Gs, math
         return Ex, Ey, Gx, Gy
 
 
-get_Ex_Ey_Gx_Gy_gauss = np.vectorize(_get_Ex_Ey_Gx_Gy_gauss, excluded = ['mathlib'])
+get_Ex_Ey_Gx_Gy_gauss = np.vectorize(
+    _get_Ex_Ey_Gx_Gy_gauss, excluded=['mathlib'])

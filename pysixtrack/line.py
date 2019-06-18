@@ -6,18 +6,18 @@ from . import elements
 from .loader_sixtrack import _expand_struct
 from .loader_mad import _from_madx_sequence
 
+
 class Line(Element):
     _description = [
-            ('elements','','List of elements',()),
-            ('element_names','', 'List of element names',())
-            ]
+        ('elements', '', 'List of elements', ()),
+        ('element_names', '', 'List of element names', ())
+    ]
     _extra = []
 
-
-    def to_dict(self,keepextra=False):
-        out={}
-        out['elements']=[ el.to_dict(keepextra) for el in self.elements]
-        out['element_names']=self.elements_names[:]
+    def to_dict(self, keepextra=False):
+        out = {}
+        out['elements'] = [el.to_dict(keepextra) for el in self.elements]
+        out['element_names'] = self.elements_names[:]
         return out
 
     def append_line(self, line):
@@ -50,8 +50,8 @@ class Line(Element):
             el.track(p)
         return out
 
-    def find_closed_orbit(self, p0c, guess=[0.,0.,0.,0.,0.,0.],
-            method='Nelder-Mead'):
+    def find_closed_orbit(self, p0c, guess=[0., 0., 0., 0., 0., 0.],
+                          method='Nelder-Mead'):
 
         def _one_turn_map(coord):
             pcl = Particles(p0c=p0c)
@@ -93,19 +93,18 @@ class Line(Element):
     def enable_beambeam(self):
 
         for ee in self.elements:
-            if isinstance(ee,[elements.BeamBeam4D, elements.BeamBeam6D]):
+            if isinstance(ee, [elements.BeamBeam4D, elements.BeamBeam6D]):
                 ee.enabled = True
 
     def disable_beambeam(self):
 
         for ee in self.elements:
-            if isinstance(ee,[elements.BeamBeam4D, elements.BeamBeam6D]):
+            if isinstance(ee, [elements.BeamBeam4D, elements.BeamBeam6D]):
                 ee.enabled = False
 
-
     def beambeam_store_closed_orbit_and_dipolar_kicks(self, particle_on_CO,
-            separation_given_wrt_closed_orbit_4D=True,
-            separation_given_wrt_closed_orbit_6D=True):
+                                                      separation_given_wrt_closed_orbit_4D=True,
+                                                      separation_given_wrt_closed_orbit_6D=True):
 
         self.disable_beambeam()
         closed_orbit = self.track_elem_by_elem(particle_on_CO)
@@ -113,7 +112,7 @@ class Line(Element):
         self.enable_beambeam()
 
         for ie, ee in enumerate(self.elements):
-            ## to transfer to beambeam.py
+            # to transfer to beambeam.py
 
             if ee.__class__.__name__ == 'BeamBeam4D':
                 if separation_given_wrt_closed_orbit_4D:
@@ -157,35 +156,26 @@ class Line(Element):
     @classmethod
     def from_sixinput(cls, sixinput, classes=elements):
         other_info = {}
-    
-        line_data, rest, iconv = _expand_struct(sixinput,convert=classes)
-    
+
+        line_data, rest, iconv = _expand_struct(sixinput, convert=classes)
+
         ele_names = [dd[0] for dd in line_data]
         elements = [dd[2] for dd in line_data]
-    
+
         line = cls(elements=elements, element_names=ele_names)
-    
+
         other_info['rest'] = rest
         other_info['iconv'] = iconv
-    
+
         return line, other_info
-    
-    
+
     @classmethod
     def from_madx_sequence(cls,
                            sequence,
                            classes=elements,
                            ignored_madtypes=[],
-                           exact_drift=False       ):
+                           exact_drift=False):
 
         line = cls(elements=[], element_names=[])
 
-        return _from_madx_sequence(line,sequence, classes,ignored_madtypes,exact_drift)
-
-
-    
-   
-
-
-
-
+        return _from_madx_sequence(line, sequence, classes, ignored_madtypes, exact_drift)

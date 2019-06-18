@@ -180,7 +180,7 @@ def _propagate_Sigma_matrix(Sigmas_at_0, S, threshold_singular=1e-16, handle_sin
         dS_Sig_11_hat, dS_Sig_33_hat, dS_costheta, dS_sintheta,\
         extra_data
 
-        
+
 propagate_Sigma_matrix = np.vectorize(_propagate_Sigma_matrix)
 
 # def propagate_Sigma_matrix(Sigmas_at_0,
@@ -202,6 +202,7 @@ propagate_Sigma_matrix = np.vectorize(_propagate_Sigma_matrix)
 #         dS_Sig_11_hat, dS_Sig_33_hat, dS_costheta, dS_sintheta,\
 #         extra_data
 #
+
 
 def propagate_full_Sigma_matrix_in_drift(Sig_11_0, Sig_12_0, Sig_13_0,
                                          Sig_14_0, Sig_22_0, Sig_23_0, Sig_24_0,

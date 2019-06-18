@@ -80,17 +80,17 @@ class Particles(object):
             #raise ValueError("Particles defined without energy reference")
         if not_none == 1:
             if p0c is not None:
-               new = self._f1(self.mass0, p0c)
-               self._update_ref(*new)
+                new = self._f1(self.mass0, p0c)
+                self._update_ref(*new)
             elif energy0 is not None:
-               new = self._f2(self.mass0, energy0)
-               self._update_ref(*new)
+                new = self._f2(self.mass0, energy0)
+                self._update_ref(*new)
             elif gamma0 is not None:
-               new = self._f4(self.mass0, gamma0)
-               self._update_ref(*new)
+                new = self._f4(self.mass0, gamma0)
+                self._update_ref(*new)
             elif beta0 is not None:
-               new = self._f3(self.mass0, beta0)
-               self._update_ref(*new)
+                new = self._f3(self.mass0, beta0)
+                self._update_ref(*new)
         else:
             raise ValueError(f"""\
             Particles defined with multiple energy references:
@@ -342,7 +342,7 @@ class Particles(object):
             self._mratio = mratio
             self._chi = self._qratio / mratio
             self._ptau = Energy / norm - 1
-            self._delta = Pc/ norm - 1
+            self._delta = Pc / norm - 1
             self.px = Px / norm
             self.py = Py / norm
 
@@ -365,15 +365,14 @@ class Particles(object):
         qratio  = {self.qratio}
         chi     = {self.chi}"""
         return out
-    
+
     _dict_vars = 's x px y py delta zeta'.split() +\
-            'mass0 q0 p0c chi mratio'.split() +\
-            'partid turn state'.split()
-    
+        'mass0 q0 p0c chi mratio'.split() +\
+        'partid turn state'.split()
+
     def to_dict(self):
         return {kk: getattr(self, kk) for kk in self._dict_vars}
 
     @classmethod
     def from_dict(cls, dct):
         return cls(**dct)
-

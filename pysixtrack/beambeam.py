@@ -9,6 +9,7 @@ from .be_beambeam.gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
 from .be_beambeam import BB6D
 from .be_beambeam import BB6Ddata
 
+
 class BeamBeam4D(Element):
     """Interaction with a transverse-Gaussian strong beam (4D modelling)."""
     _description = [
@@ -23,9 +24,8 @@ class BeamBeam4D(Element):
     ]
 
     _extra = [
-        ('min_sigma_diff','m','Threshold to detect round beam',1e-28 ),
-        ('enabled','','Switch for closed orbit search',True)]
-
+        ('min_sigma_diff', 'm', 'Threshold to detect round beam', 1e-28),
+        ('enabled', '', 'Switch for closed orbit search', True)]
 
     def track(self, p):
         if self.enabled:
@@ -54,48 +54,46 @@ class BeamBeam4D(Element):
             p.py = py
 
 
-
 class BeamBeam6D(Element):
     """Interaction with a transverse-Gaussian strong beam (6D modelling).
 
     http://cds.cern.ch/record/2306400
     """
     _description = [
-        ('phi', 'rad', 'Crossing angle (>0 weak beam increases x in the direction motion)',0),
-        ('alpha', 'rad', 'Crossing plane tilt angle (>0 x tends to y)',0),
-        ('x_bb_co', 'm', 'H. position of the strong beam w.r.t. the closed orbit',0),
-        ('y_bb_co', 'm', 'V. position of the strong beam w.r.t. the closed orbit',0),
-        ('charge_slices', 'qe', 'Charge of the interacting slices (strong beam)',()),
+        ('phi', 'rad', 'Crossing angle (>0 weak beam increases x in the direction motion)', 0),
+        ('alpha', 'rad', 'Crossing plane tilt angle (>0 x tends to y)', 0),
+        ('x_bb_co', 'm', 'H. position of the strong beam w.r.t. the closed orbit', 0),
+        ('y_bb_co', 'm', 'V. position of the strong beam w.r.t. the closed orbit', 0),
+        ('charge_slices', 'qe', 'Charge of the interacting slices (strong beam)', ()),
         ('zeta_slices', 'm',
-         'Longitudinal position of the interacting slices (>0 head of the strong).',()),
-        ('sigma_11', 'm^2', 'Sigma_11 element of the sigma matrix of the strong beam',0),
-        ('sigma_12', 'm', 'Sigma_12 element of the sigma matrix of the strong beam',0),
-        ('sigma_13', 'm^2', 'Sigma_13 element of the sigma matrix of the strong beam',0),
-        ('sigma_14', 'm', 'Sigma_14 element of the sigma matrix of the strong beam',0),
-        ('sigma_22', '', 'Sigma_22 element of the sigma matrix of the strong beam',0),
-        ('sigma_23', 'm', 'Sigma_23 element of the sigma matrix of the strong beam',0),
-        ('sigma_24', '', 'Sigma_24 element of the sigma matrix of the strong beam',0),
-        ('sigma_33', 'm^2', 'Sigma_33 element of the sigma matrix of the strong beam',0),
-        ('sigma_34', 'm', 'Sigma_34 element of the sigma matrix of the strong beam',0),
-        ('sigma_44', '', 'Sigma_44 element of the sigma matrix of the strong beam',0),
-        ('x_co', 'm', 'x coordinate the closed orbit (weak beam).',0),
-        ('px_co', '', 'px coordinate the closed orbit (weak beam).',0),
-        ('y_co', 'm', 'y coordinate the closed orbit (weaek beam).',0),
-        ('py_co', '', 'py coordinate the closed orbit (weaek beam).',0),
-        ('zeta_co', 'm', 'zeta coordinate the closed orbit (weaek beam).',0),
-        ('delta_co', '', 'delta coordinate the closed orbit (weaek beam).',0),
-        ('d_x', 'm', 'Quantity subtracted from x after the interaction.',0),
-        ('d_px', '', 'Quantity subtracted from px after the interaction.',0),
-        ('d_y', 'm', 'Quantity subtracted from y after the interaction.',0),
-        ('d_py', '', 'Quantity subtracted from py after the interaction.',0),
-        ('d_zeta', 'm', 'Quantity subtracted from sigma after the interaction.',0),
-        ('d_delta', '', 'Quantity subtracted from delta after the interaction.',0)
+         'Longitudinal position of the interacting slices (>0 head of the strong).', ()),
+        ('sigma_11', 'm^2', 'Sigma_11 element of the sigma matrix of the strong beam', 0),
+        ('sigma_12', 'm', 'Sigma_12 element of the sigma matrix of the strong beam', 0),
+        ('sigma_13', 'm^2', 'Sigma_13 element of the sigma matrix of the strong beam', 0),
+        ('sigma_14', 'm', 'Sigma_14 element of the sigma matrix of the strong beam', 0),
+        ('sigma_22', '', 'Sigma_22 element of the sigma matrix of the strong beam', 0),
+        ('sigma_23', 'm', 'Sigma_23 element of the sigma matrix of the strong beam', 0),
+        ('sigma_24', '', 'Sigma_24 element of the sigma matrix of the strong beam', 0),
+        ('sigma_33', 'm^2', 'Sigma_33 element of the sigma matrix of the strong beam', 0),
+        ('sigma_34', 'm', 'Sigma_34 element of the sigma matrix of the strong beam', 0),
+        ('sigma_44', '', 'Sigma_44 element of the sigma matrix of the strong beam', 0),
+        ('x_co', 'm', 'x coordinate the closed orbit (weak beam).', 0),
+        ('px_co', '', 'px coordinate the closed orbit (weak beam).', 0),
+        ('y_co', 'm', 'y coordinate the closed orbit (weaek beam).', 0),
+        ('py_co', '', 'py coordinate the closed orbit (weaek beam).', 0),
+        ('zeta_co', 'm', 'zeta coordinate the closed orbit (weaek beam).', 0),
+        ('delta_co', '', 'delta coordinate the closed orbit (weaek beam).', 0),
+        ('d_x', 'm', 'Quantity subtracted from x after the interaction.', 0),
+        ('d_px', '', 'Quantity subtracted from px after the interaction.', 0),
+        ('d_y', 'm', 'Quantity subtracted from y after the interaction.', 0),
+        ('d_py', '', 'Quantity subtracted from py after the interaction.', 0),
+        ('d_zeta', 'm', 'Quantity subtracted from sigma after the interaction.', 0),
+        ('d_delta', '', 'Quantity subtracted from delta after the interaction.', 0)
     ]
-    _extra =[
-        ('min_sigma_diff','m','Threshold to detect round beam',1e-28 ),
-        ('threshold_singular','','Threshold to detect small denominator',1e-28),
-        ('enabled','','Switch for closed orbit search',True)]
-
+    _extra = [
+        ('min_sigma_diff', 'm', 'Threshold to detect round beam', 1e-28),
+        ('threshold_singular', '', 'Threshold to detect small denominator', 1e-28),
+        ('enabled', '', 'Switch for closed orbit search', True)]
 
     def track(self, p):
         if self.enabled:
@@ -142,4 +140,3 @@ class BeamBeam6D(Element):
             p.py = py_ret
             p.zeta = zeta_ret
             p.delta = delta_ret
-
