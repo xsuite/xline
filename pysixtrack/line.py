@@ -1,0 +1,309 @@
+from math import factorial
+
+import numpy as np
+
+from .base_classes import Element
+from . import elements 
+
+clight = 299792458
+pi = np.pi
+
+def bn_mad(bn_mad, n, sign):
+    return sign*bn_mad*factorial(n-1)
+
+
+def bn_rel(bn16, bn3, r0, d0, sign):
+    out = []
+    for nn, (a, b) in enumerate(zip(bn16, bn3)):
+        n = nn+1
+        sixval = d0*a*b*r0**(1-n)*10**(3*n-6)
+        out.append(bn_mad(sixval, n, sign))
+    return out
+
+def _expand_struct(self, convert=elements):
+    elems = []
+    count = {}
+    icount = 0
+    iconv = []
+    names = []
+    rest = []
+    Drift = convert.Drift
+    Multipole = convert.Multipole
+    Cavity = convert.Cavity
+    XYShift = convert.XYShift
+    SRotation = convert.SRotation
+    #Line = convert.Line
+    BeamBeam4D = convert.BeamBeam4D
+    BeamBeam6D = convert.BeamBeam6D
+    exclude = False
+    # add special elenents
+    if 'CAV' in self.iter_struct():
+        self.single['CAV'] = [12*self.ition, self.u0, self.harm, 0]
+    for nnn in self.iter_struct():
+        exclude = False
+        ccc = count.setdefault(nnn, 0)
+        if len(self.single[nnn]) == 7:
+            etype, d1, d2, d3, d4, d5, d6 = self.single[nnn]
+        else:
+            etype, d1, d2, d3, = self.single[nnn]
+            d4, d5, d6 = None, None, None
+        elem = None
+        if nnn in self.align:
+            dx, dy, tilt = self.align[nnn][ccc]
+            tilt = tilt*180e-3/pi
+            dx *= 1e-3
+            dy *= 1e-3
+            hasshift = abs(dx)+abs(dy) > 0
+            hastilt = abs(tilt) > 0
+            if hasshift:
+                names.append(nnn+'_preshift')
+                elems.append(XYShift(dx=dx, dy=dy))
+                icount += 1
+            if hastilt:
+                names.append(nnn+'_pretilt')
+                elems.append(SRotation(angle=tilt))
+                icount += 1
+        if etype in [0, 25]:
+            elem = Drift(length=d3)
+            if d3 > 0:
+                exclude = True
+        elif abs(etype) in [1, 2, 3, 4, 5, 7, 8, 9, 10]:
+            bn_six = d1
+            nn = abs(etype)
+            sign = -etype/nn
+            madval = bn_mad(bn_six, nn, sign)
+            knl = [0]*(nn-1)+[madval]
+            ksl = [0]*nn
+            if sign == 1:
+                knl, ksl = ksl, knl
+            elem = Multipole(knl=knl, ksl=ksl, hxl=0, hyl=0, length=0)
+        elif etype == 11:
+            knl, ksl = self.get_knl(nnn, ccc)
+            hxl = 0
+            hyl = 0
+            l = 0
+            # beaware of the case of thick bend
+            # see beambeam example where mbw has the length
+            if d3 == -1:
+                hxl = -d1
+                l = d2
+                knl[0] = hxl
+            elif d3 == -2:
+                hyl = -d1  # strange sign!!!
+                l = d2
+                ksl[0] = hyl
+            elem = Multipole(knl=knl, ksl=ksl, hxl=hxl, hyl=hyl, length=l)
+        elif etype == 12:
+            # e0=self.initialconditions[-1]
+            # p0c=np.sqrt(e0**2-self.pma**2)
+            # beta0=p0c/e0
+            v = d1*1e6
+            freq = d2*clight/self.tlen
+            # print(v,freq)
+            elem = Cavity(voltage=v, frequency=freq, lag=180-d3)
+        elif etype == 20:
+            thisbb = self.bbelements[nnn]
+            if type(thisbb) is self.classes['BeamBeam4D']:
+                elem = BeamBeam4D(**thisbb._asdict())
+            elif type(thisbb) is self.classes['BeamBeam6D']:
+                elem = BeamBeam6D(**thisbb._asdict())
+            else:
+                raise ValueError('What?!')
+        else:
+            rest.append([nnn]+self.single[nnn])
+        if elem is not None:
+            elems.append(elem)
+            names.append(nnn)
+        if nnn in self.align:
+            if hastilt:
+                names.append(nnn+'_posttilt')
+                elems.append(SRotation(angle=-tilt))
+                icount += 1
+            if hasshift:
+                names.append(nnn+'_postshift')
+                elems.append(XYShift(dx=-dx, dy=-dy))
+                icount += 1
+        if elem is not None:
+            if not exclude:
+                iconv.append(icount)
+            icount += 1
+        count[nnn] = ccc+1
+    #newelems = [dict(i._asdict()) for i in elems]
+    types = [i.__class__.__name__ for i in elems]
+    return list(zip(names, types, elems)), rest, iconv
+ 
+
+class Line(Element):
+    _description = [
+            ('elements','','List of elements',()),
+            ('element_names','', 'List of element names',())
+            ]
+    _extra = []
+
+    @classmethod
+    def from_madx_sequence(self,seq):
+        pass
+
+    def to_dict(self,keepextra=False):
+        out={}
+        out['elements']=[ el.to_dict(keepextra) for el in self.elements]
+        out['element_names']=self.elements_names[:]
+        return out
+
+    def append_line(self, line):
+        # Append the elements
+        if type(line) is Line:
+            # got a pysixtrack line
+            self.elements += line.elements
+        else:
+            # got a different type of line (e.g. pybplep)
+            for ee in line.elements:
+                type_name = ee.__class__.__name__
+                newele = element_types[type_name](**ee._asdict())
+                self.elements.append(newele)
+
+        # Append the names
+        self.element_names += line.element_names
+
+        assert(len(self.elements) == len(self.element_names))
+
+        return self
+
+    def track(self, p):
+        for el in self.elements:
+            el.track(p)
+
+    def track_elem_by_elem(self, p):
+        out = []
+        for el in self.elements:
+            out.append(p.copy())
+            el.track(p)
+        return out
+
+    def find_closed_orbit(self, p0c, guess=[0.,0.,0.,0.,0.,0.],
+            method='Nelder-Mead'):
+
+        def _one_turn_map(coord):
+            pcl = Particles(p0c=p0c)
+            pcl.x = coord[0]
+            pcl.px = coord[1]
+            pcl.y = coord[2]
+            pcl.py = coord[3]
+            pcl.zeta = coord[4]
+            pcl.delta = coord[5]
+
+            self.track(pcl)
+            coord_out = np.array(
+                [pcl.x, pcl.px, pcl.y, pcl.py, pcl.sigma, pcl.delta])
+
+            return coord_out
+
+        def _CO_error(coord):
+            return np.sum((_one_turn_map(coord) - coord)**2)
+
+        if method == 'get_guess':
+            res = type('', (), {})()
+            res.x = guess
+        else:
+            import scipy.optimize as so
+            res = so.minimize(_CO_error, np.array(
+                guess), tol=1e-20, method=method)
+
+        pcl = Particles(p0c=p0c)
+
+        pcl.x = res.x[0]
+        pcl.px = res.x[1]
+        pcl.y = res.x[2]
+        pcl.py = res.x[3]
+        pcl.zeta = res.x[4]
+        pcl.delta = res.x[5]
+
+        return pcl
+
+    def enable_beambeam(self):
+
+        for ee in self.elements:
+            if ee.__class__.__name__ in ['BeamBeam4D', 'BeamBeam6D']:
+                ee.enabled = True
+
+    def disable_beambeam(self):
+
+        for ee in self.elements:
+            if ee.__class__.__name__ in ['BeamBeam4D', 'BeamBeam6D']:
+                ee.enabled = False
+
+
+    def beambeam_store_closed_orbit_and_dipolar_kicks(self, particle_on_CO,
+            separation_given_wrt_closed_orbit_4D=True,
+            separation_given_wrt_closed_orbit_6D=True):
+
+        self.disable_beambeam()
+        closed_orbit = self.track_elem_by_elem(particle_on_CO)
+
+        self.enable_beambeam()
+
+        for ie, ee in enumerate(self.elements):
+            ## to transfer to beambeam.py
+
+            if ee.__class__.__name__ == 'BeamBeam4D':
+                if separation_given_wrt_closed_orbit_4D:
+                    ee.x_bb += closed_orbit[ie].x
+                    ee.y_bb += closed_orbit[ie].y
+
+                # Evaluate dipolar kick
+                ptemp = closed_orbit[ie].copy()
+                ptempin = ptemp.copy()
+
+                ee.track(ptemp)
+
+                ee.d_px = ptemp.px - ptempin.px
+                ee.d_py = ptemp.py - ptempin.py
+
+            elif ee.__class__.__name__ == 'BeamBeam6D':
+                if not separation_given_wrt_closed_orbit_6D:
+                    raise ValueError('Not implemented!')
+
+                # Store closed orbit
+                ee.x_co = closed_orbit[ie].x
+                ee.px_co = closed_orbit[ie].px
+                ee.y_co = closed_orbit[ie].y
+                ee.py_co = closed_orbit[ie].py
+                ee.zeta_co = closed_orbit[ie].zeta
+                ee.delta_co = closed_orbit[ie].delta
+
+                # Evaluate 6d kick on closed orbit
+                ptemp = closed_orbit[ie].copy()
+                ptempin = ptemp.copy()
+
+                ee.track(ptemp)
+
+                ee.d_x = ptemp.x - ptempin.x
+                ee.d_px = ptemp.px - ptempin.px
+                ee.d_y = ptemp.y - ptempin.y
+                ee.d_py = ptemp.py - ptempin.py
+                ee.d_zeta = ptemp.zeta - ptempin.zeta
+                ee.d_delta = ptemp.delta - ptempin.delta
+
+    @classmethod
+    def from_sixinput(cls, sixinput, classes=elements):
+        other_info = {}
+    
+        line_data, rest, iconv = _expand_struct(sixinput,convert=classes)
+    
+        ele_names = [dd[0] for dd in line_data]
+        elements = [dd[2] for dd in line_data]
+    
+        line = cls(elements=elements, element_names=ele_names)
+    
+        other_info['rest'] = rest
+        other_info['iconv'] = iconv
+    
+        return line, other_info
+    
+    
+    
+   
+
+
+
+
