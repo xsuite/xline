@@ -4,54 +4,23 @@ import numpy as np
 from scipy.constants import e as qe
 from scipy.constants import c as clight
 
-from base_classes import Element
-from be_beambeam.gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
-from be_beambeam import BB6D
-from be_beambeam import BB6Ddata
+from .base_classes import Element
+from .be_beambeam.gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
+from .be_beambeam import BB6D
+from .be_beambeam import BB6Ddata
 
-class BeamBeam4D(object):
-    __slots__ = (
-        'charge',
-        'sigma_x',
-        'sigma_y',
-        'beta_r',
-        'min_sigma_diff',
-        'x_bb',
-        'y_bb',
-        'd_px',
-        'd_py',
-        'enabled')
-    __units__ = ('e', 'm', 'm', [],
-                 'm', 'm', 'm', [], [], [])
-    __defaults__ = (0., 0., 0., 0.,
-                    1e-28, 0., 0., 0., 0., True)
-
-    def track(self, p):
-        if self.enabled:
-            charge = p.qratio * p.q0
-            x = p.x - self.x_bb
-            px = p.px
-            y = p.y - self.y_bb
-            py = p.py
-
-            chi = p.chi
-
-            beta = p.beta0 / p.rvv
-            p0c = p.p0c * qe
-
-            Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(
-                x, y, self.sigma_x, self.sigma_y, min_sigma_diff=1e-10,
-                skip_Gs=True, mathlib=p._m)
-
-            fact_kick = chi * self.charge * qe * charge * qe\
-                * (1. + beta * self.beta_r) / (p0c * (beta + self.beta_r))
-
-            px += (fact_kick * Ex - self.d_px)
-            py += (fact_kick * Ey - self.d_py)
-
-            p.px = px
-            p.py = py
-
+class BeamBeam4D(Element):
+    """Interaction with a transverse-Gaussian strong beam (4D modelling)."""
+    _description = [
+        ('charge', 'e', 'Charge of the interacting distribution (strong beam)', 0),
+        ('sigma_x', 'm', 'Horizontal size of the strong beam (r.m.s.)', 0),
+        ('sigma_y', 'm', 'Vertical size of the strong beam (r.m.s.)', 0),
+        ('beta_r', '', 'Relativistic beta of the stron beam', 0),
+        ('x_bb', 'm', 'H. position of the strong beam w.r.t. the reference trajectory', 0),
+        ('y_bb', 'm', 'V. position of the strong beam w.r.t. the reference trajectory', 0),
+        ('d_px', '', 'H. kick subtracted after the interaction.', 0),
+        ('d_py', '', 'V. kick subtracted after the interaction.', 0)
+    ]
 
 
 class BeamBeam6D(Element):

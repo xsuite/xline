@@ -42,11 +42,11 @@ class Base(metaclass=_MetaElement):
     @classmethod
     def from_dict(self,dct,keepextra=True):
         for kk in self.__class__._base_fields:
-            setattr(self,kk)=dct[kk]
+            setattr(self,kk,dct[kk])
         if keepextra:
             for kk in self.self.__class__._extra_fields:
                 if kk in dct:
-                    setattr(self,kk)=dct[kk]
+                    setattr(self, kk, dct[kk])
 
     def copy(self,keepextra=True):
         return self.__class__.from_dict(self.to_dict(keepextra),keepextra)
