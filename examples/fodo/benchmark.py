@@ -2,7 +2,9 @@ import sixtracktools
 import pysixtrack
 
 six = sixtracktools.SixInput('.')
-line, rest, iconv = six.expand_struct(convert=pysixtrack.element_types)
+line, other = pysixtrack.Line.from_sixinput(six)
+iconv = other['iconv']
+
 sixdump = sixtracktools.SixDump101('res/dump.dat')[1::2]
 
 def compare(prun,pbench):
@@ -24,7 +26,7 @@ for ii in range(1,len(iconv)):
     print(f"\n-----sixtrack={ii} sixtracklib={jja} --------------")
     #print(f"pysixtr {jja}, x={prun.x}, px={prun.px}")
     for jj in range(jja+1, jjb+1):
-        label,elem_type,elem=line[jj]
+        label,elem=line.element_names[jj], line.elements[jj] 
         elem.track(prun)
         print(f"{jj} {label},{str(elem)[:50]}")
     pbench=pysixtrack.Particles(**sixdump[ii].get_minimal_beam())

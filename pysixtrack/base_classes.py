@@ -39,16 +39,20 @@ class Base(metaclass=_MetaElement):
             return self.__class__._base_fields
 
     def to_dict(self, keepextra=False):
-        return {kk: getattr(self, kk) for kk in self.get_fields(keepextra)}
+        out={kk: getattr(self, kk) for kk in self.get_fields(keepextra)}
+        out['__class__']=self.__class__.__name__
+        return out
 
     @classmethod
-    def from_dict(self, dct, keepextra=True):
-        for kk in self.__class__._base_fields:
+    def from_dict(cls, dct, keepextra=True):
+        self=cls()
+        for kk in cls._base_fields:
             setattr(self, kk, dct[kk])
         if keepextra:
-            for kk in self.self.__class__._extra_fields:
+            for kk in cls._extra_fields:
                 if kk in dct:
                     setattr(self, kk, dct[kk])
+        return self
 
     def copy(self, keepextra=True):
         return self.__class__.from_dict(self.to_dict(keepextra), keepextra)
