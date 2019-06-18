@@ -1,8 +1,6 @@
 import numpy as np
 
-from . import slicing
 from . import boost
-
 
 class ParBoost(object):
     # it is practically a struct

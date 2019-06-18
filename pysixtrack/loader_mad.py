@@ -21,11 +21,12 @@ def _from_madx_sequence(line, sequence, classes=pyblep_elements,
             line.element_names.append('drift_%d' % i_drift)
             i_drift += 1
 
+        eename = ee.name
+        mad_etype = ee.base_type.name
+
         if ee.length > 0:
             raise ValueError(f"Sequence {seq} contains {eename} with length>0")
 
-        mad_etype = ee.base_type.name
-        eename = ee.name
 
         if mad_etype in ['marker', 'monitor', 'hmonitor', 'vmonitor',
                          'rcollimator', 'placeholder', 'instrument', 'solenoid', 'drift']:

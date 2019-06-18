@@ -2,6 +2,7 @@ import numpy as np
 
 from .base_classes import Element
 from . import elements
+from .particles import Particles
 
 from .loader_sixtrack import _expand_struct
 from .loader_mad import _from_madx_sequence

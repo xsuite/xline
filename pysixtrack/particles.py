@@ -1,6 +1,3 @@
-from collections import namedtuple
-from copy import deepcopy
-
 import numpy as np
 
 # attaching faddeeva to np
@@ -262,6 +259,9 @@ class Particles(object):
     @mass0.setter
     def mass0(self, mass0):
         new = self._f1(mass0, self.p0c)
+        _abs = self._get_absolute()
+        self._update_ref(*new)
+        self._update_particles_from_absolute(*_abs)
 
     beta0 = property(lambda self: self._beta0)
 
@@ -303,20 +303,15 @@ class Particles(object):
 
     @mratio.setter
     def mratio(self, mratio):
-        Px, Py, Energy, Pc = self.Px, self.Py, self.Energy, self.Pc
-        self._ptau = Energy / (mratio * energy0) - 1
-        self._delta = Energy / (delta * energy0) - 1
-        self.px = Px / (p0c * mratio)
-        self.py = Py / (p0c * mratio)
-        self._chi = self._qratio / mratio
         self._mratio = mratio
+        self._chi = self._qratio / self._mratio
 
     qratio = property(lambda self: self._qratio)
 
     @qratio.setter
     def qratio(self, qratio):
-        self._chi = qratio / self._mratio
         self._qratio = qratio
+        self._chi = qratio / self._mratio
 
     chi = property(lambda self: self._chi)
 

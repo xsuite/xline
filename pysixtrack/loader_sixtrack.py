@@ -2,7 +2,6 @@ from math import factorial
 
 import numpy as np
 
-from .base_classes import Element
 from . import elements
 
 clight = 299792458

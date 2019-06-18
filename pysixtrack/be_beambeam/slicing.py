@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.special import erf, erfinv
+from scipy.special import erfinv
 
 
 def constant_charge_slicing_gaussian(N_part_tot, sigmaz, N_slices):
