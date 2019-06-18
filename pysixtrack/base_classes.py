@@ -10,10 +10,10 @@ class _MetaElement(type):
         ann={}
         dct['__annotations__']=ann
         for dd in description:
-            ann[dd[0]]=object
+            ann[dd[0]]=type(dd[3])
             dct[dd[0]]=dd[3]
         for dd in extra:
-            ann[dd[0]]=object
+            ann[dd[0]]=type(dd[3])
             dct[dd[0]]=dd[3]
         try:
             doc = [dct['__doc__'], '\nFields:\n']
