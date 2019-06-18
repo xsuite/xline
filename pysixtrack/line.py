@@ -4,6 +4,7 @@ from .base_classes import Element
 from . import elements
 
 from .loader_sixtrack import _expand_struct
+from .loader_mad import _from_madx_sequence
 
 class Line(Element):
     _description = [
@@ -12,9 +13,6 @@ class Line(Element):
             ]
     _extra = []
 
-    @classmethod
-    def from_madx_sequence(self,seq):
-        pass
 
     def to_dict(self,keepextra=False):
         out={}
@@ -173,6 +171,18 @@ class Line(Element):
         return line, other_info
     
     
+    @classmethod
+    def from_madx_sequence(cls,
+                           sequence,
+                           classes=elements,
+                           ignored_madtypes=[],
+                           exact_drift=False       ):
+
+        line = cls(elements=[], element_names=[])
+
+        return _from_madx_sequence(line,sequence, classes,ignored_madtypes,exact_drift)
+
+
     
    
 
