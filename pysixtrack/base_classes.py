@@ -11,6 +11,7 @@ class _MetaElement(type):
         dct['__annotations__']=ann
         for dd in description:
             ann[dd[0]]=object
+            dct[dd[0]]=dd[3]
         for dd in extra:
             ann[dd[0]]=object
             dct[dd[0]]=dd[3]
@@ -39,8 +40,13 @@ class Base(metaclass=_MetaElement):
         return {kk: getattr(self,kk) for kk in self.get_fields(keepextra)}
 
     @classmethod
-    def from_dict(self,keepextra=True):
-        pass
+    def from_dict(self,dct,keepextra=True):
+        for kk in self.__class__._base_fields:
+            setattr(self,kk)=dct[kk]
+        if keepextra:
+            for kk in self.self.__class__._extra_fields:
+                if kk in dct:
+                    setattr(self,kk)=dct[kk]
 
     def copy(self,keepextra=True):
         return self.__class__.from_dict(self.to_dict(keepextra),keepextra)
