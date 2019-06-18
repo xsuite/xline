@@ -30,7 +30,8 @@ class _MetaElement(type):
 
 
 class Base(metaclass=_MetaElement):
-    def get_fields(keepextra=False):
+    
+    def get_fields(self, keepextra=False):
         if keepextra:
             return self.__class__._fields
         else:

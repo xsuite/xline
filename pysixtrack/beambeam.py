@@ -22,6 +22,38 @@ class BeamBeam4D(Element):
         ('d_py', '', 'V. kick subtracted after the interaction.', 0)
     ]
 
+    _extra = [
+        ('min_sigma_diff','m','Threshold to detect round beam',1e-28 ),
+        ('enabled','','Switch for closed orbit search',True)]
+
+
+    def track(self, p):
+        if self.enabled:
+            charge = p.qratio * p.q0
+            x = p.x - self.x_bb
+            px = p.px
+            y = p.y - self.y_bb
+            py = p.py
+
+            chi = p.chi
+
+            beta = p.beta0 / p.rvv
+            p0c = p.p0c * qe
+
+            Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(
+                x, y, self.sigma_x, self.sigma_y, min_sigma_diff=1e-10,
+                skip_Gs=True, mathlib=p._m)
+
+            fact_kick = chi * self.charge * qe * charge * qe\
+                * (1. + beta * self.beta_r) / (p0c * (beta + self.beta_r))
+
+            px += (fact_kick * Ex - self.d_px)
+            py += (fact_kick * Ey - self.d_py)
+
+            p.px = px
+            p.py = py
+
+
 
 class BeamBeam6D(Element):
     """Interaction with a transverse-Gaussian strong beam (6D modelling).
