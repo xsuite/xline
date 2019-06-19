@@ -48,11 +48,12 @@ def get_bb_names_and_xyz_points(mad, seq_name):
     for ee in seq.elements:
         if ee.base_type.name == 'beambeam':
             eename = ee.name
-            bb_elements.append(ee)
+#            bb_elements.append(ee)
             bb_names.append(eename)
             bb_xyz_points.append(MadPoint(eename+':1', mad))
     
     return bb_elements, bb_names, bb_xyz_points
+
 
 from cpymad.madx import Madx
 import pysixtrack
@@ -63,19 +64,23 @@ mad.options.warn=False;
 mad.options.info=False;
 
 mad.call('mad/lhcwbb.seq')
+mad.use('lhcb1'); mad.twiss(); mad.survey()
+IP5_xyz_b1 = MadPoint('ip5'+':1', mad)
+mad.use('lhcb2'); mad.twiss(); mad.survey()
+IP5_xyz_b2 = MadPoint('ip5'+':1', mad)
 
 
 bb_ele_b1, bb_names_b1, bb_xyz_b1 = get_bb_names_and_xyz_points(
         mad, seq_name='lhcb1')
 
-# Install BB in B2
-for bb1 in bb_ele_b1:
-    mad.seqedit(sequence='lhcb2')
-    newbb=mad.command.beambeam.clone(bb1.name,
-            sigx=1e-3, sigy=1e-3, xma=0., yma=0, charge=0., 
-            comments=bb1.comments)
-    mad.install(element=bb1.name, at=bb1.at,from_=bb1['from'])
-    mad.endedit()
+# # Install BB in B2
+# for bb1 in bb_ele_b1:
+#     mad.command.beambeam.clone(bb1.name,
+#             sigx=1e-3, sigy=1e-3, xma=0., yma=0, charge=0., 
+#             comments=bb1.comments)
+#     mad.editseq('lhcb2') 
+#     mad.install(element=bb1.name, at=bb1.at,from_=bb1['from'])
+#     mad.endedit()
 
 bb_ele_b1, bb_names_b1, bb_xyz_b1 = get_bb_names_and_xyz_points(
         mad, seq_name='lhcb1')
