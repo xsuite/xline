@@ -61,7 +61,7 @@ def _from_madx_sequence(line, sequence, classes=pyblep_elements,
                                     frequency=ee.freq * 1e6, lag=ee.lag * 360)
 
         elif mad_etype == 'beambeam':
-            if ee.comments.startswith('beambeam6d'):
+            if ee.slot_id==6 or ee.slot_id==60:
                 # BB interaction is 6D
                 newele = classes.BeamBeam6D(
                     phi=0.,

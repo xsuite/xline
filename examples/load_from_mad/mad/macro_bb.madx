@@ -7,6 +7,11 @@
 ! D. Pellegrini: added macros to print the lenses in the sixtrack expert format, May 2017
 ! D. Pellegrini: added macros to remove BB lenses to simulate beams such as 8b4e, Set 2017
 
+beambeam4d = 4;
+beambeam6d = 6;
+beambeam6dip = 60;
+
+
 DEFINE_BB_PARAM : macro =
 {
 
@@ -337,13 +342,13 @@ bb_labelNIRb1_nn : beambeam, sigx   = sigx_labelNIRb1_nn, sigy    = sigy_labelNI
                              xma    = posx_labelNIRb1_nn + posx_labelNIRb1_crab_nn,
 			     yma    = posy_labelNIRb1_nn + posy_labelNIRb1_crab_nn,
 		             charge:= flag * ON_BB_CHARGE;
-bb_labelNIRb1_nn, comments = "bbcomm";
+bb_labelNIRb1_nn, slot_id = bbcomm;
 
 bb_labelNIRb2_nn : beambeam, sigx   = sigx_labelNIRb2_nn, sigy    = sigy_labelNIRb2_nn,
                              xma    = posx_labelNIRb2_nn + posx_labelNIRb2_crab_nn,
 			     yma    = posy_labelNIRb2_nn + posy_labelNIRb2_crab_nn,
 		             charge:= flag * ON_BB_CHARGE;
-bb_labelNIRb2_nn, comments =  "bbcomm";
+bb_labelNIRb2_nn, slot_id =  bbcomm;
 };
 
 PRINT_BB_LENSES: macro = {
