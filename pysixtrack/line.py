@@ -18,8 +18,19 @@ class Line(Element):
     def to_dict(self, keepextra=False):
         out = {}
         out['elements'] = [el.to_dict(keepextra) for el in self.elements]
-        out['element_names'] = self.elements_names[:]
+        out['element_names'] = self.element_names[:]
         return out
+
+    @classmethod
+    def from_dict(cls,dct,keepextra=True):
+        self=cls(elements=[], element_names=[])
+        for el in dct['elements']:
+            eltype=getattr(elements,el['__class__'])
+            newel=eltype.from_dict(el)
+            self.elements.append(newel)
+        self.element_names=dct['element_names']
+        return self
+
 
     def append_line(self, line):
         # Append the elements
@@ -94,13 +105,13 @@ class Line(Element):
     def enable_beambeam(self):
 
         for ee in self.elements:
-            if isinstance(ee, [elements.BeamBeam4D, elements.BeamBeam6D]):
+            if isinstance(ee, (elements.BeamBeam4D, elements.BeamBeam6D)):
                 ee.enabled = True
 
     def disable_beambeam(self):
 
         for ee in self.elements:
-            if isinstance(ee, [elements.BeamBeam4D, elements.BeamBeam6D]):
+            if isinstance(ee, (elements.BeamBeam4D, elements.BeamBeam6D)):
                 ee.enabled = False
 
     def beambeam_store_closed_orbit_and_dipolar_kicks(self, particle_on_CO,
