@@ -1,7 +1,7 @@
 import numpy as np
 
 class MadPoint(object):
-    def __init__(self,name,mad):
+    def __init__(self,name,mad, add_CO=True):
         self.name=name
         twiss=mad.table.twiss
         survey=mad.table.survey
@@ -28,7 +28,11 @@ class MadPoint(object):
         self.ey=np.dot(wm,np.array([0,1,0]))
         self.ez=np.dot(wm,np.array([0,0,1]))
         self.sp=np.array([self.sx,self.sy,self.sz])
-        self.p=self.sp+ self.ex * self.tx + self.ey * self.ty
+        if add_CO:
+            self.p=self.sp+ self.ex * self.tx + self.ey * self.ty
+        else:
+            self.p=self.sp
+
     def dist(self,other):
         return np.sqrt(np.sum((self.p-other.p)**2))
     def distxy(self,other):
@@ -77,17 +81,32 @@ ip_names = [1, 2, 5, 8]
 mad.use('lhcb1'); mad.twiss(); mad.survey()
 IP_xyz_b1 = {}
 for ip in ip_names:
-    IP_xyz_b1[ip] = MadPoint('ip%d'%ip+':1', mad)
+    IP_xyz_b1[ip] = MadPoint('ip%d'%ip+':1', mad, add_CO=False)
 
 mad.use('lhcb2'); mad.twiss(); mad.survey()
 IP_xyz_b2 = {}
 for ip in ip_names:
-    IP_xyz_b2[ip] = MadPoint('ip%d'%ip+':1', mad)
+    IP_xyz_b2[ip] = MadPoint('ip%d'%ip+':1', mad, add_CO=False)
 
 bb_names_b1, bb_xyz_b1 = get_bb_names_and_xyz_points(
         mad, seq_name='lhcb1')
 bb_names_b2, bb_xyz_b2 = get_bb_names_and_xyz_points(
         mad, seq_name='lhcb2')
+
+
+# Find shift between the rings
+use_ip = 5
+shift_12 = IP_xyz_b2[use_ip].p - IP_xyz_b1[use_ip].p
+
+# Shift all B2 points
+for p_xyz_b2 in bb_xyz_b2+[IP_xyz_b2[kk] for kk in ip_names]:
+    p_xyz_b2.p -= shift_12
+
+# Check distances
+print('Distances between ref orbits:')
+for ip in ip_names:
+    print('IP%d: %e'%(ip, norm(IP_xyz_b2[ip].p - IP_xyz_b1[ip].p)))
+
 
 
 # A check
