@@ -68,6 +68,9 @@ mad.options.info=False;
 # Load sequence
 mad.call('mad/lhcwbb.seq')
 
+# Disable beam-beam kicks 
+mad.globals.on_bb_charge = 0.
+
 ip_names = [1, 2, 5, 8]
 
 # Retrieve geometry information
