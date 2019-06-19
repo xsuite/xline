@@ -6,8 +6,6 @@ fc.3.aux
 fc.8
 headonslice
 last_twiss.%SEEDRAN.gz
-macro_bb.madx
-opticsfile.22_ctpps2
 temp
 twiss.b1
 twiss.b2
