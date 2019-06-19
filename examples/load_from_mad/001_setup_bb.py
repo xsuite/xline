@@ -37,8 +37,8 @@ class MadPoint(object):
 
 def get_bb_names_and_xyz_points(mad, seq_name):
     mad.use(sequence=seq_name);
-#    mad.twiss()
-#    mad.survey()
+    mad.twiss()
+    mad.survey()
     
     seq = mad.sequence[seq_name]
    
@@ -50,7 +50,7 @@ def get_bb_names_and_xyz_points(mad, seq_name):
             eename = ee.name
             bb_elements.append(ee)
             bb_names.append(eename)
-#            bb_xyz_points.append(MadPoint(eename+':1', mad))
+            bb_xyz_points.append(MadPoint(eename+':1', mad))
     
     return bb_elements, bb_names, bb_xyz_points
 
@@ -77,10 +77,10 @@ bb_ele_b1, bb_names_b1, bb_xyz_b1 = get_bb_names_and_xyz_points(mad, seq_name='l
 # Install BB in B2
 for bb1 in bb_ele_b1:
     mad.seqedit(sequence='lhcb2')
-    newbb=mad.command.beambeam.clone(bb1.name)
-    mad.install(element=bb1.name, at=bb1.at,from_=bb1['from'],
+    newbb=mad.command.beambeam.clone(bb1.name,
             sigx=1e-3, sigy=1e-3, xma=0., yma=0, charge=0., 
             comments=bb1.comments)
+    mad.install(element=bb1.name, at=bb1.at,from_=bb1['from'])
     mad.endedit()
 
 #bb_ele_b1, bb_names_b1, bb_xyz_b1 = get_bb_names_and_xyz_points(mad, seq_name='lhcb1')
