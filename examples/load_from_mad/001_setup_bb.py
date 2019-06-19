@@ -54,13 +54,6 @@ def get_bb_names_and_xyz_points(mad, seq_name):
     
     return bb_elements, bb_names, bb_xyz_points
 
-def add_beambeam(mad,sequence,name,s,from_):
-    el=mad.command.beambeam.clone(name)
-    mad.seqedit(sequence=sequence)
-    mad.install(element=name,at=s,from_=from_)
-    mad.endedit()
-    return mad.elements[name]
-
 from cpymad.madx import Madx
 import pysixtrack
 
@@ -72,7 +65,8 @@ mad.options.info=False;
 mad.call('mad/lhcwbb.seq')
 
 
-bb_ele_b1, bb_names_b1, bb_xyz_b1 = get_bb_names_and_xyz_points(mad, seq_name='lhcb1')
+bb_ele_b1, bb_names_b1, bb_xyz_b1 = get_bb_names_and_xyz_points(
+        mad, seq_name='lhcb1')
 
 # Install BB in B2
 for bb1 in bb_ele_b1:
@@ -83,8 +77,10 @@ for bb1 in bb_ele_b1:
     mad.install(element=bb1.name, at=bb1.at,from_=bb1['from'])
     mad.endedit()
 
-#bb_ele_b1, bb_names_b1, bb_xyz_b1 = get_bb_names_and_xyz_points(mad, seq_name='lhcb1')
-bb_ele_b2, bb_names_b2, bb_xyz_b2 = get_bb_names_and_xyz_points(mad, seq_name='lhcb2')
+bb_ele_b1, bb_names_b1, bb_xyz_b1 = get_bb_names_and_xyz_points(
+        mad, seq_name='lhcb1')
+bb_ele_b2, bb_names_b2, bb_xyz_b2 = get_bb_names_and_xyz_points(
+        mad, seq_name='lhcb2')
 
 # A check
 assert len(bb_names_b1)==len(bb_names_b2)
@@ -92,14 +88,43 @@ for nbb1, nbb2 in zip(bb_names_b1, bb_names_b2):
     assert(nbb1==nbb2)
 
 
-i_bb = 10
-pb1 = bb_xyz_b1[i_bb]
-pb2 = bb_xyz_b2[i_bb]
+def norm(v):
+    return np.sqrt(np.sum(v**2))
+
+import matplotlib.pyplot as plt
+plt.close('all')
+fig1 = plt.figure(1)
+
+plt.plot(           [pb.p[0] for pb in bb_xyz_b1],
+                    [pb.p[2] for pb in bb_xyz_b1], 'b.')
+plt.quiver(np.array([pb.p[0] for pb in bb_xyz_b1]),
+           np.array([pb.p[2] for pb in bb_xyz_b1]), 
+          np.array([pb.ex[0] for pb in bb_xyz_b1]),
+          np.array([pb.ex[2] for pb in bb_xyz_b1]))
+plt.quiver(np.array([pb.p[0] for pb in bb_xyz_b1]),
+           np.array([pb.p[2] for pb in bb_xyz_b1]), 
+          np.array([pb.ez[0] for pb in bb_xyz_b1]),
+          np.array([pb.ez[2] for pb in bb_xyz_b1]))
+
+plt.plot(           [pb.p[0] for pb in bb_xyz_b2],
+                    [pb.p[2] for pb in bb_xyz_b2], 'r.')
+plt.quiver(np.array([pb.p[0] for pb in bb_xyz_b2]),
+           np.array([pb.p[2] for pb in bb_xyz_b2]), 
+          np.array([pb.ex[0] for pb in bb_xyz_b2]),
+          np.array([pb.ex[2] for pb in bb_xyz_b2]))
+plt.quiver(np.array([pb.p[0] for pb in bb_xyz_b2]),
+           np.array([pb.p[2] for pb in bb_xyz_b2]), 
+          np.array([pb.ez[0] for pb in bb_xyz_b2]),
+          np.array([pb.ez[2] for pb in bb_xyz_b2]))
+plt.show()
 
 
-
-
-
-
+# # Check that the two reference system are parallel
+# assert(norm(pb1.ex-pb2.ex)<1e-10) #1e-4 is a reasonable limit
+# assert(norm(pb1.ey-pb2.ey)<1e-10) #1e-4 is a reasonable limit
+# assert(norm(pb1.ez-pb2.ez)<1e-10) #1e-4 is a reasonable limit
+# 
+# # Check that there is no horizontal separation
+# assert(np.abs(np.dot(v12, pb1.ez))<1e-10)
 
 #line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.lhcb1)
