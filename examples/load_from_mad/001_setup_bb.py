@@ -42,17 +42,18 @@ def get_bb_names_and_xyz_points(mad, seq_name):
     
     seq = mad.sequence[seq_name]
    
-    bb_elements = []
     bb_names = []
     bb_xyz_points = []
     for ee in seq.elements:
         if ee.base_type.name == 'beambeam':
             eename = ee.name
-#            bb_elements.append(ee)
             bb_names.append(eename)
             bb_xyz_points.append(MadPoint(eename+':1', mad))
     
-    return bb_elements, bb_names, bb_xyz_points
+    return bb_names, bb_xyz_points
+
+def norm(v):
+    return np.sqrt(np.sum(v**2))
 
 
 from cpymad.madx import Madx
@@ -63,38 +64,42 @@ mad.options.echo=False;
 mad.options.warn=False;
 mad.options.info=False;
 
+
+# Load sequence
 mad.call('mad/lhcwbb.seq')
+
+ip_names = [1, 2, 5, 8]
+
+# Retrieve geometry information
 mad.use('lhcb1'); mad.twiss(); mad.survey()
-IP5_xyz_b1 = MadPoint('ip5'+':1', mad)
+IP_xyz_b1 = {}
+for ip in ip_names:
+    IP_xyz_b1[ip] = MadPoint('ip%d'%ip+':1', mad)
+
 mad.use('lhcb2'); mad.twiss(); mad.survey()
-IP5_xyz_b2 = MadPoint('ip5'+':1', mad)
+IP_xyz_b2 = {}
+for ip in ip_names:
+    IP_xyz_b2[ip] = MadPoint('ip%d'%ip+':1', mad)
 
-
-bb_ele_b1, bb_names_b1, bb_xyz_b1 = get_bb_names_and_xyz_points(
+bb_names_b1, bb_xyz_b1 = get_bb_names_and_xyz_points(
         mad, seq_name='lhcb1')
-
-# # Install BB in B2
-# for bb1 in bb_ele_b1:
-#     mad.command.beambeam.clone(bb1.name,
-#             sigx=1e-3, sigy=1e-3, xma=0., yma=0, charge=0., 
-#             comments=bb1.comments)
-#     mad.editseq('lhcb2') 
-#     mad.install(element=bb1.name, at=bb1.at,from_=bb1['from'])
-#     mad.endedit()
-
-bb_ele_b1, bb_names_b1, bb_xyz_b1 = get_bb_names_and_xyz_points(
-        mad, seq_name='lhcb1')
-bb_ele_b2, bb_names_b2, bb_xyz_b2 = get_bb_names_and_xyz_points(
+bb_names_b2, bb_xyz_b2 = get_bb_names_and_xyz_points(
         mad, seq_name='lhcb2')
+
 
 # A check
 assert len(bb_names_b1)==len(bb_names_b2)
 for nbb1, nbb2 in zip(bb_names_b1, bb_names_b2):
-    assert(nbb1==nbb2)
+    assert(nbb1==nbb2.replace('b2_','b1_'))
 
+# # Check that the two reference system are parallel
+# assert(norm(pb1.ex-pb2.ex)<1e-10) #1e-4 is a reasonable limit
+# assert(norm(pb1.ey-pb2.ey)<1e-10) #1e-4 is a reasonable limit
+# assert(norm(pb1.ez-pb2.ez)<1e-10) #1e-4 is a reasonable limit
+# 
+# # Check that there is no horizontal separation
+# assert(np.abs(np.dot(v12, pb1.ez))<1e-10)
 
-def norm(v):
-    return np.sqrt(np.sum(v**2))
 
 import matplotlib.pyplot as plt
 plt.close('all')
@@ -123,13 +128,5 @@ plt.quiver(np.array([pb.p[0] for pb in bb_xyz_b2]),
           np.array([pb.ez[2] for pb in bb_xyz_b2]))
 plt.show()
 
-
-# # Check that the two reference system are parallel
-# assert(norm(pb1.ex-pb2.ex)<1e-10) #1e-4 is a reasonable limit
-# assert(norm(pb1.ey-pb2.ey)<1e-10) #1e-4 is a reasonable limit
-# assert(norm(pb1.ez-pb2.ez)<1e-10) #1e-4 is a reasonable limit
-# 
-# # Check that there is no horizontal separation
-# assert(np.abs(np.dot(v12, pb1.ez))<1e-10)
 
 #line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.lhcb1)
