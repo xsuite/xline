@@ -93,6 +93,11 @@ bb_names_b1, bb_xyz_b1 = get_bb_names_and_xyz_points(
 bb_names_b2, bb_xyz_b2 = get_bb_names_and_xyz_points(
         mad, seq_name='lhcb2')
 
+# Check that reference system are parallel at the IPs
+for ip in ip_names:
+    assert(1. - np.dot(IP_xyz_b1[ip].ex, IP_xyz_b2[ip].ex) <1e-12)
+    assert(1. - np.dot(IP_xyz_b1[ip].ey, IP_xyz_b2[ip].ey) <1e-12)
+    assert(1. - np.dot(IP_xyz_b1[ip].ez, IP_xyz_b2[ip].ez) <1e-12)
 
 # Find shift between the rings
 use_ip = 5
