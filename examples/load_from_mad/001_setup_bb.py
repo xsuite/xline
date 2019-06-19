@@ -156,15 +156,10 @@ for i_bb, name_bb in enumerate(bb_names_b1):
     except AssertionError:
         print(name_bb, 'The beams are longitudinally shifted')
 
+    # Find separations
+    sep_x.append(np.dot(vbb_12, ex))
+    sep_y.append(np.dot(vbb_12, ey))
 
-
-#    # Find separations
-#    sep_x = np.dot(vbb_12, 0.5*
-
-#    # Check that the two reference system are parallel
-#    assert(norm(pb1.ex-pb2.ex)<1e-10) #1e-4 is a reasonable limit
-#    assert(norm(pb1.ey-pb2.ey)<1e-10) #1e-4 is a reasonable limit
-#    assert(norm(pb1.ez-pb2.ez)<1e-10) #1e-4 is a reasonable limit
     
 
 import matplotlib.pyplot as plt
