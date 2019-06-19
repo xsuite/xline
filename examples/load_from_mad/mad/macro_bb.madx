@@ -7,6 +7,11 @@
 ! D. Pellegrini: added macros to print the lenses in the sixtrack expert format, May 2017
 ! D. Pellegrini: added macros to remove BB lenses to simulate beams such as 8b4e, Set 2017
 
+____beambeam4d = 4;
+____beambeam6d = 6;
+____beambeam6dip = 60;
+
+
 DEFINE_BB_PARAM : macro =
 {
 
@@ -277,22 +282,22 @@ readmytable,file="temp/twiss.tfs",table=twissb2;
 
 !! Define head on BB lens for beam1/2
 
-exec define_BB_lens(ho,1,0,hocharge_IR1,beambeam6dip);
-n=1;while(n<=(nho_IR1/2)) {exec define_BB_lens(ho.L,1,$n,hocharge_IR1,beambeam6d);exec define_BB_lens(ho.R,1,$n,hocharge_IR1,beambeam6d);n=n+1;};
-exec define_BB_lens(ho,2,0,hocharge_IR2,beambeam6dip);
-n=1;while(n<=(nho_IR2/2)) {exec define_BB_lens(ho.L,2,$n,hocharge_IR2,beambeam6d);exec define_BB_lens(ho.R,2,$n,hocharge_IR2,beambeam6d);n=n+1;};
-exec define_BB_lens(ho,5,0,hocharge_IR5,beambeam6dip);
-n=1;while(n<=(nho_IR5/2)) {exec define_BB_lens(ho.L,5,$n,hocharge_IR5,beambeam6d);exec define_BB_lens(ho.R,5,$n,hocharge_IR5,beambeam6d);n=n+1;};
-exec define_BB_lens(ho,8,0,hocharge_IR8,beambeam6dip);
-n=1;while(n<=(nho_IR8/2)) {exec define_BB_lens(ho.L,8,$n,hocharge_IR8,beambeam6d);exec define_BB_lens(ho.R,8,$n,hocharge_IR8,beambeam6d);n=n+1;};
+exec define_BB_lens(ho,1,0,hocharge_IR1,____beambeam6dip);
+n=1;while(n<=(nho_IR1/2)) {exec define_BB_lens(ho.L,1,$n,hocharge_IR1,____beambeam6d);exec define_BB_lens(ho.R,1,$n,hocharge_IR1,____beambeam6d);n=n+1;};
+exec define_BB_lens(ho,2,0,hocharge_IR2,____beambeam6dip);
+n=1;while(n<=(nho_IR2/2)) {exec define_BB_lens(ho.L,2,$n,hocharge_IR2,____beambeam6d);exec define_BB_lens(ho.R,2,$n,hocharge_IR2,____beambeam6d);n=n+1;};
+exec define_BB_lens(ho,5,0,hocharge_IR5,____beambeam6dip);
+n=1;while(n<=(nho_IR5/2)) {exec define_BB_lens(ho.L,5,$n,hocharge_IR5,____beambeam6d);exec define_BB_lens(ho.R,5,$n,hocharge_IR5,____beambeam6d);n=n+1;};
+exec define_BB_lens(ho,8,0,hocharge_IR8,____beambeam6dip);
+n=1;while(n<=(nho_IR8/2)) {exec define_BB_lens(ho.L,8,$n,hocharge_IR8,____beambeam6d);exec define_BB_lens(ho.R,8,$n,hocharge_IR8,____beambeam6d);n=n+1;};
 
 !! Define parasitic BB lens for beam1/2
 
 n=1; while ( n <= nparasitic ) {
-exec define_BB_lens(par.L,1,$n,lr_charge,beambeam4d);exec define_BB_lens(par.R,1,$n,lr_charge,beambeam4d); if (abs(x_su) < 1.e-12) {npara0_1 = n;};
-exec define_BB_lens(par.L,2,$n,lr_charge,beambeam4d);exec define_BB_lens(par.R,2,$n,lr_charge,beambeam4d); if (abs(x_su) < 1.e-12) {npara0_2 = n;};
-exec define_BB_lens(par.L,5,$n,lr_charge,beambeam4d);exec define_BB_lens(par.R,5,$n,lr_charge,beambeam4d); if (abs(x_su) < 1.e-12) {npara0_5 = n;};
-exec define_BB_lens(par.L,8,$n,lr_charge,beambeam4d);exec define_BB_lens(par.R,8,$n,lr_charge,beambeam4d); if (abs(x_su) < 1.e-12) {npara0_8 = n;};
+exec define_BB_lens(par.L,1,$n,lr_charge,____beambeam4d);exec define_BB_lens(par.R,1,$n,lr_charge,____beambeam4d); if (abs(x_su) < 1.e-12) {npara0_1 = n;};
+exec define_BB_lens(par.L,2,$n,lr_charge,____beambeam4d);exec define_BB_lens(par.R,2,$n,lr_charge,____beambeam4d); if (abs(x_su) < 1.e-12) {npara0_2 = n;};
+exec define_BB_lens(par.L,5,$n,lr_charge,____beambeam4d);exec define_BB_lens(par.R,5,$n,lr_charge,____beambeam4d); if (abs(x_su) < 1.e-12) {npara0_5 = n;};
+exec define_BB_lens(par.L,8,$n,lr_charge,____beambeam4d);exec define_BB_lens(par.R,8,$n,lr_charge,____beambeam4d); if (abs(x_su) < 1.e-12) {npara0_8 = n;};
 n=n+1;};
 
 system,"echo 'Number of parasitic encounter before D1'";
@@ -337,13 +342,13 @@ bb_labelNIRb1_nn : beambeam, sigx   = sigx_labelNIRb1_nn, sigy    = sigy_labelNI
                              xma    = posx_labelNIRb1_nn + posx_labelNIRb1_crab_nn,
 			     yma    = posy_labelNIRb1_nn + posy_labelNIRb1_crab_nn,
 		             charge:= flag * ON_BB_CHARGE;
-bb_labelNIRb1_nn, comments = "bbcomm";
+bb_labelNIRb1_nn, slot_id = bbcomm;
 
 bb_labelNIRb2_nn : beambeam, sigx   = sigx_labelNIRb2_nn, sigy    = sigy_labelNIRb2_nn,
                              xma    = posx_labelNIRb2_nn + posx_labelNIRb2_crab_nn,
 			     yma    = posy_labelNIRb2_nn + posy_labelNIRb2_crab_nn,
 		             charge:= flag * ON_BB_CHARGE;
-bb_labelNIRb2_nn, comments =  "bbcomm";
+bb_labelNIRb2_nn, slot_id =  bbcomm;
 };
 
 PRINT_BB_LENSES: macro = {
