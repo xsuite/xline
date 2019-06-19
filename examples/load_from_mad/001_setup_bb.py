@@ -78,6 +78,8 @@ mad.globals.on_bb_charge = 0.
 ip_names = [1, 2, 5, 8]
 
 # Retrieve geometry information
+
+# IP locations
 mad.use('lhcb1'); mad.twiss(); mad.survey()
 IP_xyz_b1 = {}
 for ip in ip_names:
@@ -88,10 +90,16 @@ IP_xyz_b2 = {}
 for ip in ip_names:
     IP_xyz_b2[ip] = MadPoint('ip%d'%ip+':1', mad, add_CO=False)
 
+# Beam-beam names and locations
 bb_names_b1, bb_xyz_b1 = get_bb_names_and_xyz_points(
         mad, seq_name='lhcb1')
 bb_names_b2, bb_xyz_b2 = get_bb_names_and_xyz_points(
         mad, seq_name='lhcb2')
+
+# Check naming convention
+assert len(bb_names_b1)==len(bb_names_b2)
+for nbb1, nbb2 in zip(bb_names_b1, bb_names_b2):
+    assert(nbb1==nbb2.replace('b2_','b1_'))
 
 # Check that reference system are parallel at the IPs
 for ip in ip_names:
@@ -99,34 +107,65 @@ for ip in ip_names:
     assert(1. - np.dot(IP_xyz_b1[ip].ey, IP_xyz_b2[ip].ey) <1e-12)
     assert(1. - np.dot(IP_xyz_b1[ip].ez, IP_xyz_b2[ip].ez) <1e-12)
 
-# Find shift between the rings
-use_ip = 5
-shift_12 = IP_xyz_b2[use_ip].p - IP_xyz_b1[use_ip].p
+# Shift B2 so that survey is head-on at the closest IP
+# and find vector separation
+sep_x = []
+sep_y = []
+for i_bb, name_bb in enumerate(bb_names_b1):
+    
+    pb1 = bb_xyz_b1[i_bb]
+    pb2 = bb_xyz_b2[i_bb]
+    
+    # Find closest IP
+    d_ip = 1e6
+    use_ip = 0
+    for ip in ip_names:
+        dd = norm(pb1.p - IP_xyz_b1[ip].p)
+        if dd < d_ip:
+            use_ip = ip
+            d_ip = dd
 
-# Shift all B2 points
-for p_xyz_b2 in bb_xyz_b2+[IP_xyz_b2[kk] for kk in ip_names]:
-    p_xyz_b2.p -= shift_12
+    # Shift B2
+    shift_12 = IP_xyz_b2[use_ip].p - IP_xyz_b1[use_ip].p
+    pb2.p -= shift_12
 
-# Check distances
-print('Distances between ref orbits:')
-for ip in ip_names:
-    print('IP%d: %e'%(ip, norm(IP_xyz_b2[ip].p - IP_xyz_b1[ip].p)))
+    # Find v12
+    vbb_12 = bb_xyz_b2[i_bb].p - bb_xyz_b1[i_bb].p
+
+    # Check that the two reference system are parallel
+    try:
+        assert(norm(pb1.ex-pb2.ex)<1e-10) #1e-4 is a reasonable limit
+        assert(norm(pb1.ey-pb2.ey)<1e-10) #1e-4 is a reasonable limit
+        assert(norm(pb1.ez-pb2.ez)<1e-10) #1e-4 is a reasonable limit
+        ex, ey, ex = pb1.ex, pb1.ey, pb1.ez
+    except AssertionError:
+        print(name_bb, 'Reference systems are not parallel')
+        # Check that there is separatio in the survey (we are in the D1)
+        assert(norm(pb1.sp - pb2.sp)>1e-3)
+        
+        # Go to baricentric reference
+        ex = (pb1.sp - pb2.sp)
+        ex = ex/norm(ex)
+        if np.dot(ex, pb1.ex)<0.: ex = -ex
+        ey = pb1.ey
+        ez = np.cross(ex, ey)
+
+    # Check that there is no longitudinal separation
+    try:
+        assert(np.abs(np.dot(vbb_12, pb1.ez))<1e-4)
+    except AssertionError:
+        print(name_bb, 'The beams are longitudinally shifted')
 
 
 
-# A check
-assert len(bb_names_b1)==len(bb_names_b2)
-for nbb1, nbb2 in zip(bb_names_b1, bb_names_b2):
-    assert(nbb1==nbb2.replace('b2_','b1_'))
+#    # Find separations
+#    sep_x = np.dot(vbb_12, 0.5*
 
-# # Check that the two reference system are parallel
-# assert(norm(pb1.ex-pb2.ex)<1e-10) #1e-4 is a reasonable limit
-# assert(norm(pb1.ey-pb2.ey)<1e-10) #1e-4 is a reasonable limit
-# assert(norm(pb1.ez-pb2.ez)<1e-10) #1e-4 is a reasonable limit
-# 
-# # Check that there is no horizontal separation
-# assert(np.abs(np.dot(v12, pb1.ez))<1e-10)
-
+#    # Check that the two reference system are parallel
+#    assert(norm(pb1.ex-pb2.ex)<1e-10) #1e-4 is a reasonable limit
+#    assert(norm(pb1.ey-pb2.ey)<1e-10) #1e-4 is a reasonable limit
+#    assert(norm(pb1.ez-pb2.ez)<1e-10) #1e-4 is a reasonable limit
+    
 
 import matplotlib.pyplot as plt
 plt.close('all')
