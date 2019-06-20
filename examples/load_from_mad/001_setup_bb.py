@@ -244,6 +244,12 @@ for ee, eename in zip(line.elements, line.element_names):
         ee.sigma_34 = bb_sigmas_b2[34][i_bb]  
         ee.sigma_44 = bb_sigmas_b2[44][i_bb]
 
+        if not(bb_coupling):
+            ee.sigma_13 = 0.
+            ee.sigma_14 = 0.
+            ee.sigma_23 = 0.
+            ee.sigma_24 = 0.
+
         i_bb += 1
 
 import matplotlib.pyplot as plt
