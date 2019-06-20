@@ -58,10 +58,11 @@ def get_bb_names_xyz_points_sigma_matrices(mad, seq_name):
             bb_names.append(eename)
             bb_xyz_points.append(MadPoint(eename+':1', mad))
 
-            i_twiss = np.where(mad.table.twiss.name==(eename+':1')[0][0]
+            i_twiss = np.where(mad.table.twiss.name==(eename+':1'))[0][0]
             
             for sn in _sigma_names:
-                bb_sigmas[sn].append(getattr(mad.table.twiss, 'sig%d'%sn)[i_twiss]
+                bb_sigmas[sn].append(
+                        getattr(mad.table.twiss, 'sig%d'%sn)[i_twiss])
 
     return bb_names, bb_xyz_points, bb_sigmas
 
@@ -84,6 +85,8 @@ mad.call('mad/lhcwbb.seq')
 # Parameters to be cross-checked
 n_slices = 11
 
+# Get bunch intensity
+bunch_intensity = mad.sequence.lhcb1.beam.npart
 
 # Disable beam-beam kicks 
 mad.globals.on_bb_charge = 0.
@@ -104,9 +107,9 @@ for ip in ip_names:
     IP_xyz_b2[ip] = MadPoint('ip%d'%ip+':1', mad, add_CO=False)
 
 # Beam-beam names and locations
-bb_names_b1, bb_xyz_b1 = get_bb_names_and_xyz_points(
+bb_names_b1, bb_xyz_b1, bb_sigmas_b1 = get_bb_names_xyz_points_sigma_matrices(
         mad, seq_name='lhcb1')
-bb_names_b2, bb_xyz_b2 = get_bb_names_and_xyz_points(
+bb_names_b2, bb_xyz_b2, bb_sigmas_b2 = get_bb_names_xyz_points_sigma_matrices(
         mad, seq_name='lhcb2')
 
 # Check naming convention
@@ -114,7 +117,7 @@ assert len(bb_names_b1)==len(bb_names_b2)
 for nbb1, nbb2 in zip(bb_names_b1, bb_names_b2):
     assert(nbb1==nbb2.replace('b2_','b1_'))
 
-# Check that reference system are parallel at the IPs
+# Check that reference systems are parallel at the IPs
 for ip in ip_names:
     assert(1. - np.dot(IP_xyz_b1[ip].ex, IP_xyz_b2[ip].ex) <1e-12)
     assert(1. - np.dot(IP_xyz_b1[ip].ey, IP_xyz_b2[ip].ey) <1e-12)
