@@ -86,7 +86,7 @@ mad.call('mad/lhcwbb.seq')
 n_slices = 11
 
 # Get bunch intensity
-bunch_intensity = mad.sequence.lhcb1.beam.npart
+#bunch_intensity = mad.sequence.lhcb1.beam.npart
 
 # Disable beam-beam kicks 
 mad.globals.on_bb_charge = 0.
