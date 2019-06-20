@@ -194,16 +194,33 @@ for ee, eename in zip(line.elements, line.element_names):
         assert(eename==bb_names_b1[i_bb])
         
         ee.charge = bunch_intensity
-        ee.sigma_x = np.sqrt(bb_sigmas_b1[11][i_bb]) 
-        ee.sigma_y = np.sqrt(bb_sigmas_b1[33][i_bb])
+        ee.sigma_x = np.sqrt(bb_sigmas_b2[11][i_bb]) 
+        ee.sigma_y = np.sqrt(bb_sigmas_b2[33][i_bb])
         ee.beta_r = beta_r
         ee.x_bb = sep_x[i_bb]
         ee.y_bb = sep_y[i_bb]
+
         i_bb += 1
     if isinstance(ee, pysixtrack.elements.BeamBeam6D):
         assert(eename==bb_names_b1[i_bb])
-   
-        prrrrr
+        
+        ee.phi = None #tbd
+        ee.alpha = None # tbd
+        ee.x_bb_co = sep_x[i_bb]
+        ee.y_bb_co = sep_y[i_bb]
+        ee.charge_slices = [0.0]
+        ee.zeta_slices = [0.0]
+        ee.sigma_11 = bb_sigmas_b2[11][i_bb] 
+        ee.sigma_12 = bb_sigmas_b2[12][i_bb]
+        ee.sigma_13 = bb_sigmas_b2[13][i_bb]
+        ee.sigma_14 = bb_sigmas_b2[14][i_bb] 
+        ee.sigma_22 = bb_sigmas_b2[22][i_bb]
+        ee.sigma_23 = bb_sigmas_b2[23][i_bb]
+        ee.sigma_24 = bb_sigmas_b2[24][i_bb]
+        ee.sigma_33 = bb_sigmas_b2[33][i_bb]
+        ee.sigma_34 = bb_sigmas_b2[34][i_bb]  
+        ee.sigma_44 = bb_sigmas_b2[44][i_bb]
+        
         i_bb += 1
 
 import matplotlib.pyplot as plt
