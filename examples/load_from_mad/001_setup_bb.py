@@ -44,6 +44,21 @@ class MadPoint(object):
         dd=self.p-other.p
         return np.dot(dd,self.ex),np.dot(dd,self.ey)
 
+def find_alpha_and_phi(dpx, dpy):
+    
+    phi = np.sqrt(dpx**2+dpy**2)/2.
+    if phi < 1e-20:
+        alpha = 0.
+    elif np.abs(dpx) >= np.abs(dpy):
+        alpha = np.arctan(dpy/dpx)
+        if dpx<0: phi = -phi
+    else:
+        alpha = np.sign(dpy)*(np.pi/2-np.abs(np.arctan(dpx/dpy)))
+        if dpy<0: phi = -phi
+    
+    return alpha, phi
+
+
 def get_bb_names_xyz_points_sigma_matrices(mad, seq_name):
     mad.use(sequence=seq_name);
     mad.twiss()
@@ -207,8 +222,13 @@ for ee, eename in zip(line.elements, line.element_names):
     if isinstance(ee, pysixtrack.elements.BeamBeam6D):
         assert(eename==bb_names_b1[i_bb])
         
-        ee.phi = None #tbd
-        ee.alpha = None # tbd
+        dpx = bb_xyz_b1[i_bb].tpx - bb_xyz_b2[i_bb].tpx
+        dpy = bb_xyz_b1[i_bb].tpy - bb_xyz_b2[i_bb].tpy
+
+        alpha, phi = find_alpha_and_phi(dpx, dpy)
+        
+        ee.phi = phi
+        ee.alpha = alpha 
         ee.x_bb_co = sep_x[i_bb]
         ee.y_bb_co = sep_y[i_bb]
         ee.charge_slices = [0.0]
@@ -224,8 +244,6 @@ for ee, eename in zip(line.elements, line.element_names):
         ee.sigma_34 = bb_sigmas_b2[34][i_bb]  
         ee.sigma_44 = bb_sigmas_b2[44][i_bb]
 
-        if eename == 'bb_ho1b1_0':
-            prrrrr
         i_bb += 1
 
 import matplotlib.pyplot as plt
