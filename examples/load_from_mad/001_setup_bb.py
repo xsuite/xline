@@ -84,6 +84,7 @@ mad.call('mad/lhcwbb.seq')
 
 # Parameters to be cross-checked
 n_slices = 11
+bb_coupling = False
 
 # Disable beam-beam kicks 
 mad.globals.on_bb_charge = 0.
@@ -109,8 +110,11 @@ bb_names_b1, bb_xyz_b1, bb_sigmas_b1 = get_bb_names_xyz_points_sigma_matrices(
 bb_names_b2, bb_xyz_b2, bb_sigmas_b2 = get_bb_names_xyz_points_sigma_matrices(
         mad, seq_name='lhcb2')
 
-# Get bunch intensity
+# Get bunch paramenters
 bunch_intensity = mad.sequence.lhcb1.beam.npart
+gamma_r = mad.sequence.lhcb1.beam.gamma
+beta_r = np.sqrt(1-1./gamma_r**2)
+
 
 # Check naming convention
 assert len(bb_names_b1)==len(bb_names_b2)
@@ -181,6 +185,26 @@ for i_bb, name_bb in enumerate(bb_names_b1):
     sep_y.append(np.dot(vbb_12, ey))
 
     
+line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.lhcb1)
+
+i_bb = 0
+assert(bb_coupling==False)#Not implemented
+for ee, eename in zip(line.elements, line.element_names):
+    if isinstance(ee, pysixtrack.elements.BeamBeam4D):
+        assert(eename==bb_names_b1[i_bb])
+        
+        ee.charge = bunch_intensity
+        ee.sigma_x = np.sqrt(bb_sigmas_b1[11][i_bb]) 
+        ee.sigma_y = np.sqrt(bb_sigmas_b1[33][i_bb])
+        ee.beta_r = beta_r
+        ee.x_bb = sep_x[i_bb]
+        ee.y_bb = sep_y[i_bb]
+        i_bb += 1
+    if isinstance(ee, pysixtrack.elements.BeamBeam6D):
+        assert(eename==bb_names_b1[i_bb])
+   
+        prrrrr
+        i_bb += 1
 
 import matplotlib.pyplot as plt
 plt.close('all')
@@ -210,4 +234,3 @@ plt.quiver(np.array([pb.p[2] for pb in bb_xyz_b2]),
 plt.show()
 
 
-#line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.lhcb1)
