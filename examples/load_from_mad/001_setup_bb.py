@@ -1,5 +1,7 @@
 import numpy as np
 
+_sigma_names = [11,12,13,14,22,23,24,33,34,44] 
+
 class MadPoint(object):
     def __init__(self,name,mad, add_CO=True):
         self.name=name
@@ -39,7 +41,7 @@ class MadPoint(object):
         dd=self.p-other.p
         return np.dot(dd,self.ex),np.dot(dd,self.ey)
 
-def get_bb_names_and_xyz_points(mad, seq_name):
+def get_bb_names_xyz_points_sigma_matrices(mad, seq_name):
     mad.use(sequence=seq_name);
     mad.twiss()
     mad.survey()
@@ -48,13 +50,20 @@ def get_bb_names_and_xyz_points(mad, seq_name):
    
     bb_names = []
     bb_xyz_points = []
+    bb_sigmas = {kk:[] for kk in _sigma_names}
+    
     for ee in seq.elements:
         if ee.base_type.name == 'beambeam':
             eename = ee.name
             bb_names.append(eename)
             bb_xyz_points.append(MadPoint(eename+':1', mad))
-    
-    return bb_names, bb_xyz_points
+
+            i_twiss = np.where(mad.table.twiss.name==(eename+':1')[0][0]
+            
+            for sn in _sigma_names:
+                bb_sigmas[sn].append(getattr(mad.table.twiss, 'sig%d'%sn)[i_twiss]
+
+    return bb_names, bb_xyz_points, bb_sigmas
 
 def norm(v):
     return np.sqrt(np.sum(v**2))
@@ -71,6 +80,10 @@ mad.options.info=False;
 
 # Load sequence
 mad.call('mad/lhcwbb.seq')
+
+# Parameters to be cross-checked
+n_slices = 11
+
 
 # Disable beam-beam kicks 
 mad.globals.on_bb_charge = 0.
