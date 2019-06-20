@@ -10,6 +10,8 @@ class MadPoint(object):
         idx=np.where(survey.name==name)[0][0]
         self.tx=twiss.x[idx]
         self.ty=twiss.y[idx]
+        self.tpx=twiss.px[idx]
+        self.tpy=twiss.py[idx]
         self.sx=survey.x[idx]
         self.sy=survey.y[idx]
         self.sz=survey.z[idx]
@@ -37,6 +39,7 @@ class MadPoint(object):
 
     def dist(self,other):
         return np.sqrt(np.sum((self.p-other.p)**2))
+
     def distxy(self,other):
         dd=self.p-other.p
         return np.dot(dd,self.ex),np.dot(dd,self.ey)
@@ -220,7 +223,9 @@ for ee, eename in zip(line.elements, line.element_names):
         ee.sigma_33 = bb_sigmas_b2[33][i_bb]
         ee.sigma_34 = bb_sigmas_b2[34][i_bb]  
         ee.sigma_44 = bb_sigmas_b2[44][i_bb]
-        
+
+        if eename == 'bb_ho1b1_0':
+            prrrrr
         i_bb += 1
 
 import matplotlib.pyplot as plt
