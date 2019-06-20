@@ -85,9 +85,6 @@ mad.call('mad/lhcwbb.seq')
 # Parameters to be cross-checked
 n_slices = 11
 
-# Get bunch intensity
-#bunch_intensity = mad.sequence.lhcb1.beam.npart
-
 # Disable beam-beam kicks 
 mad.globals.on_bb_charge = 0.
 
@@ -112,10 +109,17 @@ bb_names_b1, bb_xyz_b1, bb_sigmas_b1 = get_bb_names_xyz_points_sigma_matrices(
 bb_names_b2, bb_xyz_b2, bb_sigmas_b2 = get_bb_names_xyz_points_sigma_matrices(
         mad, seq_name='lhcb2')
 
+# Get bunch intensity
+bunch_intensity = mad.sequence.lhcb1.beam.npart
+
 # Check naming convention
 assert len(bb_names_b1)==len(bb_names_b2)
 for nbb1, nbb2 in zip(bb_names_b1, bb_names_b2):
     assert(nbb1==nbb2.replace('b2_','b1_'))
+
+# Check number of slice
+assert(len(
+    [nn for nn in bb_names_b1 if nn.startswith('bb_ho.l1')])==(n_slices-1)/2)
 
 # Check that reference systems are parallel at the IPs
 for ip in ip_names:
@@ -182,27 +186,27 @@ import matplotlib.pyplot as plt
 plt.close('all')
 fig1 = plt.figure(1)
 
-plt.plot(           [pb.p[0] for pb in bb_xyz_b1],
-                    [pb.p[2] for pb in bb_xyz_b1], 'b.')
-plt.quiver(np.array([pb.p[0] for pb in bb_xyz_b1]),
-           np.array([pb.p[2] for pb in bb_xyz_b1]), 
-          np.array([pb.ex[0] for pb in bb_xyz_b1]),
-          np.array([pb.ex[2] for pb in bb_xyz_b1]))
-plt.quiver(np.array([pb.p[0] for pb in bb_xyz_b1]),
-           np.array([pb.p[2] for pb in bb_xyz_b1]), 
-          np.array([pb.ez[0] for pb in bb_xyz_b1]),
-          np.array([pb.ez[2] for pb in bb_xyz_b1]))
+plt.plot(           [pb.p[2] for pb in bb_xyz_b1],
+                    [pb.p[0] for pb in bb_xyz_b1], 'b.')
+plt.quiver(np.array([pb.p[2] for pb in bb_xyz_b1]),
+           np.array([pb.p[0] for pb in bb_xyz_b1]), 
+          np.array([pb.ex[2] for pb in bb_xyz_b1]),
+          np.array([pb.ex[0] for pb in bb_xyz_b1]))
+plt.quiver(np.array([pb.p[2] for pb in bb_xyz_b1]),
+           np.array([pb.p[0] for pb in bb_xyz_b1]), 
+          np.array([pb.ez[2] for pb in bb_xyz_b1]),
+          np.array([pb.ez[0] for pb in bb_xyz_b1]))
 
-plt.plot(           [pb.p[0] for pb in bb_xyz_b2],
-                    [pb.p[2] for pb in bb_xyz_b2], 'r.')
-plt.quiver(np.array([pb.p[0] for pb in bb_xyz_b2]),
-           np.array([pb.p[2] for pb in bb_xyz_b2]), 
-          np.array([pb.ex[0] for pb in bb_xyz_b2]),
-          np.array([pb.ex[2] for pb in bb_xyz_b2]))
-plt.quiver(np.array([pb.p[0] for pb in bb_xyz_b2]),
-           np.array([pb.p[2] for pb in bb_xyz_b2]), 
-          np.array([pb.ez[0] for pb in bb_xyz_b2]),
-          np.array([pb.ez[2] for pb in bb_xyz_b2]))
+plt.plot(           [pb.p[2] for pb in bb_xyz_b2],
+                    [pb.p[0] for pb in bb_xyz_b2], 'r.')
+plt.quiver(np.array([pb.p[2] for pb in bb_xyz_b2]),
+           np.array([pb.p[0] for pb in bb_xyz_b2]), 
+          np.array([pb.ex[2] for pb in bb_xyz_b2]),
+          np.array([pb.ex[0] for pb in bb_xyz_b2]))
+plt.quiver(np.array([pb.p[2] for pb in bb_xyz_b2]),
+           np.array([pb.p[0] for pb in bb_xyz_b2]), 
+          np.array([pb.ez[2] for pb in bb_xyz_b2]),
+          np.array([pb.ez[0] for pb in bb_xyz_b2]))
 plt.show()
 
 
