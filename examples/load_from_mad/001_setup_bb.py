@@ -199,11 +199,6 @@ for i_bb, name_bb in enumerate(bb_names_b1):
     sep_x.append(np.dot(vbb_12, pb1.ex))
     sep_y.append(np.dot(vbb_12, pb1.ey))
    
-    if name_bb == 'bb_par.l5b1_21':
-        prrrr
-
-
-
 line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.lhcb1)
 
 i_bb = 0

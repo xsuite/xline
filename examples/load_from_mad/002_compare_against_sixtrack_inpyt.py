@@ -18,6 +18,8 @@ bb_ele_six, bb_names_six = line_from_sixtrack.get_elements_of_type(
 
 assert(len(bb_ele_six) == len(bb_ele_mad) == len(bb_names_mad) == len(bb_names_six))
 
+
+
 for ee_mad, ee_six, nn_mad, nn_six in zip(bb_ele_mad, bb_ele_six, 
         bb_names_mad, bb_names_six):
     assert(nn_mad == nn_six)
@@ -26,9 +28,39 @@ for ee_mad, ee_six, nn_mad, nn_six in zip(bb_ele_mad, bb_ele_six,
     dsix = ee_six.to_dict(keepextra=True)
 
     for kk in dmad.keys():
-        check_rel = np.abs((dmad[kk] - dsix[kk])/dmad[kk]) < 1e-5
+        if dmad[kk] == dsix[kk]:
+            continue
+
+        try:
+            diff_rel = np.abs((dmad[kk] - dsix[kk])/dmad[kk])
+        except ZeroDivisionError:
+            diff_rel = 100.
+        check_rel = diff_rel < 1e-4
         if not check_rel:
+            diff_abs = np.abs(dmad[kk] - dsix[kk])
+            check_abs = diff_abs< 1e-12
             print(f"{nn_mad}[{kk}] - mad:{dmad[kk]} six:{dsix[kk]}")
-            prrrr
+
+            # Exceptions:
+            if kk == 'x_bb':
+                if diff_abs/dmad['sigma_x'] < 0.001:
+                    continue
+            if kk == 'y_bb':
+                if diff_abs/dmad['sigma_y'] < 0.001:
+                    continue
+            if kk=='alpha':
+                if diff_abs<10e-6:
+                    continue
+            if kk=='x_bb_co':
+                if diff_abs/np.sqrt(dmad['sigma_11']) < 0.001:
+                    continue
+            if kk=='y_bb_co':
+                if diff_abs/np.sqrt(dmad['sigma_33']) < 0.001:
+                    continue
+
+
+            
+            if not check_abs:
+                raise ValueError('Too large discrepancy!')
 
 
