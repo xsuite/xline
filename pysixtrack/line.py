@@ -101,6 +101,24 @@ class Line(Element):
         pcl.delta = res.x[5]
 
         return pcl
+    
+    def get_elements_of_type(self, types):
+        if not hasattr(types, '__iter__'):
+            type_list = [types]
+        else:
+            type_list = types
+
+        names = []
+        elements = []
+        for ee, nn in zip(self.elements, self.element_names):
+            for tt in type_list:
+                if isinstance(ee, tt):
+                    names.append(nn)
+                    elements.append(ee)
+
+        return elements, names
+
+
 
     def enable_beambeam(self):
 
