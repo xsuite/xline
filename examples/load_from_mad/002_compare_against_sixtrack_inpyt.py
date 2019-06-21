@@ -20,7 +20,7 @@ assert(len(bb_ele_six) == len(bb_ele_mad) == len(bb_names_mad) == len(bb_names_s
 for ee_mad, ee_six, nn_mad, nn_six in zip(bb_ele_mad, bb_ele_six, 
         bb_names_mad, bb_names_six):
     assert(nn_mad == nn_six)
-    if nn_mad == 'bb_par.r1b1_5':
+    if nn_mad == 'bb_par.r5b1_10':
         prrrrr
 
 

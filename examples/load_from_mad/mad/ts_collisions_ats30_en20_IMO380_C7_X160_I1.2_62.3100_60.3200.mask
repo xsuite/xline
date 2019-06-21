@@ -407,6 +407,9 @@ exec INSTALL_BB_LENS(b2);
 !Print the lenses in bb_lenses.dat
 exec, PRINT_BB_LENSES;
 
+!gianni
+save, sequence=lhcb1,lhcb2, beam=true, file=lhcwbb.seq;
+
 ON_BB_CHARGE := 0; !Switch off the charge the bb lenses
 
 /*
