@@ -61,6 +61,11 @@ class Line(Element):
             el.track(p)
         return out
 
+    def append_element(self, element, name):
+        self.elements.append(element)
+        self.element_names.append(name)
+        assert(len(self.elements) == len(self.element_names)) 
+
     def find_closed_orbit(self, p0c, guess=[0., 0., 0., 0., 0., 0.],
                           method='Nelder-Mead'):
 
@@ -114,14 +119,31 @@ class Line(Element):
         newline = Line(elements=[], element_names=[])
 
         for ee, nn in zip(self.elements, self.element_names):
-            
             if isinstance(ee, (elements.Drift, elements.DriftExact)):
                 if ee.length==0.:
                     continue
+            newline.append_element(ee, nn)
+        
+        return newline
 
-            newline.elements.append(ee)
-            newline.element_names.append(nn)
+    def merge_consecutive_drifts(self):
+        newline = Line(elements=[], element_names=[])
+        
+        for ee, nn in zip(self.elements, self.element_names):
+            if len(newline.elements) == 0:
+                newline.append_element(ee, nn)
+                continue
 
+            if isinstance(ee, (elements.Drift, elements.DriftExact)):
+                prev_ee = newline.elements[-1]
+                prev_nn = newline.element_names[-1]
+                if isinstance(prev_ee, (elements.Drift, elements.DriftExact)):
+                    prev_ee.length += ee.length
+                    prev_nn += nn
+                else:
+                    newline.append_element(ee, nn)
+            else:
+                newline.append_element(ee, nn)
         return newline
 
     def get_elements_of_type(self, types):
