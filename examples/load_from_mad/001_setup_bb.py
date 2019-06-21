@@ -220,14 +220,14 @@ for ee, eename in zip(line.elements, line.element_names):
         
         dpx = bb_xyz_b1[i_bb].tpx - bb_xyz_b2[i_bb].tpx
         dpy = bb_xyz_b1[i_bb].tpy - bb_xyz_b2[i_bb].tpy
-
+        
         alpha, phi = find_alpha_and_phi(dpx, dpy)
         
         ee.phi = phi
         ee.alpha = alpha 
         ee.x_bb_co = sep_x[i_bb]
         ee.y_bb_co = sep_y[i_bb]
-        ee.charge_slices = [0.0]
+        ee.charge_slices = [bunch_intensity/n_slices]
         ee.zeta_slices = [0.0]
         ee.sigma_11 = bb_sigmas_b2[11][i_bb] 
         ee.sigma_12 = bb_sigmas_b2[12][i_bb]
