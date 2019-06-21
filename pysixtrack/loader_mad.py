@@ -19,6 +19,7 @@ def _from_madx_sequence(line, sequence, classes=pyblep_elements,
         if pp > old_pp:
             line.elements.append(myDrift(length=(pp-old_pp)))
             line.element_names.append('drift_%d' % i_drift)
+            old_pp = pp
             i_drift += 1
 
         eename = ee.name

@@ -248,10 +248,10 @@ for ee, eename in zip(line.elements, line.element_names):
 
         i_bb += 1
 
-dct = line.to_dict(keepextra=True)
-#dct['elements'] = dct['elements'][:2]
+assert(np.abs(line.get_length()-mad.sequence.lhcb1.beam.circ)<1e-6)
+
 with open('line_from_mad.pkl', 'wb') as fid:
-    pickle.dump(dct, fid)
+    pickle.dump(line.to_dict(keepextra=True), fid)
 
 import matplotlib.pyplot as plt
 plt.close('all')

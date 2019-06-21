@@ -101,6 +101,15 @@ class Line(Element):
         pcl.delta = res.x[5]
 
         return pcl
+
+    def get_length(self):
+        thick_element_types = (elements.Drift, elements.DriftExact)
+
+        ll = 0
+        for ee in self.elements:
+            if isinstance(ee, thick_element_types):
+                ll+=ee.length
+        return ll
     
     def get_elements_of_type(self, types):
         if not hasattr(types, '__iter__'):
