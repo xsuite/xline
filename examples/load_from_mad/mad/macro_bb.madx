@@ -320,7 +320,7 @@ posx_labelNIRb1_nn  = table(twissb2,bbmk_labelNIRb2_nn,x)+x_su_labelNIR_nn;
 posy_labelNIRb1_nn  = table(twissb2,bbmk_labelNIRb2_nn,y);
 
 s_labelNIRb1_nn = table(twissb1_crab,bbmk_labelNIRb1_nn,s)-table(twissb1_crab,bbmk_hoNIRb1_0,s);
-sin_labelNIRb2_nn=sin(-2*s_labelNIRb1_nn*twopi*HRF400/LHCLENGTH)/anorm_crab;
+sin_labelNIRb2_nn=sin(2*s_labelNIRb1_nn*twopi*HRF400/LHCLENGTH)/anorm_crab;
 if (abs(s_labelNIRb1_nn)> b_h_dist*0.5) {sin_labelNIRb2_nn=0;};
 posx_labelNIRb1_crab_nn  = table(twissb2_crab,bbmk_labelNIRb2_nn,x)*sin_labelNIRb2_nn;
 posy_labelNIRb1_crab_nn  = table(twissb2_crab,bbmk_labelNIRb2_nn,y)*sin_labelNIRb2_nn;
@@ -332,7 +332,7 @@ posx_labelNIRb2_nn  = table(twissb1,bbmk_labelNIRb1_nn,x)-x_su_labelNIR_nn;
 posy_labelNIRb2_nn  = table(twissb1,bbmk_labelNIRb1_nn,y);
 
 s_labelNIRb2_nn = table(twissb2_crab,bbmk_labelNIRb2_nn,s)-table(twissb2_crab,bbmk_hoNIRb2_0,s);
-sin_labelNIRb1_nn=sin(-2*s_labelNIRb2_nn*twopi*HRF400/LHCLENGTH)/anorm_crab;
+sin_labelNIRb1_nn=sin(2*s_labelNIRb2_nn*twopi*HRF400/LHCLENGTH)/anorm_crab;
 if (abs(s_labelNIRb2_nn)> b_h_dist*0.5) {sin_labelNIRb1_nn=0;};
 posx_labelNIRb2_crab_nn  = table(twissb1_crab,bbmk_labelNIRb1_nn,x)*sin_labelNIRb1_nn;
 posy_labelNIRb2_crab_nn  = table(twissb1_crab,bbmk_labelNIRb1_nn,y)*sin_labelNIRb1_nn;
@@ -408,13 +408,14 @@ if (flag > 0.) {
   if ( oy_labelNIRb2_nn < 0 && oy_labelNIRb2_nn > -1e-7 ) { oy_labelNIRb2_nn = -1e-7; }
 
 !  print, TEXT="name nslices Sxx Syy hsep vsep ratio";
-  printf, TEXT="bb_labelnirb1_nn 0 %F %F %F %F 1", value= s2x_labelNIRb2_nn, s2y_labelNIRb2_nn, ox_labelNIRb2_nn, oy_labelNIRb2_nn;
+  printf, TEXT="bb_labelnirb1_nn 0 %F %F %F %F 1", value= s2x_labelNIRb2_nn, s2y_labelNIRb2_nn,-ox_labelNIRb2_nn,-oy_labelNIRb2_nn;
 !  printf, TEXT="%F %F %F %F %F %F", value = posx_labelNIRb2_nn, posx_labelNIRb2_crab_nn, posx_labelNIRb1_nn, posx_labelNIRb1_crab_nn, ox_labelNIRb2_nn, x_su_labelNIR_nn;
 }
 };
 
 PRINT_LENS6D(label,NIR,nn,flag) : macro = {
-  ox_labelNIRb2_nn = (posx_labelNIRb1_nn+posx_labelNIRb1_crab_nn-posx_labelNIRb2_nn-x_su_labelNIR_nn+1e-10)*1e3; 
+
+  ox_labelNIRb2_nn = (posx_labelNIRb1_nn+posx_labelNIRb1_crab_nn-posx_labelNIRb2_nn-x_su_labelNIR_nn+1e-10)*1e3;
   oy_labelNIRb2_nn = (posy_labelNIRb1_nn+posy_labelNIRb1_crab_nn-posy_labelNIRb2_nn+1e-10)*1e3;
 ! Avoid numerical instabilities in Sixtrack
   if ( ox_labelNIRb2_nn > 0 && ox_labelNIRb2_nn <  1e-7 ) { ox_labelNIRb2_nn =  1e-7; }
@@ -438,7 +439,7 @@ PRINT_LENS6D(label,NIR,nn,flag) : macro = {
   if (dlt_px == 0.) { xplane_labelNIR_nn = pi/2; }
   else { xplane_labelNIR_nn = atan((dlt_py)/(dlt_px)); }
 
-  printf, TEXT="bb_labelnirb1_nn 1 %F %F %F %F", value= xang_labelNIR_nn, xplane_labelNIR_nn, ox_labelNIRb2_nn, oy_labelNIRb2_nn;
+  printf, TEXT="bb_labelnirb1_nn 1 %F %F %F %F", value= xang_labelNIR_nn, xplane_labelNIR_nn, -ox_labelNIRb2_nn, -oy_labelNIRb2_nn;
   printf, TEXT="%F %F %F %F %F", value=
           table(twissb2,bbmk_labelNIRb2_nn,sig11)*1e6, 
           table(twissb2,bbmk_labelNIRb2_nn,sig12)*1e6, 
