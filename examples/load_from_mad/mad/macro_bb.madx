@@ -436,8 +436,20 @@ PRINT_LENS6D(label,NIR,nn,flag) : macro = {
   dlt_py=py_labelNIRb1_nn-py_labelNIRb2_nn;
 
   xang_labelNIR_nn=0.5*sqrt(dlt_px^2 + dlt_py^2);
-  if (dlt_px == 0.) { xplane_labelNIR_nn = pi/2; }
-  else { xplane_labelNIR_nn = atan((dlt_py)/(dlt_px)); }
+  if (xang_labelNIR_nn < 1e-20){alpha = 0.;}
+  else{
+    if(abs(dlt_px)>=abs(dlt_py)){
+      xplane_labelNIR_nn = atan((dlt_py)/(dlt_px));
+      if (dlt_px < 0){xang_labelNIR_nn = -xang_labelNIR_nn;}
+      }
+    else{
+      xplane_labelNIR_nn = abs(dlt_py)/dlt_py * (pi/2 - abs(atan((dlt_px)/(dlt_py))));
+      if (dlt_py < 0){xang_labelNIR_nn = -xang_labelNIR_nn;}
+      }
+  }
+
+  !if (dlt_px == 0.) { xplane_labelNIR_nn = pi/2; }
+  !else { xplane_labelNIR_nn = atan((dlt_py)/(dlt_px)); }
 
   printf, TEXT="bb_labelnirb1_nn 1 %F %F %F %F", value= xang_labelNIR_nn, xplane_labelNIR_nn, -ox_labelNIRb2_nn, -oy_labelNIRb2_nn;
   printf, TEXT="%F %F %F %F %F", value=
