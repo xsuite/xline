@@ -180,7 +180,7 @@ for i_bb, name_bb in enumerate(bb_names_b1):
         assert(norm(pb1.ex-pb2.ex)<1e-10) #1e-4 is a reasonable limit
         assert(norm(pb1.ey-pb2.ey)<1e-10) #1e-4 is a reasonable limit
         assert(norm(pb1.ez-pb2.ez)<1e-10) #1e-4 is a reasonable limit
-        ex, ey, ex = pb1.ex, pb1.ey, pb1.ez
+        ex, ey, ez = pb1.ex, pb1.ey, pb1.ez
     except AssertionError:
         print(name_bb, 'Reference systems are not parallel')
         # Check that there is separatio in the survey (we are in the D1)
@@ -202,7 +202,6 @@ for i_bb, name_bb in enumerate(bb_names_b1):
     # Find separations
     sep_x.append(np.dot(vbb_12, ex))
     sep_y.append(np.dot(vbb_12, ey))
-
     
 line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.lhcb1)
 
