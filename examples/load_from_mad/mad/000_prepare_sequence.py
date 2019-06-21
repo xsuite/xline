@@ -17,9 +17,11 @@ except FileExistsError:
 
 shutil.copy('fc.2', '../sixtrack/fort.2')
 
-with open('fc.3', 'r') as fid_fc3:
-    with open('fort_beginning.3', 'r') as fid_fort3:
-        with open('../sixtrack/fort.3', 'w') as fout:
-            fout.write(fid_fort3.read())
-            fout.write(fid_fc3.read())
-
+with open('../sixtrack/fort.3', 'w') as fout:
+    with open('fort_beginning.3', 'r') as fid_fort3b:
+        fout.write(fid_fort3b.read())
+    with open('fc.3', 'r') as fid_fc3:
+        fout.write(fid_fc3.read())
+    with open('fort_end.3', 'r') as fid_fort3e:
+        fout.write(fid_fort3e.read())
+ 
