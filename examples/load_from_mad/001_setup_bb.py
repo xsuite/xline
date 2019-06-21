@@ -180,19 +180,15 @@ for i_bb, name_bb in enumerate(bb_names_b1):
         assert(norm(pb1.ex-pb2.ex)<1e-10) #1e-4 is a reasonable limit
         assert(norm(pb1.ey-pb2.ey)<1e-10) #1e-4 is a reasonable limit
         assert(norm(pb1.ez-pb2.ez)<1e-10) #1e-4 is a reasonable limit
-        ex, ey, ez = pb1.ex, pb1.ey, pb1.ez
     except AssertionError:
         print(name_bb, 'Reference systems are not parallel')
-        # Check that there is separatio in the survey (we are in the D1)
-        assert(norm(pb1.sp - pb2.sp)>1e-3)
+        if np.sqrt(norm(pb1.ex-pb2.ex)**2\
+                 + norm(pb1.ey-pb2.ey)**2\
+                 + norm(pb1.ez-pb2.ez)**2) < 5e-3:
+            print('Smaller that 5e-3, tollerated.')
+        else:
+            raise ValueError('Too large! Stopping.')
         
-        # Go to baricentric reference
-        ex = (pb1.sp - pb2.sp)
-        ex = ex/norm(ex)
-        if np.dot(ex, pb1.ex)<0.: ex = -ex
-        ey = pb1.ey
-        ez = np.cross(ex, ey)
-
     # Check that there is no longitudinal separation
     try:
         assert(np.abs(np.dot(vbb_12, pb1.ez))<1e-4)
@@ -200,9 +196,14 @@ for i_bb, name_bb in enumerate(bb_names_b1):
         print(name_bb, 'The beams are longitudinally shifted')
 
     # Find separations
-    sep_x.append(np.dot(vbb_12, ex))
-    sep_y.append(np.dot(vbb_12, ey))
-    
+    sep_x.append(np.dot(vbb_12, pb1.ex))
+    sep_y.append(np.dot(vbb_12, pb1.ey))
+   
+    if name_bb == 'bb_par.l5b1_21':
+        prrrr
+
+
+
 line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.lhcb1)
 
 i_bb = 0
