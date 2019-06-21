@@ -1,4 +1,5 @@
 import pickle
+import numpy as np
 
 import pysixtrack
 import sixtracktools
@@ -20,9 +21,14 @@ assert(len(bb_ele_six) == len(bb_ele_mad) == len(bb_names_mad) == len(bb_names_s
 for ee_mad, ee_six, nn_mad, nn_six in zip(bb_ele_mad, bb_ele_six, 
         bb_names_mad, bb_names_six):
     assert(nn_mad == nn_six)
-    if nn_mad == 'bb_par.r5b1_10':
-        prrrrr
 
+    dmad = ee_mad.to_dict(keepextra=True)
+    dsix = ee_six.to_dict(keepextra=True)
 
+    for kk in dmad.keys():
+        check_rel = np.abs((dmad[kk] - dsix[kk])/dmad[kk]) < 1e-5
+        if not check_rel:
+            print(f"{nn_mad}[{kk}] - mad:{dmad[kk]} six:{dsix[kk]}")
+            prrrr
 
 
