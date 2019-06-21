@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 
 _sigma_names = [11,12,13,14,22,23,24,33,34,44] 
 
@@ -251,6 +252,11 @@ for ee, eename in zip(line.elements, line.element_names):
             ee.sigma_24 = 0.
 
         i_bb += 1
+
+dct = line.to_dict(keepextra=True)
+dct['elements'] = dct['elements'][:2]
+with open('line_from_mad.pkl', 'wb') as fid:
+    pickle.dump(dct, fid)
 
 import matplotlib.pyplot as plt
 plt.close('all')
