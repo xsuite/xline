@@ -35,7 +35,7 @@ for ee_mad, ee_six, nn_mad, nn_six in zip(bb_ele_mad, bb_ele_six,
             diff_rel = np.abs((dmad[kk] - dsix[kk])/dmad[kk])
         except ZeroDivisionError:
             diff_rel = 100.
-        check_rel = diff_rel < 1e-4
+        check_rel = diff_rel < 1e-5
         if not check_rel:
             diff_abs = np.abs(dmad[kk] - dsix[kk])
             check_abs = diff_abs< 1e-12
@@ -57,9 +57,11 @@ for ee_mad, ee_six, nn_mad, nn_six in zip(bb_ele_mad, bb_ele_six,
             if kk=='y_bb_co':
                 if diff_abs/np.sqrt(dmad['sigma_33']) < 0.001:
                     continue
+            if kk=='phi': #### FOR DEBUG, to be removed
+                diff_abs = np.abs(np.abs(dmad[kk]) - np.abs(dsix[kk]))
+                check_abs = diff_abs< 1e-10
 
-
-            
+            # general check
             if not check_abs:
                 raise ValueError('Too large discrepancy!')
 
