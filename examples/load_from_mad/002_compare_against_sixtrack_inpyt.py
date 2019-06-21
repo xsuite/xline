@@ -10,15 +10,14 @@ with open('line_from_mad.pkl', 'rb') as fid:
 sixinput = sixtracktools.sixinput.SixInput('sixtrack/')
 line_from_sixtrack, other = pysixtrack.Line.from_sixinput(sixinput)
 
+assert((line_from_mad.get_length() - line_from_sixtrack.get_length())<1e-6)
+
 bb_ele_mad, bb_names_mad = line_from_mad.get_elements_of_type(
         [pysixtrack.elements.BeamBeam4D, pysixtrack.elements.BeamBeam6D])
 bb_ele_six, bb_names_six = line_from_sixtrack.get_elements_of_type(
         [pysixtrack.elements.BeamBeam4D, pysixtrack.elements.BeamBeam6D])
 
-
 assert(len(bb_ele_six) == len(bb_ele_mad) == len(bb_names_mad) == len(bb_names_six))
-
-
 
 for ee_mad, ee_six, nn_mad, nn_six in zip(bb_ele_mad, bb_ele_six, 
         bb_names_mad, bb_names_six):

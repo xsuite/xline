@@ -31,7 +31,6 @@ class Line(Element):
         self.element_names=dct['element_names']
         return self
 
-
     def append_line(self, line):
         # Append the elements
         if type(line) is Line:
@@ -111,6 +110,20 @@ class Line(Element):
                 ll+=ee.length
         return ll
     
+    def remove_zero_length_drifts(self):
+        newline = Line(elements=[], element_names=[])
+
+        for ee, nn in zip(self.elements, self.element_names):
+            
+            if isinstance(ee, (elements.Drift, elements.DriftExact)):
+                if ee.length==0.:
+                    continue
+
+            newline.elements.append(ee)
+            newline.element_names.append(nn)
+
+        return newline
+
     def get_elements_of_type(self, types):
         if not hasattr(types, '__iter__'):
             type_list = [types]
