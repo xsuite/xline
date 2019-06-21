@@ -22,7 +22,7 @@ option,-echo,-info;
 !Call some macro facilities
 !call,file="db5/toolkit/macro.madx";
 
- mylhcbeam=1 ;! LHC beam 1 (clockwise)
+! mylhcbeam=1 ;! LHC beam 1 (clockwise)
 !mylhcbeam=2 ;! LHC beam 2 (clockwise)
 !mylhcbeam=4 ;! LHC beam 2 (counterclockwise)
 
@@ -97,7 +97,7 @@ I_MO=380;
 !General switch to select collision (0/1)
 ON_COLLISION:=1;
 !General switch to install bb lens (0/1)
-ON_BB_SWITCH:=1;
+!ON_BB_SWITCH:=1;
 !General switch to install wire
 ON_WIRE:=0;
 
@@ -406,6 +406,9 @@ exec INSTALL_BB_LENS(b2);
 
 !Print the lenses in bb_lenses.dat
 exec, PRINT_BB_LENSES;
+
+!gianni
+save, sequence=lhcb1,lhcb2, beam=true, file=lhcwbb.seq;
 
 ON_BB_CHARGE := 0; !Switch off the charge the bb lenses
 
@@ -955,5 +958,5 @@ if (not_a_mask==1){
 };
 
 ! Gianni: save sequences
-save, sequence=lhcb1,lhcb2, beam=true, file=lhcwbb.seq;
-stop;
+!save, sequence=lhcb1,lhcb2, beam=true, file=lhcwbb.seq;
+!stop;
