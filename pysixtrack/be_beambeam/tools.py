@@ -127,7 +127,7 @@ def setup_beam_beam_in_line(line, bb_names, bb_sigmas_strong,
             ee.charge = bunch_intensity_strong
             ee.sigma_x = np.sqrt(bb_sigmas_strong[11][i_bb]) 
             ee.sigma_y = np.sqrt(bb_sigmas_strong[33][i_bb])
-            ee.beta_r = beta_r
+            ee.beta_r = beta_r_strong
             ee.x_bb = sep_x[i_bb]
             ee.y_bb = sep_y[i_bb]
     
