@@ -21,7 +21,6 @@ mad.call('mad/lhcwbb.seq')
 
 # Parameters to be cross-checked
 n_slices = 11
-bb_coupling = False
 
 # Disable beam-beam kicks 
 mad.globals.on_bb_charge = 0.
@@ -68,7 +67,7 @@ shift_strong_beam_based_on_close_ip(
         IPs_survey_weak=IP_xyz_b1,
         IPs_survey_strong=IP_xyz_b2)
 
-line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.lhcb1)
+# line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.lhcb1)
 
 mad_ft = Madx()
 mad_ft.options.echo=False;
@@ -82,19 +81,20 @@ mad_ft.use('lhcb1')
 line_for_tracking, _ = pysixtrack.Line.from_madx_sequence(
         mad_ft.sequence['lhcb1'])
 
-setup_beam_beam_in_line(line, bb_names_b1,
+setup_beam_beam_in_line(line_for_tracking, bb_names_b1,
         bb_sigmas_strong=bb_sigmas_b2,
         bb_points_weak=bb_xyz_b1, bb_points_strong=bb_xyz_b2,
-        bunch_intensity=bunch_intensity, n_slices_6D=n_slices)
+        beta_r_strong = beta_r, bunch_intensity_strong=bunch_intensity, 
+        n_slices_6D=n_slices, bb_coupling=False)
 
-ready_bb_elems = line.get_elements_of_type(
-        (pysixtrack.elements.BeamBeam4D, 
-         pysixtrack.elements.BeamBeam6D))
-dct_ready_bb = {nn:ee for nn, ee in zip(ready_bb_elems[1], ready_bb_elems[0])}
-
-for ii, nn in enumerate(line_for_tracking.element_names):
-    if nn in dct_ready_bb.keys():
-        line_for_tracking.elements[ii] = dct_ready_bb[nn]
+# ready_bb_elems = line.get_elements_of_type(
+#         (pysixtrack.elements.BeamBeam4D, 
+#          pysixtrack.elements.BeamBeam6D))
+# dct_ready_bb = {nn:ee for nn, ee in zip(ready_bb_elems[1], ready_bb_elems[0])}
+# 
+# for ii, nn in enumerate(line_for_tracking.element_names):
+#     if nn in dct_ready_bb.keys():
+#         line_for_tracking.elements[ii] = dct_ready_bb[nn]
 
 assert(np.abs(line_for_tracking.get_length()\
         - mad.sequence.lhcb1.beam.circ)<1e-6)

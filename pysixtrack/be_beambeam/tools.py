@@ -1,5 +1,5 @@
 import numpy as np
-
+import pysixtrack
 from pysixtrack import MadPoint
 
 _sigma_names = [11,12,13,14,22,23,24,33,34,44] 
@@ -93,7 +93,7 @@ def find_bb_separations(points_weak, points_strong,names=None):
             print(name_bb, 'Reference systems are not parallel')
             if np.sqrt(norm(pbw.ex-pbs.ex)**2\
                      + norm(pbw.ey-pbs.ey)**2\
-                     + norm(pbw.ez-pbs.ez)**2) < 5e-3):
+                     + norm(pbw.ez-pbs.ez)**2) < 5e-3:
                 print('Smaller that 5e-3, tolerated.')
             else:
                 raise ValueError('Too large! Stopping.')
@@ -111,8 +111,8 @@ def find_bb_separations(points_weak, points_strong,names=None):
     return sep_x, sep_y
 
 def setup_beam_beam_in_line(line, bb_names, bb_sigmas_strong, 
-    bb_points_weak, bb_points_strong,
-    bunch_intensity, n_slices_6D):
+    bb_points_weak, bb_points_strong, beta_r_strong,
+    bunch_intensity_strong, n_slices_6D, bb_coupling):
 
     bb_sep_x, bb_sep_y = find_bb_separations(
         points_weak=bb_points_weak, points_strong=bb_points_strong,
@@ -122,21 +122,21 @@ def setup_beam_beam_in_line(line, bb_names, bb_sigmas_strong,
     assert(bb_coupling==False)#Not implemented
     for ee, eename in zip(line.elements, line.element_names):
         if isinstance(ee, pysixtrack.elements.BeamBeam4D):
-            assert(eename==bb_names_b1[i_bb])
+            assert(eename==bb_names[i_bb])
             
             ee.charge = bunch_intensity
-            ee.sigma_x = np.sqrt(bb_sigmas_b2[11][i_bb]) 
-            ee.sigma_y = np.sqrt(bb_sigmas_b2[33][i_bb])
+            ee.sigma_x = np.sqrt(bb_sigmas_strong[11][i_bb]) 
+            ee.sigma_y = np.sqrt(bb_sigmas_strong[33][i_bb])
             ee.beta_r = beta_r
             ee.x_bb = sep_x[i_bb]
             ee.y_bb = sep_y[i_bb]
     
             i_bb += 1
         if isinstance(ee, pysixtrack.elements.BeamBeam6D):
-            assert(eename==bb_names_b1[i_bb])
+            assert(eename==bb_names[i_bb])
             
-            dpx = bb_xyz_b1[i_bb].tpx - bb_xyz_b2[i_bb].tpx
-            dpy = bb_xyz_b1[i_bb].tpy - bb_xyz_b2[i_bb].tpy
+            dpx = bb_points_weak[i_bb].tpx - bb_points_strong[i_bb].tpx
+            dpy = bb_points_weak[i_bb].tpy - bb_points_strong[i_bb].tpy
             
             alpha, phi = find_alpha_and_phi(dpx, dpy)
             
@@ -146,16 +146,16 @@ def setup_beam_beam_in_line(line, bb_names, bb_sigmas_strong,
             ee.y_bb_co = sep_y[i_bb]
             ee.charge_slices = [bunch_intensity/n_slices]
             ee.zeta_slices = [0.0]
-            ee.sigma_11 = bb_sigmas_b2[11][i_bb] 
-            ee.sigma_12 = bb_sigmas_b2[12][i_bb]
-            ee.sigma_13 = bb_sigmas_b2[13][i_bb]
-            ee.sigma_14 = bb_sigmas_b2[14][i_bb] 
-            ee.sigma_22 = bb_sigmas_b2[22][i_bb]
-            ee.sigma_23 = bb_sigmas_b2[23][i_bb]
-            ee.sigma_24 = bb_sigmas_b2[24][i_bb]
-            ee.sigma_33 = bb_sigmas_b2[33][i_bb]
-            ee.sigma_34 = bb_sigmas_b2[34][i_bb]  
-            ee.sigma_44 = bb_sigmas_b2[44][i_bb]
+            ee.sigma_11 = bb_sigmas_strong[11][i_bb] 
+            ee.sigma_12 = bb_sigmas_strong[12][i_bb]
+            ee.sigma_13 = bb_sigmas_strong[13][i_bb]
+            ee.sigma_14 = bb_sigmas_strong[14][i_bb] 
+            ee.sigma_22 = bb_sigmas_strong[22][i_bb]
+            ee.sigma_23 = bb_sigmas_strong[23][i_bb]
+            ee.sigma_24 = bb_sigmas_strong[24][i_bb]
+            ee.sigma_33 = bb_sigmas_strong[33][i_bb]
+            ee.sigma_34 = bb_sigmas_strong[34][i_bb]  
+            ee.sigma_44 = bb_sigmas_strong[44][i_bb]
     
             if not(bb_coupling):
                 ee.sigma_13 = 0.
