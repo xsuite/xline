@@ -39,13 +39,13 @@ class Base(metaclass=_MetaElement):
             return self.__class__._base_fields
 
     def to_dict(self, keepextra=False):
-        out={kk: getattr(self, kk) for kk in self.get_fields(keepextra)}
-        out['__class__']=self.__class__.__name__
+        out = {kk: getattr(self, kk) for kk in self.get_fields(keepextra)}
+        out['__class__'] = self.__class__.__name__
         return out
 
     @classmethod
     def from_dict(cls, dct, keepextra=True):
-        self=cls()
+        self = cls()
         for kk in cls._base_fields:
             setattr(self, kk, dct[kk])
         if keepextra:

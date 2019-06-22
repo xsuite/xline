@@ -16,7 +16,7 @@ class Line(Element):
     _extra = []
 
     def __len__(self):
-        assert(len(self.elements)==len(self.element_names))
+        assert(len(self.elements) == len(self.element_names))
         return len(self.elements)
 
     def to_dict(self, keepextra=False):
@@ -26,13 +26,13 @@ class Line(Element):
         return out
 
     @classmethod
-    def from_dict(cls,dct,keepextra=True):
-        self=cls(elements=[], element_names=[])
+    def from_dict(cls, dct, keepextra=True):
+        self = cls(elements=[], element_names=[])
         for el in dct['elements']:
-            eltype=getattr(elements,el['__class__'])
-            newel=eltype.from_dict(el)
+            eltype = getattr(elements, el['__class__'])
+            newel = eltype.from_dict(el)
             self.elements.append(newel)
-        self.element_names=dct['element_names']
+        self.element_names = dct['element_names']
         return self
 
     def append_line(self, line):
@@ -68,7 +68,7 @@ class Line(Element):
     def append_element(self, element, name):
         self.elements.append(element)
         self.element_names.append(name)
-        assert(len(self.elements) == len(self.element_names)) 
+        assert(len(self.elements) == len(self.element_names))
 
     def get_length(self):
         thick_element_types = (elements.Drift, elements.DriftExact)
@@ -76,20 +76,22 @@ class Line(Element):
         ll = 0
         for ee in self.elements:
             if isinstance(ee, thick_element_types):
-                ll+=ee.length
+                ll += ee.length
         return ll
 
     def get_s_elements(self, mode='upstream'):
         thick_element_types = (elements.Drift, elements.DriftExact)
-        
+
         assert(mode in ['upstream', 'downstream'])
         s_prev = 0
         s = []
         for ee in self.elements:
-            if mode == 'upstream': s.append(s_prev)
+            if mode == 'upstream':
+                s.append(s_prev)
             if isinstance(ee, thick_element_types):
-                s_prev+=ee.length
-            if mode == 'downstream': s.append(s_prev)
+                s_prev += ee.length
+            if mode == 'downstream':
+                s.append(s_prev)
         return s
 
     def remove_inactive_multipoles(self, inplace=False):
@@ -98,7 +100,7 @@ class Line(Element):
         for ee, nn in zip(self.elements, self.element_names):
             if isinstance(ee, (elements.Multipole)):
                 aux = [ee.hxl, ee.hyl] + ee.knl + ee.ksl
-                if np.sum(np.abs(np.array(aux))) ==0.:
+                if np.sum(np.abs(np.array(aux))) == 0.:
                     continue
             newline.append_element(ee, nn)
 
@@ -109,13 +111,13 @@ class Line(Element):
             return self
         else:
             return newline
-    
+
     def remove_zero_length_drifts(self, inplace=False):
         newline = Line(elements=[], element_names=[])
 
         for ee, nn in zip(self.elements, self.element_names):
             if isinstance(ee, (elements.Drift, elements.DriftExact)):
-                if ee.length==0.:
+                if ee.length == 0.:
                     continue
             newline.append_element(ee, nn)
 
@@ -126,10 +128,10 @@ class Line(Element):
             return self
         else:
             return newline
-            
+
     def merge_consecutive_drifts(self, inplace=False):
         newline = Line(elements=[], element_names=[])
-        
+
         for ee, nn in zip(self.elements, self.element_names):
             if len(newline.elements) == 0:
                 newline.append_element(ee, nn)
@@ -145,7 +147,7 @@ class Line(Element):
                     newline.append_element(ee, nn)
             else:
                 newline.append_element(ee, nn)
- 
+
         if inplace:
             self.elements.clear()
             self.element_names.clear()
@@ -223,8 +225,8 @@ class Line(Element):
                 ee.enabled = False
 
     def beambeam_store_closed_orbit_and_dipolar_kicks(self, particle_on_CO,
-                    separation_given_wrt_closed_orbit_4D=True,
-                    separation_given_wrt_closed_orbit_6D=True):
+                                                      separation_given_wrt_closed_orbit_4D=True,
+                                                      separation_given_wrt_closed_orbit_6D=True):
 
         self.disable_beambeam()
         closed_orbit = self.track_elem_by_elem(particle_on_CO)
