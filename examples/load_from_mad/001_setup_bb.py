@@ -248,10 +248,25 @@ for ee, eename in zip(line.elements, line.element_names):
 
         i_bb += 1
 
-assert(np.abs(line.get_length()-mad.sequence.lhcb1.beam.circ)<1e-6)
+mad_ft = Madx()
+mad_ft.call('mad/lhcwbb_fortracking.seq')
+line_for_tracking, _ = pysixtrack.Line.from_madx_sequence(
+        mad_ft.sequence['lhcb1'])
+
+ready_bb_elems = line.get_elements_of_type(
+        (pysixtrack.elements.BeamBeam4D, 
+         pysixtrack.elements.BeamBeam6D))
+dct_ready_bb = {nn:ee for nn, ee in zip(ready_bb_elems[1], ready_bb_elems[0])}
+
+for ii, nn in enumerate(line_for_tracking.element_names):
+    if nn in dct_ready_bb.keys():
+        line_for_tracking.elements[ii] = dct_ready_bb[nn]
+
+assert(np.abs(line_for_tracking.get_length()\
+        - mad.sequence.lhcb1.beam.circ)<1e-6)
 
 with open('line_from_mad.pkl', 'wb') as fid:
-    pickle.dump(line.to_dict(keepextra=True), fid)
+    pickle.dump(line_for_tracking.to_dict(keepextra=True), fid)
 
 import matplotlib.pyplot as plt
 plt.close('all')
