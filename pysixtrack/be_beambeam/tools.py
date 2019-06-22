@@ -124,7 +124,7 @@ def setup_beam_beam_in_line(line, bb_names, bb_sigmas_strong,
         if isinstance(ee, pysixtrack.elements.BeamBeam4D):
             assert(eename==bb_names[i_bb])
             
-            ee.charge = bunch_intensity
+            ee.charge = bunch_intensity_strong
             ee.sigma_x = np.sqrt(bb_sigmas_strong[11][i_bb]) 
             ee.sigma_y = np.sqrt(bb_sigmas_strong[33][i_bb])
             ee.beta_r = beta_r
