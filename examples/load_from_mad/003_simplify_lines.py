@@ -4,22 +4,27 @@ import numpy as np
 import pysixtrack
 import sixtracktools
 
+# Load the two machines
 with open('line_from_mad.pkl', 'rb') as fid:
     lmad = pysixtrack.Line.from_dict(pickle.load(fid))
 
 sixinput = sixtracktools.sixinput.SixInput('sixtrack/')
 lsix, other = pysixtrack.Line.from_sixinput(sixinput)
 
-assert((lmad.get_length() - lsix.get_length())<1e-6)
+original_length = lmad.get_length()
+assert((lsix.get_length() - original_length)<1e-6)
 
+# Simplify the two machines
 for ll in (lmad, lsix):
     ll.remove_inactive_multipoles(inplace=True)
     ll.remove_zero_length_drifts(inplace=True)
     ll.merge_consecutive_drifts(inplace=True)
 
+# Check that the two machines are identical
 assert(len(lmad) == len(lsix))
 
-assert((lmad.get_length() - lsix.get_length())<1e-6)
+assert((lmad.get_length() - original_length)<1e-6)
+assert((lsix.get_length() - original_length)<1e-6)
 
 def norm(x):
     return np.sqrt(np.sum(np.array(x)**2))
@@ -88,4 +93,9 @@ for ii, (ee_mad, ee_six, nn_mad, nn_six) in enumerate(zip(
 
         # If it got here it means that no condition above is met
         raise ValueError('Too large discrepancy!')
+print("""
 
+******************************************************************
+ The line from mad seq. and the line from sixinput are identical!
+******************************************************************
+""")
