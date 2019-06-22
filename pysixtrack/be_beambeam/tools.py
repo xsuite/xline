@@ -114,7 +114,7 @@ def setup_beam_beam_in_line(line, bb_names, bb_sigmas_strong,
     bb_points_weak, bb_points_strong, beta_r_strong,
     bunch_intensity_strong, n_slices_6D, bb_coupling):
 
-    bb_sep_x, bb_sep_y = find_bb_separations(
+    sep_x, sep_y = find_bb_separations(
         points_weak=bb_points_weak, points_strong=bb_points_strong,
         names = bb_names) 
 
