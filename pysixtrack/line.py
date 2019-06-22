@@ -109,7 +109,6 @@ class Line(Element):
             return self
         else:
             return newline
- 
     
     def remove_zero_length_drifts(self, inplace=False):
         newline = Line(elements=[], element_names=[])
@@ -171,9 +170,6 @@ class Line(Element):
 
         return elements, names
 
-
-
-
     def find_closed_orbit(self, p0c, guess=[0., 0., 0., 0., 0., 0.],
                           method='Nelder-Mead'):
 
@@ -227,8 +223,8 @@ class Line(Element):
                 ee.enabled = False
 
     def beambeam_store_closed_orbit_and_dipolar_kicks(self, particle_on_CO,
-                                                      separation_given_wrt_closed_orbit_4D=True,
-                                                      separation_given_wrt_closed_orbit_6D=True):
+                    separation_given_wrt_closed_orbit_4D=True,
+                    separation_given_wrt_closed_orbit_6D=True):
 
         self.disable_beambeam()
         closed_orbit = self.track_elem_by_elem(particle_on_CO)
