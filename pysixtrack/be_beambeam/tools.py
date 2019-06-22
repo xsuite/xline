@@ -144,7 +144,7 @@ def setup_beam_beam_in_line(line, bb_names, bb_sigmas_strong,
             ee.alpha = alpha 
             ee.x_bb_co = sep_x[i_bb]
             ee.y_bb_co = sep_y[i_bb]
-            ee.charge_slices = [bunch_intensity/n_slices]
+            ee.charge_slices = [bunch_intensity_strong/n_slices]
             ee.zeta_slices = [0.0]
             ee.sigma_11 = bb_sigmas_strong[11][i_bb] 
             ee.sigma_12 = bb_sigmas_strong[12][i_bb]
