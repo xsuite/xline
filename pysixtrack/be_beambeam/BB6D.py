@@ -38,7 +38,7 @@ def BB6D_track(x, px, y, py, sigma, delta, q0, p0, bb6ddata):
     # Boost coordinates of the weak beam
     x_star, px_star, y_star, py_star, sigma_star, delta_star = boost.boost(
         x_subCO, px_subCO, y_subCO, py_subCO, sigma_subCO, delta_subCO, parboost)
-    #~ x_star, px_star, y_star, py_star, sigma_star, delta_star = (x, px, y, py, sigma, delta)
+    # ~ x_star, px_star, y_star, py_star, sigma_star, delta_star = (x, px, y, py, sigma, delta)
     for i_slice in range(N_slices):
         sigma_slice_star = sigma_slices_star[i_slice]
         x_slice_star = x_slices_star[i_slice]
