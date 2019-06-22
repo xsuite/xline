@@ -66,7 +66,7 @@ shift_strong_beam_based_on_close_ip(
         IPs_survey_strong=IP_xyz_b2)
 
 # Use another instance of cpymad to load sequence to be used from tracking 
-# (dispesion knowb ON, multipole error correctio, tunes, chromaticity)
+# (dispesion knowb ON, multipole error correction, tunes, chromaticity)
 mad_ft = Madx()
 mad_ft.options.echo=False;
 mad_ft.options.warn=False;
@@ -92,8 +92,8 @@ assert(np.abs(line_for_tracking.get_length()\
 # There is a problem in the mask 
 # (the RF frequancy is wrong in the machine for tracking
 # I patch it here -> to be fixed properly!!!!
-line_temp = pysixtrack.Line.from_madx_sequence(mad.sequence.lhcb1) 
-dct_correct_cavities = dict(zip(*line_tmp.get_elements_of_type(
+line_temp, _ = pysixtrack.Line.from_madx_sequence(mad.sequence.lhcb1) 
+dct_correct_cavities = dict(zip(*line_temp.get_elements_of_type(
     pysixtrack.elements.Cavity)[::-1]))
 for ii, nn in enumerate(line_for_tracking.element_names):
     if nn in dct_correct_cavities.keys():
