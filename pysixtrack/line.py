@@ -15,6 +15,10 @@ class Line(Element):
     ]
     _extra = []
 
+    def __len__(self):
+        assert(len(self.elements)==len(self.element_names))
+        return len(self.elements)
+
     def to_dict(self, keepextra=False):
         out = {}
         out['elements'] = [el.to_dict(keepextra) for el in self.elements]
@@ -114,8 +118,27 @@ class Line(Element):
             if isinstance(ee, thick_element_types):
                 ll+=ee.length
         return ll
+
+    def remove_inactive_multipoles(self, inplace=False):
+        newline = Line(elements=[], element_names=[])
+
+        for ee, nn in zip(self.elements, self.element_names):
+            if isinstance(ee, (elements.Multipole)):
+                aux = [ee.hxl, ee.hyl] + ee.knl + ee.ksl
+                if np.sum(np.abs(np.array(aux))) ==0.:
+                    continue
+            newline.append_element(ee, nn)
+
+        if inplace:
+            self.elements.clear()
+            self.element_names.clear()
+            self.append_line(newline)
+            return self
+        else:
+            return newline
+ 
     
-    def remove_zero_length_drifts(self):
+    def remove_zero_length_drifts(self, inplace=False):
         newline = Line(elements=[], element_names=[])
 
         for ee, nn in zip(self.elements, self.element_names):
@@ -123,10 +146,16 @@ class Line(Element):
                 if ee.length==0.:
                     continue
             newline.append_element(ee, nn)
-        
-        return newline
 
-    def merge_consecutive_drifts(self):
+        if inplace:
+            self.elements.clear()
+            self.element_names.clear()
+            self.append_line(newline)
+            return self
+        else:
+            return newline
+            
+    def merge_consecutive_drifts(self, inplace=False):
         newline = Line(elements=[], element_names=[])
         
         for ee, nn in zip(self.elements, self.element_names):
@@ -144,7 +173,14 @@ class Line(Element):
                     newline.append_element(ee, nn)
             else:
                 newline.append_element(ee, nn)
-        return newline
+ 
+        if inplace:
+            self.elements.clear()
+            self.element_names.clear()
+            self.append_line(newline)
+            return self
+        else:
+            return newline
 
     def get_elements_of_type(self, types):
         if not hasattr(types, '__iter__'):
