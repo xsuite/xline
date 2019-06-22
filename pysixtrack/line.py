@@ -70,46 +70,6 @@ class Line(Element):
         self.element_names.append(name)
         assert(len(self.elements) == len(self.element_names)) 
 
-    def find_closed_orbit(self, p0c, guess=[0., 0., 0., 0., 0., 0.],
-                          method='Nelder-Mead'):
-
-        def _one_turn_map(coord):
-            pcl = Particles(p0c=p0c)
-            pcl.x = coord[0]
-            pcl.px = coord[1]
-            pcl.y = coord[2]
-            pcl.py = coord[3]
-            pcl.zeta = coord[4]
-            pcl.delta = coord[5]
-
-            self.track(pcl)
-            coord_out = np.array(
-                [pcl.x, pcl.px, pcl.y, pcl.py, pcl.sigma, pcl.delta])
-
-            return coord_out
-
-        def _CO_error(coord):
-            return np.sum((_one_turn_map(coord) - coord)**2)
-
-        if method == 'get_guess':
-            res = type('', (), {})()
-            res.x = guess
-        else:
-            import scipy.optimize as so
-            res = so.minimize(_CO_error, np.array(
-                guess), tol=1e-20, method=method)
-
-        pcl = Particles(p0c=p0c)
-
-        pcl.x = res.x[0]
-        pcl.px = res.x[1]
-        pcl.y = res.x[2]
-        pcl.py = res.x[3]
-        pcl.zeta = res.x[4]
-        pcl.delta = res.x[5]
-
-        return pcl
-
     def get_length(self):
         thick_element_types = (elements.Drift, elements.DriftExact)
 
@@ -118,6 +78,19 @@ class Line(Element):
             if isinstance(ee, thick_element_types):
                 ll+=ee.length
         return ll
+
+    def get_s_elements(self, mode='upstream'):
+        thick_element_types = (elements.Drift, elements.DriftExact)
+        
+        assert(mode in ['upstream', 'downstream'])
+        s_prev = 0
+        s = []
+        for ee in self.elements:
+            if mode == 'upstream': s.append(s_prev)
+            if isinstance(ee, thick_element_types):
+                s_prev+=ee.length
+            if mode == 'downstream': s.append(s_prev)
+        return s
 
     def remove_inactive_multipoles(self, inplace=False):
         newline = Line(elements=[], element_names=[])
@@ -199,6 +172,47 @@ class Line(Element):
         return elements, names
 
 
+
+
+    def find_closed_orbit(self, p0c, guess=[0., 0., 0., 0., 0., 0.],
+                          method='Nelder-Mead'):
+
+        def _one_turn_map(coord):
+            pcl = Particles(p0c=p0c)
+            pcl.x = coord[0]
+            pcl.px = coord[1]
+            pcl.y = coord[2]
+            pcl.py = coord[3]
+            pcl.zeta = coord[4]
+            pcl.delta = coord[5]
+
+            self.track(pcl)
+            coord_out = np.array(
+                [pcl.x, pcl.px, pcl.y, pcl.py, pcl.sigma, pcl.delta])
+
+            return coord_out
+
+        def _CO_error(coord):
+            return np.sum((_one_turn_map(coord) - coord)**2)
+
+        if method == 'get_guess':
+            res = type('', (), {})()
+            res.x = guess
+        else:
+            import scipy.optimize as so
+            res = so.minimize(_CO_error, np.array(
+                guess), tol=1e-20, method=method)
+
+        pcl = Particles(p0c=p0c)
+
+        pcl.x = res.x[0]
+        pcl.px = res.x[1]
+        pcl.y = res.x[2]
+        pcl.py = res.x[3]
+        pcl.zeta = res.x[4]
+        pcl.delta = res.x[5]
+
+        return pcl
 
     def enable_beambeam(self):
 
