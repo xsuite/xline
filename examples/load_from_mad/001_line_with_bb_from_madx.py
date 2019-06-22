@@ -37,7 +37,7 @@ IP_xyz_b2 = {}
 for ip in ip_names:
     IP_xyz_b2[ip] = MadPoint('ip%d'%ip+':1', mad, add_CO=False)
 
-# Get locations of the bb encounted (absolute from survey), closed orbit
+# Get locations of the bb encounters (absolute from survey), closed orbit
 # and orientation of the local reference system (MadPoint objects)
 bb_names_b1, bb_xyz_b1, bb_sigmas_b1 = get_bb_names_madpoints_sigmas(
         mad, seq_name='lhcb1')
