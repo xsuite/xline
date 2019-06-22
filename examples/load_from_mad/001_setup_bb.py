@@ -269,6 +269,16 @@ for ii, nn in enumerate(line_for_tracking.element_names):
 assert(np.abs(line_for_tracking.get_length()\
         - mad.sequence.lhcb1.beam.circ)<1e-6)
 
+# There is a problem in the mask 
+# (the RF frequancy is wrong in the machine for tracking
+# I patch it here -> to be fixed properly!!!!
+dct_correct_cavities = dict(zip(*line.get_elements_of_type(
+    pysixtrack.elements.Cavity)[::-1]))
+for ii, nn in enumerate(line_for_tracking.element_names):
+    if nn in dct_correct_cavities.keys():
+        line_for_tracking.elements[ii].frequency = \
+                dct_correct_cavities[nn].frequency
+
 with open('line_from_mad.pkl', 'wb') as fid:
     pickle.dump(line_for_tracking.to_dict(keepextra=True), fid)
 
