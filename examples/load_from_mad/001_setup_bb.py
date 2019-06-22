@@ -258,9 +258,9 @@ ready_bb_elems = line.get_elements_of_type(
          pysixtrack.elements.BeamBeam6D))
 dct_ready_bb = {nn:ee for nn, ee in zip(ready_bb_elems[1], ready_bb_elems[0])}
 
-for ii, nn in enumerate(line_for_tracking.element_names):
-    if nn in dct_ready_bb.keys():
-        line_for_tracking.elements[ii] = dct_ready_bb[nn]
+# for ii, nn in enumerate(line_for_tracking.element_names):
+#     if nn in dct_ready_bb.keys():
+#         line_for_tracking.elements[ii] = dct_ready_bb[nn]
 
 assert(np.abs(line_for_tracking.get_length()\
         - mad.sequence.lhcb1.beam.circ)<1e-6)
