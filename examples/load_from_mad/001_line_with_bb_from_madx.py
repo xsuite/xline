@@ -15,7 +15,6 @@ ip_names = [1, 2, 5, 8]
 # Parameters to be cross-checked
 n_slices = 11
 
-
 # Use cpymad to compute the required beam parameters
 mad=Madx()
 mad.options.echo=False;
@@ -26,7 +25,6 @@ mad.call('mad/lhcwbb.seq')
 
 # Disable mad beam-beam kicks (we want unperturbed beams)
 mad.globals.on_bb_charge = 0.
-
 
 # Get IP locations from the survey
 mad.use('lhcb1'); mad.twiss(); mad.survey()
