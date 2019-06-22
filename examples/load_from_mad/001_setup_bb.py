@@ -2,13 +2,12 @@ import numpy as np
 import pickle
 
 from cpymad.madx import Madx
-
 import pysixtrack
 
 from pysixtrack.be_beambeam.tools import norm, find_alpha_and_phi
-from pysixtrack.be_beambeam.tools import get_bb_names_xyz_points_sigma_matrices
-from pysixtrack.be_beambeam.tools import shift_strong_beam_based_on_closest_ip 
-from pysixtrack.be_beambeam.tools import find_bb_separations 
+from pysixtrack.be_beambeam.tools import get_bb_names_madpoints_sigmas
+from pysixtrack.be_beambeam.tools import shift_strong_beam_based_on_close_ip 
+from pysixtrack.be_beambeam.tools import setup_beam_beam_in_line 
 from pysixtrack import MadPoint
 
 mad=Madx()
@@ -43,9 +42,9 @@ for ip in ip_names:
     IP_xyz_b2[ip] = MadPoint('ip%d'%ip+':1', mad, add_CO=False)
 
 # Beam-beam names and locations
-bb_names_b1, bb_xyz_b1, bb_sigmas_b1 = get_bb_names_xyz_points_sigma_matrices(
+bb_names_b1, bb_xyz_b1, bb_sigmas_b1 = get_bb_names_madpoints_sigmas(
         mad, seq_name='lhcb1')
-bb_names_b2, bb_xyz_b2, bb_sigmas_b2 = get_bb_names_xyz_points_sigma_matrices(
+bb_names_b2, bb_xyz_b2, bb_sigmas_b2 = get_bb_names_madpoints_sigmas(
         mad, seq_name='lhcb2')
 
 # Get bunch paramenters
@@ -63,7 +62,7 @@ for nbb1, nbb2 in zip(bb_names_b1, bb_names_b2):
 assert(len(
     [nn for nn in bb_names_b1 if nn.startswith('bb_ho.l1')])==(n_slices-1)/2)
 
-shift_strong_beam_based_on_closest_ip(
+shift_strong_beam_based_on_close_ip(
         points_weak=bb_xyz_b1, 
         points_strong=bb_xyz_b2,
         IPs_survey_weak=IP_xyz_b1,
@@ -72,6 +71,10 @@ shift_strong_beam_based_on_closest_ip(
 line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.lhcb1)
 
 mad_ft = Madx()
+mad_ft.options.echo=False;
+mad_ft.options.warn=False;
+mad_ft.options.info=False;
+
 mad_ft.call('mad/lhcwbb_fortracking.seq')
 # without this the sequence does not work properly
 mad_ft.use('lhcb1')
@@ -79,6 +82,10 @@ mad_ft.use('lhcb1')
 line_for_tracking, _ = pysixtrack.Line.from_madx_sequence(
         mad_ft.sequence['lhcb1'])
 
+setup_beam_beam_in_line(line, bb_names_b1,
+        bb_sigmas_strong=bb_sigmas_b2,
+        bb_points_weak=bb_xyz_b1, bb_points_strong=bb_xyz_b2,
+        bunch_intensity=bunch_intensity, n_slices_6D=n_slices)
 
 ready_bb_elems = line.get_elements_of_type(
         (pysixtrack.elements.BeamBeam4D, 

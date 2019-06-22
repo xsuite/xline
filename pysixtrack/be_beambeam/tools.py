@@ -22,7 +22,7 @@ def find_alpha_and_phi(dpx, dpy):
     return alpha, phi
 
 
-def get_bb_names_xyz_points_sigma_matrices(mad, seq_name):
+def get_bb_names_madpoints_sigmas(mad, seq_name):
     mad.use(sequence=seq_name);
     mad.twiss()
     mad.survey()
@@ -48,7 +48,7 @@ def get_bb_names_xyz_points_sigma_matrices(mad, seq_name):
     return bb_names, bb_xyz_points, bb_sigmas
 
 
-def shift_strong_beam_based_on_closest_ip(points_weak, points_strong,
+def shift_strong_beam_based_on_close_ip(points_weak, points_strong,
         IPs_survey_weak, IPs_survey_strong):
 
     for i_bb, _ in enumerate(points_weak):
@@ -91,9 +91,9 @@ def find_bb_separations(points_weak, points_strong,names=None):
             assert(norm(pbw.ez-pbs.ez)<1e-10) #1e-4 is a reasonable limit
         except AssertionError:
             print(name_bb, 'Reference systems are not parallel')
-            if np.sqrt(norm(pbw.ex-pbs.ex*2\
+            if np.sqrt(norm(pbw.ex-pbs.ex)**2\
                      + norm(pbw.ey-pbs.ey)**2\
-                     + norm(pbw.ez-pbs.ez)**2) < 5e-3:
+                     + norm(pbw.ez-pbs.ez)**2) < 5e-3):
                 print('Smaller that 5e-3, tolerated.')
             else:
                 raise ValueError('Too large! Stopping.')
@@ -115,8 +115,8 @@ def setup_beam_beam_in_line(line, bb_names, bb_sigmas_strong,
     bunch_intensity, n_slices_6D):
 
     bb_sep_x, bb_sep_y = find_bb_separations(
-        points_weak=bb_xyz_b1, points_strong=bb_xyz_b2,
-        names = bb_names_b1) 
+        points_weak=bb_points_weak, points_strong=bb_points_strong,
+        names = bb_names) 
 
     i_bb = 0
     assert(bb_coupling==False)#Not implemented
