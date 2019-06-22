@@ -185,7 +185,7 @@ for i_bb, name_bb in enumerate(bb_names_b1):
         if np.sqrt(norm(pb1.ex-pb2.ex)**2\
                  + norm(pb1.ey-pb2.ey)**2\
                  + norm(pb1.ez-pb2.ez)**2) < 5e-3:
-            print('Smaller that 5e-3, tollerated.')
+            print('Smaller that 5e-3, tolerated.')
         else:
             raise ValueError('Too large! Stopping.')
         

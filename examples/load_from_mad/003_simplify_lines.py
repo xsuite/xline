@@ -10,46 +10,73 @@ with open('line_from_mad.pkl', 'rb') as fid:
 sixinput = sixtracktools.sixinput.SixInput('sixtrack/')
 lsix, other = pysixtrack.Line.from_sixinput(sixinput)
 
-bucket_length = lmad.get_length()/35640
-lr_spacing = 5*bucket_length
+assert((lmad.get_length() - lsix.get_length())<1e-6)
+
+for ll in (lmad, lsix):
+    ll.remove_inactive_multipoles(inplace=True)
+    ll.remove_zero_length_drifts(inplace=True)
+    ll.merge_consecutive_drifts(inplace=True)
+
+assert(len(lmad) == len(lsix))
 
 assert((lmad.get_length() - lsix.get_length())<1e-6)
 
-i_bb = 21
-s_ip5_six = lsix.get_s_elements()[lsix.element_names.index('ip5')]
-s_bb_six = lsix.get_s_elements()[lsix.element_names.index('bb_par.l5b1_%d'%i_bb)]
-nsix = (s_bb_six-s_ip5_six)/lr_spacing 
-s_ip5_mad = lmad.get_s_elements()[lmad.element_names.index('ip5')]
-s_bb_mad = lmad.get_s_elements()[lmad.element_names.index('bb_par.l5b1_%d'%i_bb)]
-nmad = (s_bb_mad-s_ip5_mad)/lr_spacing 
+def norm(x):
+    return np.sqrt(np.sum(np.array(x)**2))
 
-print(f"nmad={nmad} six={nsix}")
+for ii, (ee_mad, ee_six, nn_mad, nn_six) in enumerate(zip(
+    lmad.elements, lsix.elements, lmad.element_names, lsix.element_names)):
+    assert(type(ee_mad) == type(ee_six))
 
-#import cpymad.madx
-#mad = cpymad.madx.Madx()
-#mad.call('mad/lhcwbb_fortracking.seq')
-#mad.use('lhcb1')# Without this the sequence is corrupted
-#testline, _ = pysixtrack.Line.from_madx_sequence(mad.sequence.lhcb1)
-#s_bb_test = testline.get_s_elements()[testline.element_names.index(
-#    'bb_par.l5b1_%d'%i_bb)]
-#print(s_bb_six, s_bb_test)
-#
-#mad.use('lhcb1'); mad.twiss()
-#mad_names = list(mad.table.twiss.name)
-#mad_s = list(mad.table.twiss.s)
-#
-#i_bb_tw = mad_names.index('bb_par.l5b1_%d:1'%i_bb)
-#s_bb_tw = mad_s[i_bb_tw]
-#
-#seq = mad.sequence.lhcb1
-#s_seq = list(seq.element_positions())
-#n_seq = list(seq.element_names())
-#s_bb_seq = s_seq[n_seq.index('bb_par.l5b1_%d'%i_bb)] 
+    dmad = ee_mad.to_dict(keepextra=True)
+    dsix = ee_six.to_dict(keepextra=True)
 
-# for ll in (lmad, lsix):
-#     ll.remove_inactive_multipoles(inplace=True)
-#     ll.remove_zero_length_drifts(inplace=True)
-#     ll.merge_consecutive_drifts(inplace=True)
-# 
-# for ii, (eem, ees) in enumerate(zip(lmad.elements, lsix.elements)):
-#     assert(type(eem) == type(ees))
+    for kk in dmad.keys():
+        
+        # Check if they are identical
+        if dmad[kk] == dsix[kk]:
+            continue
+        
+        # Check if the relative error is small
+        try:
+            diff_rel = norm(
+                    np.array(dmad[kk]) - np.array(dsix[kk]))/norm(dmad[kk])
+        except ZeroDivisionError:
+            diff_rel = 100.
+        if diff_rel < 3e-5: 
+            continue
+
+        # Check if absolute error is small
+        diff_abs = norm(np.array(dmad[kk]) - np.array(dsix[kk]))
+        print(f"{nn_mad}[{kk}] - mad:{dmad[kk]} six:{dsix[kk]}")
+        if diff_abs < 1e-12:
+            continue
+
+        # Exception: multipole lrad is not passes to sixtraxk
+        if isinstance(ee_mad, pysixtrack.elements.Multipole):
+            if kk == 'length':
+                continue
+
+
+            ## Exceptions:
+            #if kk == 'x_bb':
+            #    if diff_abs/dmad['sigma_x'] < 0.001:
+            #        continue
+            #if kk == 'y_bb':
+            #    if diff_abs/dmad['sigma_y'] < 0.001:
+            #        continue
+            #if kk=='alpha':
+            #    if diff_abs<10e-6:
+            #        continue
+            #if kk=='x_bb_co':
+            #    if diff_abs/np.sqrt(dmad['sigma_11']) < 0.001:
+            #        continue
+            #if kk=='y_bb_co':
+            #    if diff_abs/np.sqrt(dmad['sigma_33']) < 0.001:
+            #        continue
+
+            # general check
+    
+        # If it got here it means that no condition above is met
+        raise ValueError('Too large discrepancy!')
+
