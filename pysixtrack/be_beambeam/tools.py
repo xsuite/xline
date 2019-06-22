@@ -48,28 +48,121 @@ def get_bb_names_xyz_points_sigma_matrices(mad, seq_name):
     return bb_names, bb_xyz_points, bb_sigmas
 
 
-def shift_strong_beam_based_on_closest_ip(points_bw, points_bs,
-        IPs_survey_bw, IPs_survey_bs):
+def shift_strong_beam_based_on_closest_ip(points_weak, points_strong,
+        IPs_survey_weak, IPs_survey_strong):
 
-    for i_bb, _ in enumerate(points_bw):
+    for i_bb, _ in enumerate(points_weak):
         
-        pbw = points_bw[i_bb]
-        pbs = points_bs[i_bb]
+        pbw = points_weak[i_bb]
+        pbs = points_strong[i_bb]
         
         # Find closest IP
         d_ip = 1e6
         use_ip = 0
-        for ip in ip_names:
-            dd = norm(pbw.p - IP_xyz_bw[ip].p)
+        for ip in IPs_survey_weak.keys():
+            dd = norm(pbw.p - IPs_survey_weak[ip].p)
             if dd < d_ip:
                 use_ip = ip
                 d_ip = dd
     
         # Shift Bs
-        shift_ws = IP_survey_bs[use_ip].p - IP_survey_bw[use_ip].p
+        shift_ws = IPs_survey_strong[use_ip].p - IPs_survey_weak[use_ip].p
         pbs.p -= shift_ws
     
-           
- 
+def find_bb_separations(points_weak, points_strong,names=None):
+
+    if names is None:
+        names = ['bb_%d'%ii for ii in range(len(points_weak))]
+
+    sep_x = []
+    sep_y = []
+    for i_bb, name_bb in enumerate(names):
+        
+        pbw = points_weak[i_bb]
+        pbs = points_strong[i_bb]
+    
+        # Find vws
+        vbb_ws = points_strong[i_bb].p - points_weak[i_bb].p
+    
+        # Check that the two reference system are parallel
+        try:
+            assert(norm(pbw.ex-pbs.ex)<1e-10) #1e-4 is a reasonable limit
+            assert(norm(pbw.ey-pbs.ey)<1e-10) #1e-4 is a reasonable limit
+            assert(norm(pbw.ez-pbs.ez)<1e-10) #1e-4 is a reasonable limit
+        except AssertionError:
+            print(name_bb, 'Reference systems are not parallel')
+            if np.sqrt(norm(pbw.ex-pbs.ex*2\
+                     + norm(pbw.ey-pbs.ey)**2\
+                     + norm(pbw.ez-pbs.ez)**2) < 5e-3:
+                print('Smaller that 5e-3, tolerated.')
+            else:
+                raise ValueError('Too large! Stopping.')
+            
+        # Check that there is no longitudinal separation
+        try:
+            assert(np.abs(np.dot(vbb_ws, pbw.ez))<1e-4)
+        except AssertionError:
+            print(name_bb, 'The beams are longitudinally shifted')
+        
+        # Find separations
+        sep_x.append(np.dot(vbb_ws, pbw.ex))
+        sep_y.append(np.dot(vbb_ws, pbw.ey))
+   
+    return sep_x, sep_y
+
+def setup_beam_beam_in_line(line, bb_names, bb_sigmas_strong, 
+    bb_points_weak, bb_points_strong,
+    bunch_intensity, n_slices_6D):
+
+    bb_sep_x, bb_sep_y = find_bb_separations(
+        points_weak=bb_xyz_b1, points_strong=bb_xyz_b2,
+        names = bb_names_b1) 
+
+    i_bb = 0
+    assert(bb_coupling==False)#Not implemented
+    for ee, eename in zip(line.elements, line.element_names):
+        if isinstance(ee, pysixtrack.elements.BeamBeam4D):
+            assert(eename==bb_names_b1[i_bb])
+            
+            ee.charge = bunch_intensity
+            ee.sigma_x = np.sqrt(bb_sigmas_b2[11][i_bb]) 
+            ee.sigma_y = np.sqrt(bb_sigmas_b2[33][i_bb])
+            ee.beta_r = beta_r
+            ee.x_bb = sep_x[i_bb]
+            ee.y_bb = sep_y[i_bb]
+    
+            i_bb += 1
+        if isinstance(ee, pysixtrack.elements.BeamBeam6D):
+            assert(eename==bb_names_b1[i_bb])
+            
+            dpx = bb_xyz_b1[i_bb].tpx - bb_xyz_b2[i_bb].tpx
+            dpy = bb_xyz_b1[i_bb].tpy - bb_xyz_b2[i_bb].tpy
+            
+            alpha, phi = find_alpha_and_phi(dpx, dpy)
+            
+            ee.phi = phi
+            ee.alpha = alpha 
+            ee.x_bb_co = sep_x[i_bb]
+            ee.y_bb_co = sep_y[i_bb]
+            ee.charge_slices = [bunch_intensity/n_slices]
+            ee.zeta_slices = [0.0]
+            ee.sigma_11 = bb_sigmas_b2[11][i_bb] 
+            ee.sigma_12 = bb_sigmas_b2[12][i_bb]
+            ee.sigma_13 = bb_sigmas_b2[13][i_bb]
+            ee.sigma_14 = bb_sigmas_b2[14][i_bb] 
+            ee.sigma_22 = bb_sigmas_b2[22][i_bb]
+            ee.sigma_23 = bb_sigmas_b2[23][i_bb]
+            ee.sigma_24 = bb_sigmas_b2[24][i_bb]
+            ee.sigma_33 = bb_sigmas_b2[33][i_bb]
+            ee.sigma_34 = bb_sigmas_b2[34][i_bb]  
+            ee.sigma_44 = bb_sigmas_b2[44][i_bb]
+    
+            if not(bb_coupling):
+                ee.sigma_13 = 0.
+                ee.sigma_14 = 0.
+                ee.sigma_23 = 0.
+                ee.sigma_24 = 0.
+    
+            i_bb += 1
 
 

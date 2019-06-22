@@ -7,6 +7,8 @@ import pysixtrack
 
 from pysixtrack.be_beambeam.tools import norm, find_alpha_and_phi
 from pysixtrack.be_beambeam.tools import get_bb_names_xyz_points_sigma_matrices
+from pysixtrack.be_beambeam.tools import shift_strong_beam_based_on_closest_ip 
+from pysixtrack.be_beambeam.tools import find_bb_separations 
 from pysixtrack import MadPoint
 
 mad=Madx()
@@ -61,109 +63,13 @@ for nbb1, nbb2 in zip(bb_names_b1, bb_names_b2):
 assert(len(
     [nn for nn in bb_names_b1 if nn.startswith('bb_ho.l1')])==(n_slices-1)/2)
 
-# Check that reference systems are parallel at the IPs
-for ip in ip_names:
-    assert(1. - np.dot(IP_xyz_b1[ip].ex, IP_xyz_b2[ip].ex) <1e-12)
-    assert(1. - np.dot(IP_xyz_b1[ip].ey, IP_xyz_b2[ip].ey) <1e-12)
-    assert(1. - np.dot(IP_xyz_b1[ip].ez, IP_xyz_b2[ip].ez) <1e-12)
+shift_strong_beam_based_on_closest_ip(
+        points_weak=bb_xyz_b1, 
+        points_strong=bb_xyz_b2,
+        IPs_survey_weak=IP_xyz_b1,
+        IPs_survey_strong=IP_xyz_b2)
 
-# Shift B2 so that survey is head-on at the closest IP
-# and find vector separation
-sep_x = []
-sep_y = []
-for i_bb, name_bb in enumerate(bb_names_b1):
-    
-    pb1 = bb_xyz_b1[i_bb]
-    pb2 = bb_xyz_b2[i_bb]
-    
-    # Find closest IP
-    d_ip = 1e6
-    use_ip = 0
-    for ip in ip_names:
-        dd = norm(pb1.p - IP_xyz_b1[ip].p)
-        if dd < d_ip:
-            use_ip = ip
-            d_ip = dd
-
-    # Shift B2
-    shift_12 = IP_xyz_b2[use_ip].p - IP_xyz_b1[use_ip].p
-    pb2.p -= shift_12
-
-    # Find v12
-    vbb_12 = bb_xyz_b2[i_bb].p - bb_xyz_b1[i_bb].p
-
-    # Check that the two reference system are parallel
-    try:
-        assert(norm(pb1.ex-pb2.ex)<1e-10) #1e-4 is a reasonable limit
-        assert(norm(pb1.ey-pb2.ey)<1e-10) #1e-4 is a reasonable limit
-        assert(norm(pb1.ez-pb2.ez)<1e-10) #1e-4 is a reasonable limit
-    except AssertionError:
-        print(name_bb, 'Reference systems are not parallel')
-        if np.sqrt(norm(pb1.ex-pb2.ex)**2\
-                 + norm(pb1.ey-pb2.ey)**2\
-                 + norm(pb1.ez-pb2.ez)**2) < 5e-3:
-            print('Smaller that 5e-3, tolerated.')
-        else:
-            raise ValueError('Too large! Stopping.')
-        
-    # Check that there is no longitudinal separation
-    try:
-        assert(np.abs(np.dot(vbb_12, pb1.ez))<1e-4)
-    except AssertionError:
-        print(name_bb, 'The beams are longitudinally shifted')
-
-    # Find separations
-    sep_x.append(np.dot(vbb_12, pb1.ex))
-    sep_y.append(np.dot(vbb_12, pb1.ey))
-   
 line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.lhcb1)
-
-i_bb = 0
-assert(bb_coupling==False)#Not implemented
-for ee, eename in zip(line.elements, line.element_names):
-    if isinstance(ee, pysixtrack.elements.BeamBeam4D):
-        assert(eename==bb_names_b1[i_bb])
-        
-        ee.charge = bunch_intensity
-        ee.sigma_x = np.sqrt(bb_sigmas_b2[11][i_bb]) 
-        ee.sigma_y = np.sqrt(bb_sigmas_b2[33][i_bb])
-        ee.beta_r = beta_r
-        ee.x_bb = sep_x[i_bb]
-        ee.y_bb = sep_y[i_bb]
-
-        i_bb += 1
-    if isinstance(ee, pysixtrack.elements.BeamBeam6D):
-        assert(eename==bb_names_b1[i_bb])
-        
-        dpx = bb_xyz_b1[i_bb].tpx - bb_xyz_b2[i_bb].tpx
-        dpy = bb_xyz_b1[i_bb].tpy - bb_xyz_b2[i_bb].tpy
-        
-        alpha, phi = find_alpha_and_phi(dpx, dpy)
-        
-        ee.phi = phi
-        ee.alpha = alpha 
-        ee.x_bb_co = sep_x[i_bb]
-        ee.y_bb_co = sep_y[i_bb]
-        ee.charge_slices = [bunch_intensity/n_slices]
-        ee.zeta_slices = [0.0]
-        ee.sigma_11 = bb_sigmas_b2[11][i_bb] 
-        ee.sigma_12 = bb_sigmas_b2[12][i_bb]
-        ee.sigma_13 = bb_sigmas_b2[13][i_bb]
-        ee.sigma_14 = bb_sigmas_b2[14][i_bb] 
-        ee.sigma_22 = bb_sigmas_b2[22][i_bb]
-        ee.sigma_23 = bb_sigmas_b2[23][i_bb]
-        ee.sigma_24 = bb_sigmas_b2[24][i_bb]
-        ee.sigma_33 = bb_sigmas_b2[33][i_bb]
-        ee.sigma_34 = bb_sigmas_b2[34][i_bb]  
-        ee.sigma_44 = bb_sigmas_b2[44][i_bb]
-
-        if not(bb_coupling):
-            ee.sigma_13 = 0.
-            ee.sigma_14 = 0.
-            ee.sigma_23 = 0.
-            ee.sigma_24 = 0.
-
-        i_bb += 1
 
 mad_ft = Madx()
 mad_ft.call('mad/lhcwbb_fortracking.seq')
