@@ -16,9 +16,6 @@ def _from_madx_sequence(line, sequence, classes=pyblep_elements,
     old_pp = 0.
     i_drift = 0
     for ee, pp in zip(elements, ele_pos):
-        if ee.name == 'bb_par.l5b1_21':
-            print('Hello')
-
 
         if pp > old_pp:
             line.elements.append(myDrift(length=(pp-old_pp)))
