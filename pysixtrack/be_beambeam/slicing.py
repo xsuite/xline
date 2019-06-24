@@ -10,7 +10,7 @@ def constant_charge_slicing_gaussian(N_part_tot, sigmaz, N_slices):
 
         z_cuts = np.sqrt(2)*sigmaz*erfinv(2*Qi-1.)
 
-        #~ import pdb; pdb.set_trace()
+        # ~ import pdb; pdb.set_trace()
 
         z_centroids = []
         first_centroid = -sigmaz / \

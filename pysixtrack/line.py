@@ -15,6 +15,10 @@ class Line(Element):
     ]
     _extra = []
 
+    def __len__(self):
+        assert(len(self.elements) == len(self.element_names))
+        return len(self.elements)
+
     def to_dict(self, keepextra=False):
         out = {}
         out['elements'] = [el.to_dict(keepextra) for el in self.elements]
@@ -22,15 +26,14 @@ class Line(Element):
         return out
 
     @classmethod
-    def from_dict(cls,dct,keepextra=True):
-        self=cls(elements=[], element_names=[])
+    def from_dict(cls, dct, keepextra=True):
+        self = cls(elements=[], element_names=[])
         for el in dct['elements']:
-            eltype=getattr(elements,el['__class__'])
-            newel=eltype.from_dict(el)
+            eltype = getattr(elements, el['__class__'])
+            newel = eltype.from_dict(el)
             self.elements.append(newel)
-        self.element_names=dct['element_names']
+        self.element_names = dct['element_names']
         return self
-
 
     def append_line(self, line):
         # Append the elements
@@ -61,6 +64,113 @@ class Line(Element):
             out.append(p.copy())
             el.track(p)
         return out
+
+    def append_element(self, element, name):
+        self.elements.append(element)
+        self.element_names.append(name)
+        assert(len(self.elements) == len(self.element_names))
+
+    def get_length(self):
+        thick_element_types = (elements.Drift, elements.DriftExact)
+
+        ll = 0
+        for ee in self.elements:
+            if isinstance(ee, thick_element_types):
+                ll += ee.length
+        return ll
+
+    def get_s_elements(self, mode='upstream'):
+        thick_element_types = (elements.Drift, elements.DriftExact)
+
+        assert(mode in ['upstream', 'downstream'])
+        s_prev = 0
+        s = []
+        for ee in self.elements:
+            if mode == 'upstream':
+                s.append(s_prev)
+            if isinstance(ee, thick_element_types):
+                s_prev += ee.length
+            if mode == 'downstream':
+                s.append(s_prev)
+        return s
+
+    def remove_inactive_multipoles(self, inplace=False):
+        newline = Line(elements=[], element_names=[])
+
+        for ee, nn in zip(self.elements, self.element_names):
+            if isinstance(ee, (elements.Multipole)):
+                aux = [ee.hxl, ee.hyl] + ee.knl + ee.ksl
+                if np.sum(np.abs(np.array(aux))) == 0.:
+                    continue
+            newline.append_element(ee, nn)
+
+        if inplace:
+            self.elements.clear()
+            self.element_names.clear()
+            self.append_line(newline)
+            return self
+        else:
+            return newline
+
+    def remove_zero_length_drifts(self, inplace=False):
+        newline = Line(elements=[], element_names=[])
+
+        for ee, nn in zip(self.elements, self.element_names):
+            if isinstance(ee, (elements.Drift, elements.DriftExact)):
+                if ee.length == 0.:
+                    continue
+            newline.append_element(ee, nn)
+
+        if inplace:
+            self.elements.clear()
+            self.element_names.clear()
+            self.append_line(newline)
+            return self
+        else:
+            return newline
+
+    def merge_consecutive_drifts(self, inplace=False):
+        newline = Line(elements=[], element_names=[])
+
+        for ee, nn in zip(self.elements, self.element_names):
+            if len(newline.elements) == 0:
+                newline.append_element(ee, nn)
+                continue
+
+            if isinstance(ee, (elements.Drift, elements.DriftExact)):
+                prev_ee = newline.elements[-1]
+                prev_nn = newline.element_names[-1]
+                if isinstance(prev_ee, (elements.Drift, elements.DriftExact)):
+                    prev_ee.length += ee.length
+                    prev_nn += nn
+                else:
+                    newline.append_element(ee, nn)
+            else:
+                newline.append_element(ee, nn)
+
+        if inplace:
+            self.elements.clear()
+            self.element_names.clear()
+            self.append_line(newline)
+            return self
+        else:
+            return newline
+
+    def get_elements_of_type(self, types):
+        if not hasattr(types, '__iter__'):
+            type_list = [types]
+        else:
+            type_list = types
+
+        names = []
+        elements = []
+        for ee, nn in zip(self.elements, self.element_names):
+            for tt in type_list:
+                if isinstance(ee, tt):
+                    names.append(nn)
+                    elements.append(ee)
+
+        return elements, names
 
     def find_closed_orbit(self, p0c, guess=[0., 0., 0., 0., 0., 0.],
                           method='Nelder-Mead'):
@@ -101,24 +211,6 @@ class Line(Element):
         pcl.delta = res.x[5]
 
         return pcl
-    
-    def get_elements_of_type(self, types):
-        if not hasattr(types, '__iter__'):
-            type_list = [types]
-        else:
-            type_list = types
-
-        names = []
-        elements = []
-        for ee, nn in zip(self.elements, self.element_names):
-            for tt in type_list:
-                if isinstance(ee, tt):
-                    names.append(nn)
-                    elements.append(ee)
-
-        return elements, names
-
-
 
     def enable_beambeam(self):
 

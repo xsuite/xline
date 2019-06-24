@@ -1,8 +1,8 @@
 import numpy as np
 
 from .base_classes import Element
-from .beambeam import BeamBeam4D
-from .beambeam import BeamBeam6D
+from .be_beambeam.beambeam import BeamBeam4D
+from .be_beambeam.beambeam import BeamBeam6D
 
 _factorial = np.array([1,
                        1,

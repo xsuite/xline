@@ -958,5 +958,5 @@ if (not_a_mask==1){
 };
 
 ! Gianni: save sequences
-!save, sequence=lhcb1,lhcb2, beam=true, file=lhcwbb.seq;
+save, sequence=lhcb1, beam=true, file=lhcwbb_fortracking.seq;
 !stop;

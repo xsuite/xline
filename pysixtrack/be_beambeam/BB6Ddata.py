@@ -2,6 +2,7 @@ import numpy as np
 
 from . import boost
 
+
 class ParBoost(object):
     # it is practically a struct
     def __init__(self, phi, alpha):
