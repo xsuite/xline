@@ -117,9 +117,9 @@ def _from_madx_sequence(line, sequence, classes=pysixtrack_elements,
         line.elements.append(newele)
         line.element_names.append(eename)
 
-   if hasattr(seq,'length') and seq.length > old_pp:
-       line.elements.append(myDrift(length=(seq.length-old_pp)))
-       line.element_names.append('drift_%d' % i_drift)
+    if hasattr(seq, 'length') and seq.length > old_pp:
+        line.elements.append(myDrift(length=(seq.length-old_pp)))
+        line.element_names.append('drift_%d' % i_drift)
 
     other_info = {}
 
