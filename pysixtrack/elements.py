@@ -64,8 +64,8 @@ class DriftExact(Drift):
 class Multipole(Element):
     """ Multipole """
     _description = [
-        ('knl', 'm^-n', "Normalized integrated strength of normal components", 0),
-        ('ksl', 'm^-n', "Normalized integrated strength of skew components", 0),
+        ('knl', 'm^-n', "Normalized integrated strength of normal components", () ),
+        ('ksl', 'm^-n', "Normalized integrated strength of skew components", () ),
         ('hxl', 'rad', "Rotation angle of the reference trajectory in the horizzontal plane", 0),
         ('hyl', 'rad', "Rotation angle of the reference trajectory in the vertical plane", 0),
         ('length', 'm', "Length of the orginating thick multipole", 0),
@@ -169,3 +169,52 @@ class SRotation(Element):
         yn = -sz * p.px + cz * p.py
         p.px = xn
         p.py = yn
+
+
+class RFMultipole(Element):
+    _description = [
+        ('voltage', 'volt', 'Voltage', 0),
+        ('frequency', 'hertz', 'Frequency', 0),
+        ('knl', '', '...', () ),
+        ('ksl', '', '...', () ),
+        ('pn', '', '...', () ),
+        ('ps', '', '...', () ),
+    ]
+
+class BeamMonitor(Element):
+    _description = [
+        ('num_stores','','...',0),
+        ('start','','...',0),
+        ('skip','','...',1),
+        ('max_particle_id','','',0),
+        ('min_particle_id','','',0),
+        ('is_rolling','','',False),
+        ('is_turn_ordered','','',True),
+        ('data','','...',0)
+        ]
+    def offset(self, particle):
+        _offset = -1
+        nn = self.max_particle_id >= self.min_particle_id \
+            and (self.max_particle_id - self.min_particle_id + 1) or -1
+        assert(self.is_turn_ordered)
+
+        if particle.turn >= self.start and nn > 0 and \
+                particle.partid >= self.min_particle_id and \
+                particle.partid <= self.max_particle_id:
+            turns_since_start = particle.turns - self.start
+            store_index = turns_since_start // self.skip
+            if store_index < self.num_stores:
+                pass
+            elif self.is_rolling:
+                store_index = store_index % self.num_stores
+            else:
+                store_index = -1
+
+            if store_index >= 0:
+                _offset = store_index * nn + particle.partid
+
+        return _offset
+
+    def track(self, p):
+        self.data.append(p.copy)
+

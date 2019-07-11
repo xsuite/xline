@@ -192,8 +192,8 @@ class Particles(object):
 
     Px = property(lambda p: p.px * p.p0c * p.mratio)
     Py = property(lambda p: p.py * p.p0c * p.mratio)
-    Energy = property(lambda p: (p.ptau * p.p0c + p.energy0) * p.mratio)
-    Pc = property(lambda p: (p.delta * p.p0c + p.p0c) * p.mratio)
+    energy = property(lambda p: (p.ptau * p.p0c + p.energy0) * p.mratio)
+    pc = property(lambda p: (p.delta * p.p0c + p.p0c) * p.mratio)
     mass = property(lambda p: p.mass0 * p.mratio)
     beta = property(lambda p: (1 + p.delta) / (1 / p.beta0 + p.ptau))
     # rvv = property(lambda self: self.beta/self.beta0)
@@ -321,7 +321,7 @@ class Particles(object):
         self._chi = chi
 
     def _get_absolute(self):
-        return self.Px, self.Py, self.Pc, self.Energy
+        return self.Px, self.Py, self.pc, self.energy
 
     def _update_ref(self, mass0, beta0, gamma0, p0c, energy0):
         self._mass0 = mass0
@@ -330,14 +330,14 @@ class Particles(object):
         self._p0c = p0c
         self._energy0 = energy0
 
-    def _update_particles_from_absolute(self, Px, Py, Pc, Energy):
+    def _update_particles_from_absolute(self, Px, Py, pc, energy):
         if self._update_coordinates:
             mratio = self.mass / self.mass0
             norm = mratio*self.p0c
             self._mratio = mratio
             self._chi = self._qratio / mratio
-            self._ptau = Energy / norm - 1
-            self._delta = Pc / norm - 1
+            self._ptau = energy / norm - 1
+            self._delta = pc / norm - 1
             self.px = Px / norm
             self.py = Py / norm
 
