@@ -64,8 +64,8 @@ class DriftExact(Drift):
 class Multipole(Element):
     """ Multipole """
     _description = [
-        ('knl', 'm^-n', "Normalized integrated strength of normal components", () ),
-        ('ksl', 'm^-n', "Normalized integrated strength of skew components", () ),
+        ('knl', 'm^-n', "Normalized integrated strength of normal components", ()),
+        ('ksl', 'm^-n', "Normalized integrated strength of skew components", ()),
         ('hxl', 'rad', "Rotation angle of the reference trajectory in the horizzontal plane", 0),
         ('hyl', 'rad', "Rotation angle of the reference trajectory in the vertical plane", 0),
         ('length', 'm', "Length of the orginating thick multipole", 0),
@@ -175,23 +175,25 @@ class RFMultipole(Element):
     _description = [
         ('voltage', 'volt', 'Voltage', 0),
         ('frequency', 'hertz', 'Frequency', 0),
-        ('knl', '', '...', () ),
-        ('ksl', '', '...', () ),
-        ('pn', '', '...', () ),
-        ('ps', '', '...', () ),
+        ('knl', '', '...', ()),
+        ('ksl', '', '...', ()),
+        ('pn', '', '...', ()),
+        ('ps', '', '...', ()),
     ]
+
 
 class BeamMonitor(Element):
     _description = [
-        ('num_stores','','...',0),
-        ('start','','...',0),
-        ('skip','','...',1),
-        ('max_particle_id','','',0),
-        ('min_particle_id','','',0),
-        ('is_rolling','','',False),
-        ('is_turn_ordered','','',True),
-        ('data','','...',0)
-        ]
+        ('num_stores', '', '...', 0),
+        ('start', '', '...', 0),
+        ('skip', '', '...', 1),
+        ('max_particle_id', '', '', 0),
+        ('min_particle_id', '', '', 0),
+        ('is_rolling', '', '', False),
+        ('is_turn_ordered', '', '', True),
+        ('data', '', '...', 0)
+    ]
+
     def offset(self, particle):
         _offset = -1
         nn = self.max_particle_id >= self.min_particle_id \
@@ -217,4 +219,3 @@ class BeamMonitor(Element):
 
     def track(self, p):
         self.data.append(p.copy)
-

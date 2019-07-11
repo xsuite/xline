@@ -4,7 +4,7 @@ from . import base_classes
 from . import elements
 
 from .line import Line
-elements.Line=Line
+elements.Line = Line
 
 from .particles import Particles
 
