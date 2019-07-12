@@ -1,13 +1,16 @@
 # Read sixtrack input using sixtracktools
 import sixtracktools
-sixinput=sixtracktools.SixInput('sixtrack_input')
+
+sixinput = sixtracktools.SixInput("sixtrack_input")
 
 # Build a pysixtrack line from pyblep line
 import pysixtrack
+
 ps_line, other = pysixtrack.Line.from_sixinput(sixinput)
 
 # Build a pysixtracklib line from pyblep line
 import pysixtracklib
+
 pslib_line = pysixtracklib.Elements()
 pslib_line.append_line(ps_line)
 pslib_line.BeamMonitor(num_stores=1)
@@ -35,5 +38,5 @@ job.track(until_turn=1)
 job.collect()
 
 # Compare
-print('pysixtrack x: ', ps_part.x)
-print('sixtracklib x:',job.output.particles[0].x[0])
+print("pysixtrack x: ", ps_part.x)
+print("sixtracklib x:", job.output.particles[0].x[0])

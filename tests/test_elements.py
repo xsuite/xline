@@ -1,11 +1,12 @@
-from pysixtrack import *
+from pysixtrack import elements
 
 
-el = Drift()
-el = DriftExact()
-el = Multipole()
+el = elements.Drift()
+el = elements.DriftExact()
+el = elements.Multipole()
 assert el.order == 0
-el = XYShift()
-el = SRotation()
-el = Cavity()
-el = Line()
+el = elements.XYShift()
+el = elements.SRotation()
+el = elements.Cavity()
+el = elements.Line()
+el = elements.DipoleEdge()

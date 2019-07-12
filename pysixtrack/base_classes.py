@@ -1,37 +1,44 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+
+def _pro_default(default):
+    type_default = type(default)
+    if type_default in [list, dict]:
+        default = field(default_factory=type_default)
+    return type_default, default
 
 
 class _MetaElement(type):
     def __new__(cls, clsname, bases, dct):
-        description = dct.get('_description', [])
-        extra = dct.get('_extra', [])
-        dct['_base_fields'] = [dd[0] for dd in description]
-        dct['_extra_fields'] = [dd[0] for dd in extra]
-        dct['_fields'] = dct['_base_fields'] + dct['_extra_fields']
+        description = dct.get("_description", [])
+        extra = dct.get("_extra", [])
+        dct["_base_fields"] = [dd[0] for dd in description]
+        dct["_extra_fields"] = [dd[0] for dd in extra]
+        dct["_fields"] = dct["_base_fields"] + dct["_extra_fields"]
         ann = {}
-        dct['__annotations__'] = ann
-        for dd in description:
-            ann[dd[0]] = type(dd[3])
-            dct[dd[0]] = dd[3]
-        for dd in extra:
-            ann[dd[0]] = type(dd[3])
-            dct[dd[0]] = dd[3]
+        dct["__annotations__"] = ann
+        for name, unit, desc, default in description:
+            ann[name], dct[name] = _pro_default(default)
+        for name, unit, desc, default in extra:
+            ann[name], dct[name] = _pro_default(default)
         try:
-            doc = [dct['__doc__'], '\nFields:\n']
+            doc = [dct["__doc__"], "\nFields:\n"]
         except KeyError:
-            doc = ['\nFields:\n']
-        fields = [f"{field:10} [{unit+']:':5} {desc} " for field,
-                  unit, desc, default in description]
-        fields += [f"{field:10} [{unit+']:':5} {desc} " for field,
-                   unit, desc, default in extra]
+            doc = ["\nFields:\n"]
+        fields = [
+            f"{name:10} [{unit+']:':5} {desc} "
+            for name, unit, desc, default in description
+        ]
+        fields += [
+            f"{name:10} [{unit+']:':5} {desc} " for name, unit, desc, default in extra
+        ]
         doc += fields
-        dct['__doc__'] = "\n".join(doc)
+        dct["__doc__"] = "\n".join(doc)
         newclass = super(_MetaElement, cls).__new__(cls, clsname, bases, dct)
         return dataclass(newclass)
 
 
 class Base(metaclass=_MetaElement):
-
     def get_fields(self, keepextra=False):
         if keepextra:
             return self.__class__._fields
@@ -40,7 +47,7 @@ class Base(metaclass=_MetaElement):
 
     def to_dict(self, keepextra=False):
         out = {kk: getattr(self, kk) for kk in self.get_fields(keepextra)}
-        out['__class__'] = self.__class__.__name__
+        out["__class__"] = self.__class__.__name__
         return out
 
     @classmethod
