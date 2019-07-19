@@ -10,29 +10,29 @@ from .loader_mad import _from_madx_sequence
 
 class Line(Element):
     _description = [
-        ('elements', '', 'List of elements', ()),
-        ('element_names', '', 'List of element names', ())
+        ("elements", "", "List of elements", ()),
+        ("element_names", "", "List of element names", ()),
     ]
     _extra = []
 
     def __len__(self):
-        assert(len(self.elements) == len(self.element_names))
+        assert len(self.elements) == len(self.element_names)
         return len(self.elements)
 
     def to_dict(self, keepextra=False):
         out = {}
-        out['elements'] = [el.to_dict(keepextra) for el in self.elements]
-        out['element_names'] = self.element_names[:]
+        out["elements"] = [el.to_dict(keepextra) for el in self.elements]
+        out["element_names"] = self.element_names[:]
         return out
 
     @classmethod
     def from_dict(cls, dct, keepextra=True):
         self = cls(elements=[], element_names=[])
-        for el in dct['elements']:
-            eltype = getattr(elements, el['__class__'])
+        for el in dct["elements"]:
+            eltype = getattr(elements, el["__class__"])
             newel = eltype.from_dict(el)
             self.elements.append(newel)
-        self.element_names = dct['element_names']
+        self.element_names = dct["element_names"]
         return self
 
     def append_line(self, line):
@@ -44,13 +44,13 @@ class Line(Element):
             # got a different type of line (e.g. pybplep)
             for ee in line.elements:
                 type_name = ee.__class__.__name__
-                newele = element_types[type_name](**ee._asdict())
+                newele = getattr(elements, type_name)(**ee._asdict())
                 self.elements.append(newele)
 
         # Append the names
         self.element_names += line.element_names
 
-        assert(len(self.elements) == len(self.element_names))
+        assert len(self.elements) == len(self.element_names)
 
         return self
 
@@ -68,7 +68,7 @@ class Line(Element):
     def append_element(self, element, name):
         self.elements.append(element)
         self.element_names.append(name)
-        assert(len(self.elements) == len(self.element_names))
+        assert len(self.elements) == len(self.element_names)
 
     def get_length(self):
         thick_element_types = (elements.Drift, elements.DriftExact)
@@ -79,18 +79,18 @@ class Line(Element):
                 ll += ee.length
         return ll
 
-    def get_s_elements(self, mode='upstream'):
+    def get_s_elements(self, mode="upstream"):
         thick_element_types = (elements.Drift, elements.DriftExact)
 
-        assert(mode in ['upstream', 'downstream'])
+        assert mode in ["upstream", "downstream"]
         s_prev = 0
         s = []
         for ee in self.elements:
-            if mode == 'upstream':
+            if mode == "upstream":
                 s.append(s_prev)
             if isinstance(ee, thick_element_types):
                 s_prev += ee.length
-            if mode == 'downstream':
+            if mode == "downstream":
                 s.append(s_prev)
         return s
 
@@ -100,7 +100,7 @@ class Line(Element):
         for ee, nn in zip(self.elements, self.element_names):
             if isinstance(ee, (elements.Multipole)):
                 aux = [ee.hxl, ee.hyl] + ee.knl + ee.ksl
-                if np.sum(np.abs(np.array(aux))) == 0.:
+                if np.sum(np.abs(np.array(aux))) == 0.0:
                     continue
             newline.append_element(ee, nn)
 
@@ -117,7 +117,7 @@ class Line(Element):
 
         for ee, nn in zip(self.elements, self.element_names):
             if isinstance(ee, (elements.Drift, elements.DriftExact)):
-                if ee.length == 0.:
+                if ee.length == 0.0:
                     continue
             newline.append_element(ee, nn)
 
@@ -157,7 +157,7 @@ class Line(Element):
             return newline
 
     def get_elements_of_type(self, types):
-        if not hasattr(types, '__iter__'):
+        if not hasattr(types, "__iter__"):
             type_list = [types]
         else:
             type_list = types
@@ -172,9 +172,9 @@ class Line(Element):
 
         return elements, names
 
-    def find_closed_orbit(self, p0c, guess=[0., 0., 0., 0., 0., 0.],
-                          method='Nelder-Mead'):
-
+    def find_closed_orbit(
+        self, p0c, guess=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], method="Nelder-Mead"
+    ):
         def _one_turn_map(coord):
             pcl = Particles(p0c=p0c)
             pcl.x = coord[0]
@@ -185,21 +185,20 @@ class Line(Element):
             pcl.delta = coord[5]
 
             self.track(pcl)
-            coord_out = np.array(
-                [pcl.x, pcl.px, pcl.y, pcl.py, pcl.sigma, pcl.delta])
+            coord_out = np.array([pcl.x, pcl.px, pcl.y, pcl.py, pcl.sigma, pcl.delta])
 
             return coord_out
 
         def _CO_error(coord):
-            return np.sum((_one_turn_map(coord) - coord)**2)
+            return np.sum((_one_turn_map(coord) - coord) ** 2)
 
-        if method == 'get_guess':
-            res = type('', (), {})()
+        if method == "get_guess":
+            res = type("", (), {})()
             res.x = guess
         else:
             import scipy.optimize as so
-            res = so.minimize(_CO_error, np.array(
-                guess), tol=1e-20, method=method)
+
+            res = so.minimize(_CO_error, np.array(guess), tol=1e-20, method=method)
 
         pcl = Particles(p0c=p0c)
 
@@ -224,9 +223,12 @@ class Line(Element):
             if isinstance(ee, (elements.BeamBeam4D, elements.BeamBeam6D)):
                 ee.enabled = False
 
-    def beambeam_store_closed_orbit_and_dipolar_kicks(self, particle_on_CO,
-                                                      separation_given_wrt_closed_orbit_4D=True,
-                                                      separation_given_wrt_closed_orbit_6D=True):
+    def beambeam_store_closed_orbit_and_dipolar_kicks(
+        self,
+        particle_on_CO,
+        separation_given_wrt_closed_orbit_4D=True,
+        separation_given_wrt_closed_orbit_6D=True,
+    ):
 
         self.disable_beambeam()
         closed_orbit = self.track_elem_by_elem(particle_on_CO)
@@ -236,7 +238,7 @@ class Line(Element):
         for ie, ee in enumerate(self.elements):
             # to transfer to beambeam.py
 
-            if ee.__class__.__name__ == 'BeamBeam4D':
+            if ee.__class__.__name__ == "BeamBeam4D":
                 if separation_given_wrt_closed_orbit_4D:
                     ee.x_bb += closed_orbit[ie].x
                     ee.y_bb += closed_orbit[ie].y
@@ -250,9 +252,9 @@ class Line(Element):
                 ee.d_px = ptemp.px - ptempin.px
                 ee.d_py = ptemp.py - ptempin.py
 
-            elif ee.__class__.__name__ == 'BeamBeam6D':
+            elif ee.__class__.__name__ == "BeamBeam6D":
                 if not separation_given_wrt_closed_orbit_6D:
-                    raise ValueError('Not implemented!')
+                    raise ValueError("Not implemented!")
 
                 # Store closed orbit
                 ee.x_co = closed_orbit[ie].x
@@ -286,18 +288,18 @@ class Line(Element):
 
         line = cls(elements=elements, element_names=ele_names)
 
-        other_info['rest'] = rest
-        other_info['iconv'] = iconv
+        other_info["rest"] = rest
+        other_info["iconv"] = iconv
 
         return line, other_info
 
     @classmethod
-    def from_madx_sequence(cls,
-                           sequence,
-                           classes=elements,
-                           ignored_madtypes=[],
-                           exact_drift=False):
+    def from_madx_sequence(
+        cls, sequence, classes=elements, ignored_madtypes=[], exact_drift=False
+    ):
 
         line = cls(elements=[], element_names=[])
 
-        return _from_madx_sequence(line, sequence, classes, ignored_madtypes, exact_drift)
+        return _from_madx_sequence(
+            line, sequence, classes, ignored_madtypes, exact_drift
+        )

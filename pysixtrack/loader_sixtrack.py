@@ -9,14 +9,14 @@ pi = np.pi
 
 
 def bn_mad(bn_mad, n, sign):
-    return sign*bn_mad*factorial(n-1)
+    return sign * bn_mad * factorial(n - 1)
 
 
 def bn_rel(bn16, bn3, r0, d0, sign):
     out = []
     for nn, (a, b) in enumerate(zip(bn16, bn3)):
-        n = nn+1
-        sixval = d0*a*b*r0**(1-n)*10**(3*n-6)
+        n = nn + 1
+        sixval = d0 * a * b * r0 ** (1 - n) * 10 ** (3 * n - 6)
         out.append(bn_mad(sixval, n, sign))
     return out
 
@@ -33,14 +33,13 @@ def _expand_struct(sixinput, convert=elements):
     Cavity = convert.Cavity
     XYShift = convert.XYShift
     SRotation = convert.SRotation
-    #Line = convert.Line
+    # Line = convert.Line
     BeamBeam4D = convert.BeamBeam4D
     BeamBeam6D = convert.BeamBeam6D
     exclude = False
     # add special elenents
-    if 'CAV' in sixinput.iter_struct():
-        sixinput.single['CAV'] = [
-            12*sixinput.ition, sixinput.u0, sixinput.harm, 0]
+    if "CAV" in sixinput.iter_struct():
+        sixinput.single["CAV"] = [12 * sixinput.ition, sixinput.u0, sixinput.harm, 0]
     for nnn in sixinput.iter_struct():
         exclude = False
         ccc = count.setdefault(nnn, 0)
@@ -52,17 +51,17 @@ def _expand_struct(sixinput, convert=elements):
         elem = None
         if nnn in sixinput.align:
             dx, dy, tilt = sixinput.align[nnn][ccc]
-            tilt = tilt*180e-3/pi
+            tilt = tilt * 180e-3 / pi
             dx *= 1e-3
             dy *= 1e-3
-            hasshift = abs(dx)+abs(dy) > 0
+            hasshift = abs(dx) + abs(dy) > 0
             hastilt = abs(tilt) > 0
             if hasshift:
-                names.append(nnn+'_preshift')
+                names.append(nnn + "_preshift")
                 elems.append(XYShift(dx=dx, dy=dy))
                 icount += 1
             if hastilt:
-                names.append(nnn+'_pretilt')
+                names.append(nnn + "_pretilt")
                 elems.append(SRotation(angle=tilt))
                 icount += 1
         if etype in [0, 25]:
@@ -72,10 +71,10 @@ def _expand_struct(sixinput, convert=elements):
         elif abs(etype) in [1, 2, 3, 4, 5, 7, 8, 9, 10]:
             bn_six = d1
             nn = abs(etype)
-            sign = -etype/nn
+            sign = -etype / nn
             madval = bn_mad(bn_six, nn, sign)
-            knl = [0]*(nn-1)+[madval]
-            ksl = [0]*nn
+            knl = [0] * (nn - 1) + [madval]
+            ksl = [0] * nn
             if sign == 1:
                 knl, ksl = ksl, knl
             elem = Multipole(knl=knl, ksl=ksl, hxl=0, hyl=0, length=0)
@@ -99,10 +98,10 @@ def _expand_struct(sixinput, convert=elements):
             # e0=sixinput.initialconditions[-1]
             # p0c=np.sqrt(e0**2-sixinput.pma**2)
             # beta0=p0c/e0
-            v = d1*1e6
-            freq = d2*clight/sixinput.tlen
+            v = d1 * 1e6
+            freq = d2 * clight / sixinput.tlen
             # print(v,freq)
-            elem = Cavity(voltage=v, frequency=freq, lag=180-d3)
+            elem = Cavity(voltage=v, frequency=freq, lag=180 - d3)
         elif etype == 20:
             thisbb = sixinput.bbelements[nnn]
             if hasattr(thisbb, "sigma_x"):
@@ -110,26 +109,26 @@ def _expand_struct(sixinput, convert=elements):
             elif hasattr(thisbb, "phi"):
                 elem = BeamBeam6D(**thisbb._asdict())
             else:
-                raise ValueError('What?!')
+                raise ValueError("What?!")
         else:
-            rest.append([nnn]+sixinput.single[nnn])
+            rest.append([nnn] + sixinput.single[nnn])
         if elem is not None:
             elems.append(elem)
             names.append(nnn)
         if nnn in sixinput.align:
             if hastilt:
-                names.append(nnn+'_posttilt')
+                names.append(nnn + "_posttilt")
                 elems.append(SRotation(angle=-tilt))
                 icount += 1
             if hasshift:
-                names.append(nnn+'_postshift')
+                names.append(nnn + "_postshift")
                 elems.append(XYShift(dx=-dx, dy=-dy))
                 icount += 1
         if elem is not None:
             if not exclude:
                 iconv.append(icount)
             icount += 1
-        count[nnn] = ccc+1
-    #newelems = [dict(i._asdict()) for i in elems]
+        count[nnn] = ccc + 1
+    # newelems = [dict(i._asdict()) for i in elems]
     types = [i.__class__.__name__ for i in elems]
     return list(zip(names, types, elems)), rest, iconv

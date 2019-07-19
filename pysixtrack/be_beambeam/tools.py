@@ -6,20 +6,20 @@ _sigma_names = [11, 12, 13, 14, 22, 23, 24, 33, 34, 44]
 
 
 def norm(v):
-    return np.sqrt(np.sum(v**2))
+    return np.sqrt(np.sum(v ** 2))
 
 
 def find_alpha_and_phi(dpx, dpy):
 
-    phi = np.sqrt(dpx**2+dpy**2)/2.
+    phi = np.sqrt(dpx ** 2 + dpy ** 2) / 2.0
     if phi < 1e-20:
-        alpha = 0.
+        alpha = 0.0
     elif np.abs(dpx) >= np.abs(dpy):
-        alpha = np.arctan(dpy/dpx)
+        alpha = np.arctan(dpy / dpx)
         if dpx < 0:
             phi = -phi
     else:
-        alpha = np.sign(dpy)*(np.pi/2-np.abs(np.arctan(dpx/dpy)))
+        alpha = np.sign(dpy) * (np.pi / 2 - np.abs(np.arctan(dpx / dpy)))
         if dpy < 0:
             phi = -phi
 
@@ -38,22 +38,22 @@ def get_bb_names_madpoints_sigmas(mad, seq_name):
     bb_sigmas = {kk: [] for kk in _sigma_names}
 
     for ee in seq.elements:
-        if ee.base_type.name == 'beambeam':
+        if ee.base_type.name == "beambeam":
             eename = ee.name
             bb_names.append(eename)
-            bb_xyz_points.append(MadPoint(eename+':1', mad))
+            bb_xyz_points.append(MadPoint(eename + ":1", mad))
 
-            i_twiss = np.where(mad.table.twiss.name == (eename+':1'))[0][0]
+            i_twiss = np.where(mad.table.twiss.name == (eename + ":1"))[0][0]
 
             for sn in _sigma_names:
-                bb_sigmas[sn].append(
-                    getattr(mad.table.twiss, 'sig%d' % sn)[i_twiss])
+                bb_sigmas[sn].append(getattr(mad.table.twiss, "sig%d" % sn)[i_twiss])
 
     return bb_names, bb_xyz_points, bb_sigmas
 
 
-def shift_strong_beam_based_on_close_ip(points_weak, points_strong,
-                                        IPs_survey_weak, IPs_survey_strong):
+def shift_strong_beam_based_on_close_ip(
+    points_weak, points_strong, IPs_survey_weak, IPs_survey_strong
+):
 
     for i_bb, _ in enumerate(points_weak):
 
@@ -77,7 +77,7 @@ def shift_strong_beam_based_on_close_ip(points_weak, points_strong,
 def find_bb_separations(points_weak, points_strong, names=None):
 
     if names is None:
-        names = ['bb_%d' % ii for ii in range(len(points_weak))]
+        names = ["bb_%d" % ii for ii in range(len(points_weak))]
 
     sep_x = []
     sep_y = []
@@ -91,23 +91,28 @@ def find_bb_separations(points_weak, points_strong, names=None):
 
         # Check that the two reference system are parallel
         try:
-            assert(norm(pbw.ex-pbs.ex) < 1e-10)  # 1e-4 is a reasonable limit
-            assert(norm(pbw.ey-pbs.ey) < 1e-10)  # 1e-4 is a reasonable limit
-            assert(norm(pbw.ez-pbs.ez) < 1e-10)  # 1e-4 is a reasonable limit
+            assert norm(pbw.ex - pbs.ex) < 1e-10  # 1e-4 is a reasonable limit
+            assert norm(pbw.ey - pbs.ey) < 1e-10  # 1e-4 is a reasonable limit
+            assert norm(pbw.ez - pbs.ez) < 1e-10  # 1e-4 is a reasonable limit
         except AssertionError:
-            print(name_bb, 'Reference systems are not parallel')
-            if np.sqrt(norm(pbw.ex-pbs.ex)**2
-                       + norm(pbw.ey-pbs.ey)**2
-                       + norm(pbw.ez-pbs.ez)**2) < 5e-3:
-                print('Smaller that 5e-3, tolerated.')
+            print(name_bb, "Reference systems are not parallel")
+            if (
+                np.sqrt(
+                    norm(pbw.ex - pbs.ex) ** 2
+                    + norm(pbw.ey - pbs.ey) ** 2
+                    + norm(pbw.ez - pbs.ez) ** 2
+                )
+                < 5e-3
+            ):
+                print("Smaller that 5e-3, tolerated.")
             else:
-                raise ValueError('Too large! Stopping.')
+                raise ValueError("Too large! Stopping.")
 
         # Check that there is no longitudinal separation
         try:
-            assert(np.abs(np.dot(vbb_ws, pbw.ez)) < 1e-4)
+            assert np.abs(np.dot(vbb_ws, pbw.ez)) < 1e-4
         except AssertionError:
-            print(name_bb, 'The beams are longitudinally shifted')
+            print(name_bb, "The beams are longitudinally shifted")
 
         # Find separations
         sep_x.append(np.dot(vbb_ws, pbw.ex))
@@ -116,19 +121,27 @@ def find_bb_separations(points_weak, points_strong, names=None):
     return sep_x, sep_y
 
 
-def setup_beam_beam_in_line(line, bb_names, bb_sigmas_strong,
-                            bb_points_weak, bb_points_strong, beta_r_strong,
-                            bunch_intensity_strong, n_slices_6D, bb_coupling):
+def setup_beam_beam_in_line(
+    line,
+    bb_names,
+    bb_sigmas_strong,
+    bb_points_weak,
+    bb_points_strong,
+    beta_r_strong,
+    bunch_intensity_strong,
+    n_slices_6D,
+    bb_coupling,
+):
 
     sep_x, sep_y = find_bb_separations(
-        points_weak=bb_points_weak, points_strong=bb_points_strong,
-        names=bb_names)
+        points_weak=bb_points_weak, points_strong=bb_points_strong, names=bb_names
+    )
 
     i_bb = 0
-    assert(bb_coupling == False)  # Not implemented
+    assert bb_coupling == False  # Not implemented
     for ee, eename in zip(line.elements, line.element_names):
         if isinstance(ee, pysixtrack.elements.BeamBeam4D):
-            assert(eename == bb_names[i_bb])
+            assert eename == bb_names[i_bb]
 
             ee.charge = bunch_intensity_strong
             ee.sigma_x = np.sqrt(bb_sigmas_strong[11][i_bb])
@@ -139,7 +152,7 @@ def setup_beam_beam_in_line(line, bb_names, bb_sigmas_strong,
 
             i_bb += 1
         if isinstance(ee, pysixtrack.elements.BeamBeam6D):
-            assert(eename == bb_names[i_bb])
+            assert eename == bb_names[i_bb]
 
             dpx = bb_points_weak[i_bb].tpx - bb_points_strong[i_bb].tpx
             dpy = bb_points_weak[i_bb].tpy - bb_points_strong[i_bb].tpy
@@ -150,7 +163,7 @@ def setup_beam_beam_in_line(line, bb_names, bb_sigmas_strong,
             ee.alpha = alpha
             ee.x_bb_co = sep_x[i_bb]
             ee.y_bb_co = sep_y[i_bb]
-            ee.charge_slices = [bunch_intensity_strong/n_slices_6D]
+            ee.charge_slices = [bunch_intensity_strong / n_slices_6D]
             ee.zeta_slices = [0.0]
             ee.sigma_11 = bb_sigmas_strong[11][i_bb]
             ee.sigma_12 = bb_sigmas_strong[12][i_bb]
@@ -163,10 +176,10 @@ def setup_beam_beam_in_line(line, bb_names, bb_sigmas_strong,
             ee.sigma_34 = bb_sigmas_strong[34][i_bb]
             ee.sigma_44 = bb_sigmas_strong[44][i_bb]
 
-            if not(bb_coupling):
-                ee.sigma_13 = 0.
-                ee.sigma_14 = 0.
-                ee.sigma_23 = 0.
-                ee.sigma_24 = 0.
+            if not (bb_coupling):
+                ee.sigma_13 = 0.0
+                ee.sigma_14 = 0.0
+                ee.sigma_23 = 0.0
+                ee.sigma_24 = 0.0
 
             i_bb += 1
