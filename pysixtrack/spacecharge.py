@@ -2,7 +2,7 @@ from scipy.constants import e as qe
 from scipy.constants import c as clight
 
 from pysixtrack.base_classes import Element
-from .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
+from .be_beambeam.gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
 
 
 class SpaceChargeCoast(Element):
@@ -61,12 +61,12 @@ class SpaceChargeBunched(Element):
         ('Delta_x', 'm', "Desc...", 0.),
         ('Delta_y', 'm', "Desc...", 0),
         ]
-    _extra = [
+     _extra = [
         ('min_sigma_diff', 'm', "Desc...", 1e-30),
         ('enabled', '', "Desc...", True),
         ]
 
-    def track(self, p):
+     def track(self, p):
         if self.enabled:
             pi = p._m.pi
             exp = p._m.exp
