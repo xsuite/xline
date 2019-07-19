@@ -58,7 +58,7 @@ class SC_controller(object):
                 if length > max_distance:
                     print("Warning: length of space charge node bigger than max_distance")
                 if self._type == 'SpaceChargeCoast':
-                    scNode = pysixtrack.SpaceChargeCoast(
+                    scNode = pysixtrack.elements.SpaceChargeCoast(
                         line_density=intensity/circumference,
                         sigma_x=sigma_x,
                         sigma_y=sigma_y,
@@ -68,7 +68,7 @@ class SC_controller(object):
                         Delta_y=CO_y,
                         enabled=True)
                 if self._type == 'SpaceChargeBunched':
-                    scNode = pysixtrack.SpaceChargeBunched(
+                    scNode = pysixtrack.elements.SpaceChargeBunched(
                         number_of_particles=intensity,
                         bunchlength_rms=bunchlength_rms,
                         sigma_x=sigma_x,
@@ -170,8 +170,16 @@ mad=madlang.open('madx/SPS_Q20_thin.seq')
 mad.acta_31637.volt=4.5
 mad.acta_31637.lag=0.5
 
+dict_elements = {}
+for ee in dir(pysixtrack.elements):
+    if ee.startswith('_'):
+        continue
+    if ee == 'np':
+        continue
+    dict_elements[ee] = getattr(pysixtrack.elements, ee)
 
-elems,rest,iconv=mad.sps.expand_struct(pysixtrack.element_types)
+
+elems,rest,iconv=mad.sps.expand_struct(dict_elements)
 sps=pysixtrack.Line(elements= [e[2] for e in elems])
 spstwiss=tfs.open('madx/twiss_SPS_Q20_thin.tfs')
 
