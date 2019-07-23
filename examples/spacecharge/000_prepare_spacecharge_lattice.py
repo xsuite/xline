@@ -10,6 +10,15 @@ from pysixtrack.particles import Particles
 
 from sc_controller import SC_controller
 
+p0c = 25.92e9
+intensity=2e11 
+neps_x=2e-6
+neps_y=2e-6
+dpp_rms=1.5e-3
+bunchlength_rms = 0.22
+V_RF_MV = 4.5
+lag__RFdeg = 180.
+max_distance = 35. #6.9 #25.
 
 mad = Madx()
 mad.options.echo=False
@@ -28,9 +37,8 @@ mad.use('sps')
 
 twtable = mad.twiss()
 
-mad.elements['acta.31637'].volt = 4.5
-mad.elements['acta.31637'].lag = 0.5
-
+mad.elements['acta.31637'].volt = V_RF_MV
+mad.elements['acta.31637'].lag = lag_RF_deg/360.
 
 line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)
 
@@ -39,18 +47,12 @@ assert(len(twtable.name) == len(line.element_names))
 for tnn, lnn in zip(twtable.name, line.element_names):
     assert(tnn.split(':')[0] == lnn)
 
+
 gamma = twtable.summary.gamma 
 beta = np.sqrt(1.-1./gamma**2)
 betagamma = beta*gamma
 
-p0c = 25.92e9
-intensity=2e11 #* spstwiss['param']['length'] # for a coasting beam with a line density of 2e11/m
-eps_x=2e-6/betagamma
-eps_y=2e-6/betagamma
-dpp_rms=1.5e-3
-bunchlength_rms = 0.22
 
-max_distance = 35. #6.9 #25.
 # my_SC_controller = SC_controller('SpaceChargeCoast',intensity * spstwiss['param']['length'],eps_x,eps_y,dpp_rms)
 my_SC_controller = SC_controller('SpaceChargeBunched',intensity,eps_x,eps_y,dpp_rms,bunchlength_rms)
 new_elems = my_SC_controller.installSCnodes(line,twtable,max_distance=max_distance,centered=False) #25.
