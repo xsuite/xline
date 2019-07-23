@@ -13,7 +13,7 @@ track_with = 'PySixtrack'
 device_opencl = '0.0'
 device_opencl = None
 
-n_turns = 100
+n_turns = 30#100
 
 with open('line.pkl', 'rb') as fid:
     line = pickle.load(fid)
@@ -29,7 +29,7 @@ DpxDpy_wrt_CO = temp_data['DpxDpy_wrt_CO']
 
 part = partCO.copy() # pysixtrack.Particles(**partCO)
 part._m = pysixtrack.Particles()._m # to be sorted out later
-part.sigma += 0.05
+part.sigma += 0.0#5
 
 x_tbt, px_tbt, y_tbt, py_tbt, sigma_tbt, delta_tbt = hp.track_particle_pysixtrack(
     line, part=part, Dx_wrt_CO_m=0., Dpx_wrt_CO_rad=DpxDpy_wrt_CO[:, :, 0].flatten(),
@@ -48,8 +48,8 @@ x_tbt, px_tbt, y_tbt, py_tbt, sigma_tbt, delta_tbt = hp.track_particle_pysixtrac
 # py_tbt -= Dpy*delta_tbt
 Dx = np.mean(x_tbt*delta_tbt)/np.mean(delta_tbt*delta_tbt)
 Dpx = np.mean(px_tbt*delta_tbt)/np.mean(delta_tbt*delta_tbt)
-x_tbt -= Dx*delta_tbt
-px_tbt -= Dpx*delta_tbt
+#x_tbt -= Dx*delta_tbt
+#px_tbt -= Dpx*delta_tbt
 # Dy = np.mean(y_tbt*delta_tbt)/np.mean(delta_tbt*delta_tbt)
 # Dpy = np.mean(py_tbt*delta_tbt)/np.mean(delta_tbt*delta_tbt)
 # y_tbt -= Dy*delta_tbt

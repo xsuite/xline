@@ -19,10 +19,17 @@ mad.warn=False
 mad.call('madx/SPS_Q20_thin.seq')
 mad.use('sps')
 
-mad.elements['acta.31637'].volt = 4.5
-mad.elements['acta.31637'].lag = 0.5
+mad.globals.klsfa = 0.
+mad.globals.klsfb = 0.
+mad.globals.klsfc = 0.
+mad.globals.klsda = 0.
+mad.globals.klsdb = 0.
 
 twtable = mad.twiss()
+
+mad.elements['acta.31637'].volt = 0*4.5
+mad.elements['acta.31637'].lag = 0.5
+
 
 line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)
 
@@ -36,7 +43,7 @@ beta = np.sqrt(1.-1./gamma**2)
 betagamma = beta*gamma
 
 p0c = 25.92e9
-intensity=2e11 #* spstwiss['param']['length'] # for a coasting beam with a line density of 2e11/m
+intensity=0*2e11 #* spstwiss['param']['length'] # for a coasting beam with a line density of 2e11/m
 eps_x=2e-6/betagamma
 eps_y=2e-6/betagamma
 dpp_rms=1.5e-3
@@ -57,7 +64,7 @@ my_SC_controller.disableSCnodes()
 part_on_CO = line.find_closed_orbit(guess=[twtable['x'][0], twtable['px'][0], 
     twtable['y'][0], twtable['py'][0], 0., 0.], p0c=p0c, method='get_guess')
 closed_orbit = line.track_elem_by_elem(part_on_CO)
-my_SC_controller.enableSCnodes()
+#my_SC_controller.enableSCnodes()
 
 with open('particle_on_CO.pkl', 'wb') as fid:
     closed_orbit[0]._m = None # to be sorted out 
