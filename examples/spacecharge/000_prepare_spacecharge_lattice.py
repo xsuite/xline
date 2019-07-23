@@ -67,7 +67,10 @@ with open('line.pkl', 'wb') as fid:
 with open('SCcontroller.pkl', 'wb') as fid:
     pickle.dump(my_SC_controller, fid)
 
-
+with open('twiss_at_start.pkl', 'wb') as fid:
+    pickle.dump({
+        'betx': twtable.betx[0],
+        'bety': twtable.bety[0]}, fid)
 
 import matplotlib.patches as patches
 if 1:

@@ -27,9 +27,6 @@ with open('DpxDpy_for_footprint.pkl', 'rb') as fid:
 xy_norm = temp_data['xy_norm']
 DpxDpy_wrt_CO = temp_data['DpxDpy_wrt_CO']
 
-
-
-
 part = partCO.copy() # pysixtrack.Particles(**partCO)
 part._m = pysixtrack.Particles()._m # to be sorted out later
 part.sigma += 0.05

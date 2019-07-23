@@ -28,7 +28,6 @@ def vectorize_all_coords(Dx_wrt_CO_m, Dpx_wrt_CO_rad,
 
 
 
-
 def track_particle_pysixtrack(line, part, Dx_wrt_CO_m, Dpx_wrt_CO_rad,
                               Dy_wrt_CO_m, Dpy_wrt_CO_rad,
                               Dsigma_wrt_CO_m, Ddelta_wrt_CO, n_turns, verbose=False):
@@ -65,8 +64,7 @@ def track_particle_pysixtrack(line, part, Dx_wrt_CO_m, Dpx_wrt_CO_rad,
         sigma_tbt.append(part.sigma.copy())
         delta_tbt.append(part.delta.copy())
 
-        for name, etype, ele in line:
-            ele.track(part)
+        line.track(part)
 
     x_tbt = np.array(x_tbt)
     px_tbt = np.array(px_tbt)
@@ -76,20 +74,3 @@ def track_particle_pysixtrack(line, part, Dx_wrt_CO_m, Dpx_wrt_CO_rad,
     delta_tbt = np.array(delta_tbt)
 
     return x_tbt, px_tbt, y_tbt, py_tbt, sigma_tbt, delta_tbt
-
-
-def betafun_from_ellip(x_tbt, px_tbt):
-
-    x_max = np.max(x_tbt)
-    mask = np.logical_and(np.abs(x_tbt) < x_max / 5., px_tbt > 0)
-    x_masked = x_tbt[mask]
-    px_masked = px_tbt[mask]
-    ind_sorted = np.argsort(x_masked)
-    x_sorted = np.take(x_masked, ind_sorted)
-    px_sorted = np.take(px_masked, ind_sorted)
-
-    px_cut = np.interp(0, x_sorted, px_sorted)
-
-    beta_x = x_max / px_cut
-
-    return beta_x, x_max, px_cut
