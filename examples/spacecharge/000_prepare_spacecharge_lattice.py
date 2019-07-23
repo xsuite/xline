@@ -3,41 +3,35 @@ import pickle
 import numpy as np
 import matplotlib.pylab as plt
 
-from pyoptics import madlang,optics
-import pyoptics.tfsdata as tfs
+from cpymad.madx import Madx
+
 import pysixtrack
 from pysixtrack.particles import Particles
-import pysixtrack.helpers as hp 
 
 from sc_controller import SC_controller
 
-#see sps/madx/a001_track_thin.madx
-mad=madlang.open('madx/SPS_Q20_thin.seq')
-mad.acta_31637.volt=4.5
-mad.acta_31637.lag=0.5
 
-dict_elements = {}
-for ee in dir(pysixtrack.elements):
-    if ee.startswith('_'):
-        continue
-    if ee == 'np':
-        continue
-    dict_elements[ee] = getattr(pysixtrack.elements, ee)
+mad = Madx()
+mad.options.echo=False
+mad.options.info=False
+mad.warn=False 
 
+mad.call('madx/SPS_Q20_thin.seq')
+mad.use('sps')
 
-elems,rest,iconv=mad.sps.expand_struct(dict_elements)
-sps=pysixtrack.Line(elements= [e[2] for e in elems])
-spstwiss=tfs.open('madx/twiss_SPS_Q20_thin.tfs')
+mad.elements['acta.31637'].volt = 4.5
+mad.elements['acta.31637'].lag = 0.5
 
-# remove beg. and end. markers in twiss table (as they are not in sixtrack lattice)
-for k in spstwiss:
-    try:
-        spstwiss[k] = spstwiss[k][1:-1]
-    except TypeError:
-        pass
-assert (len(spstwiss['s']) == len(elems))
+twtable = mad.twiss()
 
-gamma = spstwiss['param']['gamma']
+line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)
+
+# Checking our assumptions
+assert(len(twtable.name) == len(line.element_names))
+for tnn, lnn in zip(twtable.name, line.element_names):
+    assert(tnn.split(':')[0] == lnn)
+
+gamma = twtable.summary.gamma 
 beta = np.sqrt(1.-1./gamma**2)
 betagamma = beta*gamma
 
@@ -51,16 +45,18 @@ bunchlength_rms = 0.22
 max_distance = 35. #6.9 #25.
 # my_SC_controller = SC_controller('SpaceChargeCoast',intensity * spstwiss['param']['length'],eps_x,eps_y,dpp_rms)
 my_SC_controller = SC_controller('SpaceChargeBunched',intensity,eps_x,eps_y,dpp_rms,bunchlength_rms)
-new_elems = my_SC_controller.installSCnodes(elems,spstwiss,max_distance=max_distance,centered=False) #25.
+new_elems = my_SC_controller.installSCnodes(line,twtable,max_distance=max_distance,centered=False) #25.
+
+
 
 # prepare a particle on the closed orbit
-p=Particles(p0c=p0c)
-ring = hp.Ring(new_elems, p0c=p0c)
+# p=Particles(p0c=p0c)
 
 my_SC_controller.disableSCnodes()
 # print("\n  starting closed orbit search ... ")
-closed_orbit = ring.find_closed_orbit(guess=[spstwiss['x'][0], spstwiss['px'][0], 
-    spstwiss['y'][0], spstwiss['py'][0], 0., 0.], method='get_guess')
+part_on_CO = line.find_closed_orbit(guess=[twtable['x'][0], twtable['px'][0], 
+    twtable['y'][0], twtable['py'][0], 0., 0.], p0c=p0c, method='get_guess')
+closed_orbit = line.track_elem_by_elem(part_on_CO)
 my_SC_controller.enableSCnodes()
 
 with open('particle_on_CO.pkl', 'wb') as fid:
@@ -86,8 +82,8 @@ if 1:
     plt.show()
 
     f, ax = plt.subplots(figsize=(14,5))
-    ax.plot(spstwiss['s'], spstwiss['betx'], 'b', label='x', lw=2)
-    ax.plot(spstwiss['s'], spstwiss['bety'], 'g', label='y', lw=2)
+    ax.plot(twtable.s, twtable.betx, 'b', label='x', lw=2)
+    ax.plot(twtable.s, twtable.bety, 'g', label='x', lw=2)
     for s in my_SC_controller.getSCnodesOpticsParameter('s'): ax.axvline(s, linewidth=1, color='r', linestyle='--')
     ax.set_xlim(0,1100)
     ax.set_ylim(0,120)
