@@ -3,7 +3,7 @@ import pysixtrack
 from pysixtrack import MadPoint
 
 _sigma_names = [11, 12, 13, 14, 22, 23, 24, 33, 34, 44]
-
+_beta_names = ['betx', 'bety']
 
 def norm(v):
     return np.sqrt(np.sum(v ** 2))
@@ -39,7 +39,8 @@ def get_points_sigmas_for_elements(ele_names, mad, seq_name,
     seq = mad.sequence[seq_name]
 
     bb_xyz_points = []
-    bb_sigmas = {kk: [] for kk in _sigma_names}
+    bb_sigmas = {kk: [] for kk in _sigma_names + _beta_names +
+            'dispersion_x dispersion_y x y'.split()}
     for eename in ele_names:
         bb_xyz_points.append(MadPoint(eename + ":1", mad,
             use_twiss=use_twiss, use_survey=use_survey))
@@ -49,7 +50,16 @@ def get_points_sigmas_for_elements(ele_names, mad, seq_name,
         for sn in _sigma_names:
             bb_sigmas[sn].append(
                     getattr(mad.table.twiss, "sig%d" % sn)[i_twiss])
-
+        
+        for kk in ['betx', 'bety']:
+            bb_sigmas[kk].append(mad.table.twiss[kk][i_twiss])
+        gamma = mad.table.twiss.summary.gamma
+        beta = np.sqrt(1.-1./(gamma*gamma))
+        for pp in ['x', 'y']:
+            bb_sigmas['dispersion_'+pp].append(mad.table.twiss['d'+pp][i_twiss]*beta)
+            bb_sigmas[pp].append(mad.table.twiss[pp][i_twiss])
+        #, 'dx', 'dy']:
+            
     return bb_xyz_points, bb_sigmas
 
 
@@ -64,7 +74,7 @@ def get_elements(seq, ele_type=None, slot_id=None):
                 continue
         
         if slot_id is not None:
-            if ee.base_type.name != slot_id:
+            if ee.slot_id != slot_id:
                 continue
 
         elements.append(ee)

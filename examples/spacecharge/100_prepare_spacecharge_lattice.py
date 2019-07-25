@@ -7,6 +7,7 @@ from cpymad.madx import Madx
 
 import pysixtrack
 from pysixtrack.particles import Particles
+import pysixtrack.be_beambeam.tools as bt
 
 from sc_controller import SC_controller
 
@@ -18,7 +19,7 @@ dpp_rms=1.5e-3
 bunchlength_rms = 0.22
 V_RF_MV = 4.5
 lag__RFdeg = 180.
-n_SCkicks = 1080
+n_SCkicks = 100 #80
 length_fuzzy = 1.5
 seq_name = 'sps'
 
@@ -78,15 +79,16 @@ twtable = mad.twiss()
 # Generate line with spacecharge
 line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)                             
 
-
-
+_, element_names, points, sigmas = bt.get_points_sigmas_for_element_type(
+        mad, seq_name, ele_type='placeholder', slot_id=2,
+        use_survey=False, use_twiss=True)
 
 
 
 ''
 
 import matplotlib.patches as patches
-if 1:
+if 0:
     plt.close('all')
 
     f, ax = plt.subplots()
