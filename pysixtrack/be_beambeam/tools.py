@@ -26,30 +26,72 @@ def find_alpha_and_phi(dpx, dpy):
     return alpha, phi
 
 
-def get_bb_names_madpoints_sigmas(mad, seq_name):
+def get_points_sigmas_for_elements(ele_names, mad, seq_name,  
+        use_survey=True, use_twiss=True):
+    
     mad.use(sequence=seq_name)
+    
     mad.twiss()
-    mad.survey()
+    
+    if use_survey:
+        mad.survey()
 
     seq = mad.sequence[seq_name]
 
-    bb_names = []
     bb_xyz_points = []
     bb_sigmas = {kk: [] for kk in _sigma_names}
+    for eename in ele_names:
+        bb_xyz_points.append(MadPoint(eename + ":1", mad,
+            use_twiss=use_twiss, use_survey=use_survey))
 
+        i_twiss = np.where(mad.table.twiss.name == (eename + ":1"))[0][0]
+
+        for sn in _sigma_names:
+            bb_sigmas[sn].append(
+                    getattr(mad.table.twiss, "sig%d" % sn)[i_twiss])
+
+    return bb_xyz_points, bb_sigmas
+
+
+def get_elements(seq, ele_type=None, slot_id=None): 
+
+    elements = []
+    element_names = []
     for ee in seq.elements:
-        if ee.base_type.name == "beambeam":
-            eename = ee.name
-            bb_names.append(eename)
-            bb_xyz_points.append(MadPoint(eename + ":1", mad))
+         
+        if ele_type is not None:
+            if ee.base_type.name != ele_type:
+                continue
+        
+        if slot_id is not None:
+            if ee.base_type.name != slot_id:
+                continue
 
-            i_twiss = np.where(mad.table.twiss.name == (eename + ":1"))[0][0]
+        elements.append(ee)
+        element_names.append(ee.name)
 
-            for sn in _sigma_names:
-                bb_sigmas[sn].append(getattr(mad.table.twiss, "sig%d" % sn)[i_twiss])
+    return elements, element_names
 
-    return bb_names, bb_xyz_points, bb_sigmas
 
+def get_points_sigmas_for_element_type(mad, seq_name, ele_type=None, slot_id=None,
+        use_survey=True, use_twiss=True):
+    
+    elements, element_names = get_elements(seq=mad.sequence[seq_name], 
+            ele_type=ele_type, slot_id=slot_id)
+
+    points, sigmas = get_points_sigmas_for_elements(element_names, 
+            mad, seq_name, use_survey=use_survey, use_twiss=use_twiss)
+
+    return elements, element_names, points, sigmas
+    
+
+def get_bb_names_madpoints_sigmas(mad, seq_name, use_survey=True,
+        use_twiss=True):
+    _, element_names, points, sigmas = get_points_sigmas_for_element_type(
+            mad, seq_name, ele_type='beambeam', slot_id=None,
+        use_survey=use_survey, use_twiss=use_twiss)
+    return element_names, points, sigmas
+ 
 
 def shift_strong_beam_based_on_close_ip(
     points_weak, points_strong, IPs_survey_weak, IPs_survey_strong
