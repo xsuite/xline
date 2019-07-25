@@ -2,14 +2,15 @@ import pickle
 
 import numpy as np
 import matplotlib.pylab as plt
+from  scipy.constants import physical_constants
 
 from cpymad.madx import Madx
 
 import pysixtrack
 from pysixtrack.particles import Particles
+import pysixtrack.be_beambeam.tools as bt
 
-from sc_controller import SC_controller
-
+mass = physical_constants['proton mass energy equivalent in MeV'][0]*1e6
 p0c = 25.92e9
 intensity=2e11 
 neps_x=2e-6
@@ -17,77 +18,108 @@ neps_y=2e-6
 dpp_rms=1.5e-3
 bunchlength_rms = 0.22
 V_RF_MV = 4.5
-lag__RFdeg = 180.
-max_distance = 35. #6.9 #25.
+lag_RF_deg = 180.
+n_SCkicks = 100 #80
+length_fuzzy = 1.5
+seq_name = 'sps'
 
+betagamma = p0c/mass
+
+def determine_sc_locations(line, n_SCkicks, length_fuzzy):
+    s_elements = np.array(line.get_s_elements())
+    length_target = s_elements[-1] / float(n_SCkicks)
+    s_targets = np.arange(0,s_elements[-1],length_target)
+    sc_locations = []
+    for s in s_targets:
+        idx_closest = (np.abs(s_elements - s)).argmin()
+        s_closest = s_elements[idx_closest]
+        if abs(s-s_closest)<length_fuzzy/2.:
+            sc_locations.append(s_closest)
+        else:
+            sc_locations.append(s)
+    sc_lengths = np.diff(sc_locations).tolist() + [s_elements[-1]-sc_locations[-1]]
+    return sc_locations, sc_lengths
+
+def install_sc_placeholders(mad, seq_name, name, s, mode='Bunched'):
+    mad.input('''
+            seqedit, sequence=??SEQNAME??;'''.replace('??SEQNAME??',seq_name))
+    for name_, s_ in zip(np.atleast_1d(name), np.atleast_1d(s)): 
+        mad.input('''
+            ??NAME?? : placeholder, l=0., slot_id=??SID??;
+            install, element=??NAME??, at=??POS??;'''.replace(
+                    '??NAME??', name_).replace('??POS??', '%.10e'%s_).replace(
+                    '??SID??', {'Coasting':'1', 'Bunched':'2'}[mode]))
+    mad.input('''
+            flatten;
+            endedit;
+            use, sequence=??SEQNAME??;'''.replace('??SEQNAME??',seq_name))
+
+    
 mad = Madx()
 mad.options.echo=False
 mad.options.info=False
 mad.warn=False 
+mad.chdir('madx')
+mad.call('sps_thin.madx')
+mad.use(seq_name)
 
-mad.call('madx/SPS_Q20_thin.seq')
-mad.use('sps')
+# Determine space charge locations
+temp_line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)                             
+sc_locations, sc_lengths = determine_sc_locations(temp_line, n_SCkicks, length_fuzzy)
 
-# # Switch off sextupole
-# mad.globals.klsfa = 0.
-# mad.globals.klsfb = 0.
-# mad.globals.klsfc = 0.
-# mad.globals.klsda = 0.
-# mad.globals.klsdb = 0.
+# Install spacecharge place holders
+sc_names = ['sc%d'%number for number in range(len(sc_locations))]
+install_sc_placeholders(mad, seq_name, sc_names, sc_locations, mode='Bunched')
 
+# twiss
 twtable = mad.twiss()
 
-mad.elements['acta.31637'].volt = V_RF_MV
-mad.elements['acta.31637'].lag = lag_RF_deg/360.
-
-line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)
-
-# Checking our assumptions
-assert(len(twtable.name) == len(line.element_names))
-for tnn, lnn in zip(twtable.name, line.element_names):
-    assert(tnn.split(':')[0] == lnn)
+# Get position and sigma and sc locations
 
 
-gamma = twtable.summary.gamma 
-beta = np.sqrt(1.-1./gamma**2)
-betagamma = beta*gamma
+# Generate line with spacecharge
+line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)                             
+
+# Setup spacecharge
+_, mad_sc_names, points, twdata = bt.get_points_sigmas_for_element_type(
+        mad, seq_name, ele_type='placeholder', slot_id=2,
+        use_survey=False, use_twiss=True)
+
+sc_elements, sc_names = line.get_elements_of_type(pysixtrack.elements.SpaceChargeBunched)
+
+assert(len(sc_elements)==len(mad_sc_names))
+assert(len(sc_lengths)==len(mad_sc_names))
+for ii, (ss, nn) in enumerate(zip(sc_elements, sc_names)):
+    assert(nn == mad_sc_names[ii])
+    
+    ss.number_of_particles = intensity
+    ss.bunchlength_rms = bunchlength_rms
+    ss.sigma_x = np.sqrt(twdata['betx'][ii]*neps_x/betagamma + (
+        twdata['dispersion_x'][ii]*dpp_rms)**2)
+    ss.sigma_y = np.sqrt(twdata['bety'][ii]*neps_y/betagamma + (
+        twdata['dispersion_y'][ii]*dpp_rms)**2)
+    ss.length = sc_lengths[ii]
+    ss.Delta_x = twdata['x'][ii]
+    ss.Delta_y = twdata['y'][ii]
+    ss.enabled=True
+
+# enable RF
+i_cavity = line.element_names.index('acta.31637')
+line.elements[i_cavity].voltage = V_RF_MV * 1e6
+line.elements[i_cavity].lag = lag_RF_deg
 
 
-# my_SC_controller = SC_controller('SpaceChargeCoast',intensity * spstwiss['param']['length'],eps_x,eps_y,dpp_rms)
-my_SC_controller = SC_controller('SpaceChargeBunched',intensity,eps_x,eps_y,dpp_rms,bunchlength_rms)
-new_elems = my_SC_controller.installSCnodes(line,twtable,max_distance=max_distance,centered=False) #25.
-
-
-
-# prepare a particle on the closed orbit
-# p=Particles(p0c=p0c)
-
-my_SC_controller.disableSCnodes()
-# print("\n  starting closed orbit search ... ")
-part_on_CO = line.find_closed_orbit(guess=[twtable['x'][0], twtable['px'][0], 
-    twtable['y'][0], twtable['py'][0], 0., 0.], p0c=p0c, method='get_guess')
-closed_orbit = line.track_elem_by_elem(part_on_CO)
-my_SC_controller.enableSCnodes()
-
-with open('particle_on_CO.pkl', 'wb') as fid:
-    closed_orbit[0]._m = None # to be sorted out 
-    pickle.dump(closed_orbit[0], fid)
 with open('line.pkl', 'wb') as fid:
-    pickle.dump(new_elems, fid)
-with open('SCcontroller.pkl', 'wb') as fid:
-    pickle.dump(my_SC_controller, fid)
+    pickle.dump(line.to_dict(keepextra=True), fid)
 
-with open('twiss_at_start.pkl', 'wb') as fid:
-    pickle.dump({
-        'betx': twtable.betx[0],
-        'bety': twtable.bety[0]}, fid)
+
+''
 
 import matplotlib.patches as patches
-if 1:
+if 0:
     plt.close('all')
 
     f, ax = plt.subplots()
-    sc_lengths = my_SC_controller.getSCnodesLengths()
     ax.hist(sc_lengths, bins=np.linspace(0,max(sc_lengths)+0.1,100))
     ax.set_xlabel('length of SC kick (m)')
     ax.set_ylabel('counts')
@@ -97,7 +129,7 @@ if 1:
     f, ax = plt.subplots(figsize=(14,5))
     ax.plot(twtable.s, twtable.betx, 'b', label='x', lw=2)
     ax.plot(twtable.s, twtable.bety, 'g', label='x', lw=2)
-    for s in my_SC_controller.getSCnodesOpticsParameter('s'): ax.axvline(s, linewidth=1, color='r', linestyle='--')
+    for s in sc_locations: ax.axvline(s, linewidth=1, color='r', linestyle='--')
     ax.set_xlim(0,1100)
     ax.set_ylim(0,120)
     ax.set_xlabel('s (m)')
@@ -106,3 +138,4 @@ if 1:
     plt.show()
 
 
+''
