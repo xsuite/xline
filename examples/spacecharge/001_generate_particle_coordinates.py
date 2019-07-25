@@ -12,9 +12,8 @@ r_max_sigma = 10.
 N_r_footp = 10.
 N_theta_footp = 10.
 
-
 with open('line.pkl', 'rb') as fid:
-    line = pickle.load(fid)
+    line = pysixtrack.Line.from_dict(pickle.load(fid), keepextra=True)
 
 with open('particle_on_CO.pkl', 'rb') as fid:
     partCO = pickle.load(fid)

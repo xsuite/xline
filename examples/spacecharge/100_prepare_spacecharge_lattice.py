@@ -2,6 +2,7 @@ import pickle
 
 import numpy as np
 import matplotlib.pylab as plt
+from  scipy.constants import physical_constants
 
 from cpymad.madx import Madx
 
@@ -9,8 +10,7 @@ import pysixtrack
 from pysixtrack.particles import Particles
 import pysixtrack.be_beambeam.tools as bt
 
-from sc_controller import SC_controller
-
+mass = physical_constants['proton mass energy equivalent in MeV'][0]*1e6
 p0c = 25.92e9
 intensity=2e11 
 neps_x=2e-6
@@ -18,11 +18,12 @@ neps_y=2e-6
 dpp_rms=1.5e-3
 bunchlength_rms = 0.22
 V_RF_MV = 4.5
-lag__RFdeg = 180.
+lag_RF_deg = 180.
 n_SCkicks = 100 #80
 length_fuzzy = 1.5
 seq_name = 'sps'
 
+betagamma = p0c/mass
 
 def determine_sc_locations(line, n_SCkicks, length_fuzzy):
     s_elements = np.array(line.get_s_elements())
@@ -79,10 +80,37 @@ twtable = mad.twiss()
 # Generate line with spacecharge
 line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)                             
 
-_, element_names, points, sigmas = bt.get_points_sigmas_for_element_type(
+# Setup spacecharge
+_, mad_sc_names, points, twdata = bt.get_points_sigmas_for_element_type(
         mad, seq_name, ele_type='placeholder', slot_id=2,
         use_survey=False, use_twiss=True)
 
+sc_elements, sc_names = line.get_elements_of_type(pysixtrack.elements.SpaceChargeBunched)
+
+assert(len(sc_elements)==len(mad_sc_names))
+assert(len(sc_lengths)==len(mad_sc_names))
+for ii, (ss, nn) in enumerate(zip(sc_elements, sc_names)):
+    assert(nn == mad_sc_names[ii])
+    
+    ss.number_of_particles = intensity
+    ss.bunchlength_rms = bunchlength_rms
+    ss.sigma_x = np.sqrt(twdata['betx'][ii]*neps_x/betagamma + (
+        twdata['dispersion_x'][ii]*dpp_rms)**2)
+    ss.sigma_y = np.sqrt(twdata['bety'][ii]*neps_y/betagamma + (
+        twdata['dispersion_y'][ii]*dpp_rms)**2)
+    ss.length = sc_lengths[ii]
+    ss.Delta_x = twdata['x'][ii]
+    ss.Delta_y = twdata['y'][ii]
+    ss.enabled=True
+
+# enable RF
+i_cavity = line.element_names.index('acta.31637')
+line.elements[i_cavity].voltage = V_RF_MV * 1e6
+line.elements[i_cavity].lag = lag_RF_deg
+
+
+with open('line.pkl', 'wb') as fid:
+    pickle.dump(line.to_dict(keepextra=True), fid)
 
 
 ''
