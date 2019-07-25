@@ -108,10 +108,21 @@ i_cavity = line.element_names.index('acta.31637')
 line.elements[i_cavity].voltage = V_RF_MV * 1e6
 line.elements[i_cavity].lag = lag_RF_deg
 
-
 with open('line.pkl', 'wb') as fid:
     pickle.dump(line.to_dict(keepextra=True), fid)
 
+part_on_CO = line.find_closed_orbit(guess=[twtable['x'][0], twtable['px'][0], 
+   twtable['y'][0], twtable['py'][0], 0., 0.], p0c=p0c, method='get_guess')
+
+# Save particle on CO
+with open('particle_on_CO.pkl', 'wb') as fid:
+   pickle.dump(part_on_CO.to_dict(), fid)
+
+# Save twiss at start ring
+with open('twiss_at_start.pkl', 'wb') as fid:
+   pickle.dump({
+       'betx': twtable.betx[0],
+       'bety': twtable.bety[0]}, fid)
 
 ''
 

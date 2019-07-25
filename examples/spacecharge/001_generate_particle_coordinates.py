@@ -16,7 +16,7 @@ with open('line.pkl', 'rb') as fid:
     line = pysixtrack.Line.from_dict(pickle.load(fid), keepextra=True)
 
 with open('particle_on_CO.pkl', 'rb') as fid:
-    partCO = pickle.load(fid)
+    partCO = pysixtrack.Particles.from_dict(pickle.load(fid))
 
 part = partCO.copy() # pysixtrack.Particles(**partCO)
 part._m = pysixtrack.Particles()._m # to be sorted out later
