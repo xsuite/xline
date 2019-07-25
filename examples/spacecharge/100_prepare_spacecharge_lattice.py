@@ -22,14 +22,6 @@ n_SCkicks = 1080
 length_fuzzy = 1.5
 seq_name = 'sps'
 
-mad = Madx()
-mad.options.echo=False
-mad.options.info=False
-mad.warn=False 
-mad.chdir('madx')
-mad.call('sps_thin.madx')
-mad.use(seq_name)
-
 
 def determine_sc_locations(line, n_SCkicks, length_fuzzy):
     s_elements = np.array(line.get_s_elements())
@@ -60,13 +52,36 @@ def install_sc_placeholders(mad, seq_name, name, s, mode='Bunched'):
             endedit;
             use, sequence=??SEQNAME??;'''.replace('??SEQNAME??',seq_name))
 
+    
+mad = Madx()
+mad.options.echo=False
+mad.options.info=False
+mad.warn=False 
+mad.chdir('madx')
+mad.call('sps_thin.madx')
+mad.use(seq_name)
 
-line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)                             
-sc_locations, sc_lengths = determine_sc_locations(line, n_SCkicks, length_fuzzy)
+# Determine space charge locations
+temp_line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)                             
+sc_locations, sc_lengths = determine_sc_locations(temp_line, n_SCkicks, length_fuzzy)
+
+# Install spacecharge place holders
 sc_names = ['sc%d'%number for number in range(len(sc_locations))]
 install_sc_placeholders(mad, seq_name, sc_names, sc_locations, mode='Bunched')
 
+# twiss
 twtable = mad.twiss()
+
+# Get position and sigma and sc locations
+
+
+# Generate line with spacecharge
+line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)                             
+
+
+
+
+
 
 ''
 

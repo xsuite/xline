@@ -38,12 +38,14 @@ def _from_madx_sequence(
             "hmonitor",
             "vmonitor",
             "rcollimator",
-            "placeholder",
             "instrument",
             "solenoid",
             "drift",
         ]:
             newele = myDrift(length=ee.l)
+
+        elif mad_etype in ignored_madtypes:
+            pass
 
         elif mad_etype == "multipole":
             knl = ee.knl if hasattr(ee, "knl") else [0]
@@ -121,9 +123,28 @@ def _from_madx_sequence(
                     d_px=0.0,
                     d_py=0.0,
                 )
-        elif mad_etype in ignored_madtypes:
-            pass
-
+        elif mad_etype == "placeholder":
+            if ee.slot_id == 1:
+                newele = classes.SpaceChargeCoasting(
+                    line_density = 0.0, 
+                    sigma_x = 1.0,
+                    sigma_y = 1.0,
+                    length = 0.,
+                    Delta_x = 0., 
+                    Delta_y = 0.
+                )
+            elif ee.slot_id == 2:
+                newele = classes.SpaceChargeBunched(
+                    number_of_particles = 0.,
+                    bunchlength_rms = 0.,
+                    sigma_x = 1.,  
+                    sigma_y = 1.,
+                    length = 0.,
+                    Delta_x = 0.,
+                    Delta_y = 0.,
+                ) 
+            else: 
+                newele = myDrift(length=ee.l)
         else:
             raise ValueError("Not recognized")
 

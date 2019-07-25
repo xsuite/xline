@@ -3,7 +3,7 @@ import numpy as np
 from .base_classes import Element
 from .be_beambeam.beambeam import BeamBeam4D
 from .be_beambeam.beambeam import BeamBeam6D
-from .spacecharge import SpaceChargeCoast
+from .spacecharge import SpaceChargeCoasting
 from .spacecharge import SpaceChargeBunched
 
 _factorial = np.array(
