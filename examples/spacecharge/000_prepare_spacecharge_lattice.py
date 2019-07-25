@@ -8,7 +8,7 @@ from cpymad.madx import Madx
 
 import pysixtrack
 from pysixtrack.particles import Particles
-import pysixtrack.be_beambeam.tools as bt
+import pysixtrack.be_beamfields.tools as bt
 
 mass = physical_constants['proton mass energy equivalent in MeV'][0]*1e6
 p0c = 25.92e9
