@@ -5,7 +5,7 @@ from pysixtrack.base_classes import Element
 from .be_beambeam.gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
 
 
-class SpaceChargeCoast(Element):
+class SpaceChargeCoasting(Element):
     """Space charge for a coasting beam"""
 
     _description = [
