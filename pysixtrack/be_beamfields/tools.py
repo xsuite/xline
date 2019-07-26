@@ -298,7 +298,26 @@ def setup_spacecharge_bunched_in_line(sc_elements, sc_lengths,
         ss.length = sc_lengths[ii]
         ss.Delta_x = sc_twdata['x'][ii]
         ss.Delta_y = sc_twdata['y'][ii]
-        ss.enabled=True
+        ss.enabled = True
+
+
+def setup_spacecharge_coasting_in_line(sc_elements, sc_lengths,
+    sc_twdata, sc_points, p0c, mass, line_density, 
+    delta_rms, neps_x, neps_y):
+
+    betagamma = p0c/mass
+
+    for ii, ss in enumerate(sc_elements):
+        
+        ss.line_density = line_density
+        ss.sigma_x = np.sqrt(sc_twdata['betx'][ii]*neps_x/betagamma + (
+            sc_twdata['dispersion_x'][ii]*delta_rms)**2)
+        ss.sigma_y = np.sqrt(sc_twdata['bety'][ii]*neps_y/betagamma + (
+            sc_twdata['dispersion_y'][ii]*delta_rms)**2)
+        ss.length = sc_lengths[ii]
+        ss.Delta_x = sc_twdata['x'][ii]
+        ss.Delta_y = sc_twdata['y'][ii]
+        ss.enabled = True
 
 
 def check_spacecharge_consistency(sc_elements, sc_names, sc_lengths, mad_sc_names):
