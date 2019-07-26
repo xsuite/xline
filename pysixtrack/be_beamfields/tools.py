@@ -9,24 +9,7 @@ def norm(v):
     return np.sqrt(np.sum(v ** 2))
 
 
-def find_alpha_and_phi(dpx, dpy):
-
-    phi = np.sqrt(dpx ** 2 + dpy ** 2) / 2.0
-    if phi < 1e-20:
-        alpha = 0.0
-    elif np.abs(dpx) >= np.abs(dpy):
-        alpha = np.arctan(dpy / dpx)
-        if dpx < 0:
-            phi = -phi
-    else:
-        alpha = np.sign(dpy) * (np.pi / 2 - np.abs(np.arctan(dpx / dpy)))
-        if dpy < 0:
-            phi = -phi
-
-    return alpha, phi
-
-
-def get_points_sigmas_for_elements(ele_names, mad, seq_name,  
+def get_points_twissdata_for_elements(ele_names, mad, seq_name,  
         use_survey=True, use_twiss=True):
     
     mad.use(sequence=seq_name)
@@ -39,7 +22,7 @@ def get_points_sigmas_for_elements(ele_names, mad, seq_name,
     seq = mad.sequence[seq_name]
 
     bb_xyz_points = []
-    bb_sigmas = {kk: [] for kk in _sigma_names + _beta_names +
+    bb_twissdata = {kk: [] for kk in _sigma_names + _beta_names +
             'dispersion_x dispersion_y x y'.split()}
     for eename in ele_names:
         bb_xyz_points.append(MadPoint(eename + ":1", mad,
@@ -48,19 +31,19 @@ def get_points_sigmas_for_elements(ele_names, mad, seq_name,
         i_twiss = np.where(mad.table.twiss.name == (eename + ":1"))[0][0]
 
         for sn in _sigma_names:
-            bb_sigmas[sn].append(
+            bb_twissdata[sn].append(
                     getattr(mad.table.twiss, "sig%d" % sn)[i_twiss])
         
         for kk in ['betx', 'bety']:
-            bb_sigmas[kk].append(mad.table.twiss[kk][i_twiss])
+            bb_twissdata[kk].append(mad.table.twiss[kk][i_twiss])
         gamma = mad.table.twiss.summary.gamma
         beta = np.sqrt(1.-1./(gamma*gamma))
         for pp in ['x', 'y']:
-            bb_sigmas['dispersion_'+pp].append(mad.table.twiss['d'+pp][i_twiss]*beta)
-            bb_sigmas[pp].append(mad.table.twiss[pp][i_twiss])
+            bb_twissdata['dispersion_'+pp].append(mad.table.twiss['d'+pp][i_twiss]*beta)
+            bb_twissdata[pp].append(mad.table.twiss[pp][i_twiss])
         #, 'dx', 'dy']:
             
-    return bb_xyz_points, bb_sigmas
+    return bb_xyz_points, bb_twissdata
 
 
 def get_elements(seq, ele_type=None, slot_id=None): 
@@ -83,23 +66,43 @@ def get_elements(seq, ele_type=None, slot_id=None):
     return elements, element_names
 
 
-def get_points_sigmas_for_element_type(mad, seq_name, ele_type=None, slot_id=None,
+def get_points_twissdata_for_element_type(mad, seq_name, ele_type=None, slot_id=None,
         use_survey=True, use_twiss=True):
     
     elements, element_names = get_elements(seq=mad.sequence[seq_name], 
             ele_type=ele_type, slot_id=slot_id)
 
-    points, sigmas = get_points_sigmas_for_elements(element_names, 
+    points, twissdata = get_points_twissdata_for_elements(element_names, 
             mad, seq_name, use_survey=use_survey, use_twiss=use_twiss)
 
-    return elements, element_names, points, sigmas
+    return elements, element_names, points, twissdata
     
+###############################
+# beam beam related functions #
+###############################
+def find_alpha_and_phi(dpx, dpy):
+
+    phi = np.sqrt(dpx ** 2 + dpy ** 2) / 2.0
+    if phi < 1e-20:
+        alpha = 0.0
+    elif np.abs(dpx) >= np.abs(dpy):
+        alpha = np.arctan(dpy / dpx)
+        if dpx < 0:
+            phi = -phi
+    else:
+        alpha = np.sign(dpy) * (np.pi / 2 - np.abs(np.arctan(dpx / dpy)))
+        if dpy < 0:
+            phi = -phi
+
+    return alpha, phi
+
 
 def get_bb_names_madpoints_sigmas(mad, seq_name, use_survey=True,
         use_twiss=True):
-    _, element_names, points, sigmas = get_points_sigmas_for_element_type(
+    _, element_names, points, twissdata = get_points_twissdata_for_element_type(
             mad, seq_name, ele_type='beambeam', slot_id=None,
         use_survey=use_survey, use_twiss=use_twiss)
+    sigmas = {kk: twissdata[kk] for kk in _sigma_names}
     return element_names, points, sigmas
  
 
@@ -235,3 +238,71 @@ def setup_beam_beam_in_line(
                 ee.sigma_24 = 0.0
 
             i_bb += 1
+
+
+##################################
+# space charge related functions #
+##################################
+def determine_sc_locations(line, n_SCkicks, length_fuzzy):
+    s_elements = np.array(line.get_s_elements())
+    length_target = s_elements[-1] / float(n_SCkicks)
+    s_targets = np.arange(0,s_elements[-1],length_target)
+    sc_locations = []
+    for s in s_targets:
+        idx_closest = (np.abs(s_elements - s)).argmin()
+        s_closest = s_elements[idx_closest]
+        if abs(s-s_closest)<length_fuzzy/2.:
+            sc_locations.append(s_closest)
+        else:
+            sc_locations.append(s)
+    sc_lengths = np.diff(sc_locations).tolist() + [s_elements[-1]-sc_locations[-1]]
+    return sc_locations, sc_lengths
+
+
+def install_sc_placeholders(mad, seq_name, name, s, mode='Bunched'):
+    sid = {'Coasting':'1', 'Bunched':'2'}[mode]
+    mad.input(f'''
+            seqedit, sequence={seq_name};''')
+    for name_, s_ in zip(np.atleast_1d(name), np.atleast_1d(s)): 
+        mad.input(f'''
+            {name_} : placeholder, l=0., slot_id={sid};
+            install, element={name_}, at={s_:.10e};''')
+    mad.input(f'''
+            flatten;
+            endedit;
+            use, sequence={seq_name};''')
+
+
+def get_spacecharge_names_madpoints_twdata(mad, seq_name, mode):
+    _, mad_sc_names, points, twdata = get_points_twissdata_for_element_type(
+            mad, seq_name, ele_type='placeholder', 
+            slot_id={'Coasting':1, 'Bunched':2}[mode],
+            use_survey=False, use_twiss=True)
+    return mad_sc_names, points, twdata
+
+
+def setup_spacecharge_bunched_in_line(sc_elements, sc_lengths,
+    sc_twdata, sc_points, p0c, mass, number_of_particles, 
+    bunchlength_rms, delta_rms, neps_x, neps_y):
+
+    betagamma = p0c/mass
+
+    for ii, ss in enumerate(sc_elements):
+        
+        ss.number_of_particles = number_of_particles
+        ss.bunchlength_rms = bunchlength_rms
+        ss.sigma_x = np.sqrt(sc_twdata['betx'][ii]*neps_x/betagamma + (
+            sc_twdata['dispersion_x'][ii]*delta_rms)**2)
+        ss.sigma_y = np.sqrt(sc_twdata['bety'][ii]*neps_y/betagamma + (
+            sc_twdata['dispersion_y'][ii]*delta_rms)**2)
+        ss.length = sc_lengths[ii]
+        ss.Delta_x = sc_twdata['x'][ii]
+        ss.Delta_y = sc_twdata['y'][ii]
+        ss.enabled=True
+
+
+def check_spacecharge_consistency(sc_elements, sc_names, sc_lengths, mad_sc_names):
+    assert(len(sc_elements)==len(mad_sc_names))
+    assert(len(sc_lengths)==len(mad_sc_names))
+    for ii, (ss, nn) in enumerate(zip(sc_elements, sc_names)):
+        assert(nn == mad_sc_names[ii])
