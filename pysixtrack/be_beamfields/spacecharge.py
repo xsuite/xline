@@ -13,8 +13,8 @@ class SpaceChargeCoasting(Element):
         ('sigma_x', 'm', "Desc...", 1.),
         ('sigma_y', 'm', "Desc...", 1.),
         ('length', 'm', "Desc...",0.),
-        ('Delta_x', 'm', "Desc...", 0.),
-        ('Delta_y', 'm', "Desc...", 0),
+        ('x_co', 'm', "Desc...", 0.),
+        ('y_co', 'm', "Desc...", 0),
         ]
     _extra = [
         ('min_sigma_diff', 'm', "Desc...", 1e-30),
@@ -28,9 +28,9 @@ class SpaceChargeCoasting(Element):
             sigma_y = self.sigma_y
 
             charge = p.qratio*p.q0*qe
-            x = p.x - self.Delta_x
+            x = p.x - self.x_co
             px = p.px
-            y = p.y - self.Delta_y
+            y = p.y - self.y_co
             py = p.py
 
             chi = p.chi
@@ -58,8 +58,8 @@ class SpaceChargeBunched(Element):
         ('sigma_x', 'm', "Desc...", 1.),
         ('sigma_y', 'm', "Desc...", 1.),
         ('length', 'm', "Desc...",0.),
-        ('Delta_x', 'm', "Desc...", 0.),
-        ('Delta_y', 'm', "Desc...", 0),
+        ('x_co', 'm', "Desc...", 0.),
+        ('y_co', 'm', "Desc...", 0),
         ]
      _extra = [
         ('min_sigma_diff', 'm', "Desc...", 1e-30),
@@ -77,9 +77,9 @@ class SpaceChargeBunched(Element):
             sigma_y = self.sigma_y
 
             charge = p.qratio*p.q0*qe
-            x = p.x - self.Delta_x
+            x = p.x - self.x_co
             px = p.px
-            y = p.y - self.Delta_y
+            y = p.y - self.y_co
             py = p.py
             sigma = p.sigma
 

@@ -130,8 +130,8 @@ def _from_madx_sequence(
                     sigma_x = 1.0,
                     sigma_y = 1.0,
                     length = 0.,
-                    Delta_x = 0., 
-                    Delta_y = 0.
+                    x_co = 0., 
+                    y_co = 0.
                 )
             elif ee.slot_id == 2:
                 newele = classes.SpaceChargeBunched(
@@ -140,8 +140,8 @@ def _from_madx_sequence(
                     sigma_x = 1.,  
                     sigma_y = 1.,
                     length = 0.,
-                    Delta_x = 0.,
-                    Delta_y = 0.,
+                    x_co = 0.,
+                    y_co = 0.,
                 ) 
             else: 
                 newele = myDrift(length=ee.l)

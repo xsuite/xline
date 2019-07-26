@@ -296,8 +296,8 @@ def setup_spacecharge_bunched_in_line(sc_elements, sc_lengths,
         ss.sigma_y = np.sqrt(sc_twdata['bety'][ii]*neps_y/betagamma + (
             sc_twdata['dispersion_y'][ii]*delta_rms)**2)
         ss.length = sc_lengths[ii]
-        ss.Delta_x = sc_twdata['x'][ii]
-        ss.Delta_y = sc_twdata['y'][ii]
+        ss.x_co = sc_twdata['x'][ii]
+        ss.y_co = sc_twdata['y'][ii]
         ss.enabled = True
 
 
@@ -315,8 +315,8 @@ def setup_spacecharge_coasting_in_line(sc_elements, sc_lengths,
         ss.sigma_y = np.sqrt(sc_twdata['bety'][ii]*neps_y/betagamma + (
             sc_twdata['dispersion_y'][ii]*delta_rms)**2)
         ss.length = sc_lengths[ii]
-        ss.Delta_x = sc_twdata['x'][ii]
-        ss.Delta_y = sc_twdata['y'][ii]
+        ss.x_co = sc_twdata['x'][ii]
+        ss.y_co = sc_twdata['y'][ii]
         ss.enabled = True
 
 
