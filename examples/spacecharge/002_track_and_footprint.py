@@ -16,10 +16,10 @@ device_opencl = None
 n_turns = 100
 
 with open('line.pkl', 'rb') as fid:
-    line = pickle.load(fid)
+    line = pysixtrack.Line.from_dict(pickle.load(fid), keepextra=True)
 
 with open('particle_on_CO.pkl', 'rb') as fid:
-    partCO = pickle.load(fid)
+    partCO = pysixtrack.Particles.from_dict(pickle.load(fid))
 
 with open('DpxDpy_for_footprint.pkl', 'rb') as fid:
     temp_data = pickle.load(fid)

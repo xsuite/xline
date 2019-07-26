@@ -5,10 +5,10 @@ import pickle
 from cpymad.madx import Madx
 import pysixtrack
 
-from pysixtrack.be_beambeam.tools import norm, find_alpha_and_phi
-from pysixtrack.be_beambeam.tools import get_bb_names_madpoints_sigmas
-from pysixtrack.be_beambeam.tools import shift_strong_beam_based_on_close_ip
-from pysixtrack.be_beambeam.tools import setup_beam_beam_in_line
+from pysixtrack.be_beamfields.tools import norm, find_alpha_and_phi
+from pysixtrack.be_beamfields.tools import get_bb_names_madpoints_sigmas
+from pysixtrack.be_beamfields.tools import shift_strong_beam_based_on_close_ip
+from pysixtrack.be_beamfields.tools import setup_beam_beam_in_line
 from pysixtrack import MadPoint
 
 ip_names = [1, 2, 5, 8]
