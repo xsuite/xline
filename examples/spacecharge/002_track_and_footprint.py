@@ -10,16 +10,17 @@ import footprint
 import matplotlib.pyplot as plt
 
 track_with = 'PySixtrack'
-device_opencl = '0.0'
-device_opencl = None
+#track_with = 'Sixtracklib'
+device = '0.0'
+device = None
 
 n_turns = 100
 
 with open('line.pkl', 'rb') as fid:
-    line = pickle.load(fid)
+    line = pysixtrack.Line.from_dict(pickle.load(fid), keepextra=True)
 
 with open('particle_on_CO.pkl', 'rb') as fid:
-    partCO = pickle.load(fid)
+    partCO = pysixtrack.Particles.from_dict(pickle.load(fid))
 
 with open('DpxDpy_for_footprint.pkl', 'rb') as fid:
     temp_data = pickle.load(fid)
@@ -27,17 +28,31 @@ with open('DpxDpy_for_footprint.pkl', 'rb') as fid:
 xy_norm = temp_data['xy_norm']
 DpxDpy_wrt_CO = temp_data['DpxDpy_wrt_CO']
 
-
-
-
 part = partCO.copy() # pysixtrack.Particles(**partCO)
 part._m = pysixtrack.Particles()._m # to be sorted out later
 part.sigma += 0.05
 
-x_tbt, px_tbt, y_tbt, py_tbt, sigma_tbt, delta_tbt = hp.track_particle_pysixtrack(
-    line, part=part, Dx_wrt_CO_m=0., Dpx_wrt_CO_rad=DpxDpy_wrt_CO[:, :, 0].flatten(),
-    Dy_wrt_CO_m=0, Dpy_wrt_CO_rad=DpxDpy_wrt_CO[:, :, 1].flatten(),
-    Dsigma_wrt_CO_m=0., Ddelta_wrt_CO=0., n_turns=n_turns, verbose=True)
+if track_with == 'PySixtrack':
+
+    x_tbt, px_tbt, y_tbt, py_tbt, sigma_tbt, delta_tbt = hp.track_particle_pysixtrack(
+        line, part=part, Dx_wrt_CO_m=0., Dpx_wrt_CO_rad=DpxDpy_wrt_CO[:, :, 0].flatten(),
+        Dy_wrt_CO_m=0, Dpy_wrt_CO_rad=DpxDpy_wrt_CO[:, :, 1].flatten(),
+        Dsigma_wrt_CO_m=0., Ddelta_wrt_CO=0., n_turns=n_turns, verbose=True)
+
+    info = track_with
+
+elif track_with == 'Sixtracklib':
+    x_tbt, px_tbt, y_tbt, py_tbt, sigma_tbt, delta_tbt = hp.track_particle_sixtracklib(
+        line=line, partCO=part, Dx_wrt_CO_m=0., Dpx_wrt_CO_rad=DpxDpy_wrt_CO[:, :, 0].flatten(),
+        Dy_wrt_CO_m=0., Dpy_wrt_CO_rad=DpxDpy_wrt_CO[:, :, 1].flatten(),
+        Dsigma_wrt_CO_m=0., Ddelta_wrt_CO=0., n_turns=n_turns, device=device)
+    info = track_with
+    if device is None:
+    	info += ' (CPU)'
+    else:
+    	info += ' (GPU %s)'%device
+else:
+    raise ValueError('What?!')
 
 
 # remove dispersive closed orbit from transverse coordinates

@@ -1,7 +1,6 @@
 import pickle
 import pysixtrack
 import numpy as np
-import pyoptics.tfsdata as tfs
 
 import example_helpers as hp
 import footprint
@@ -13,12 +12,11 @@ r_max_sigma = 10.
 N_r_footp = 10.
 N_theta_footp = 10.
 
-
 with open('line.pkl', 'rb') as fid:
-    line = pickle.load(fid)
+    line = pysixtrack.Line.from_dict(pickle.load(fid), keepextra=True)
 
 with open('particle_on_CO.pkl', 'rb') as fid:
-    partCO = pickle.load(fid)
+    partCO = pysixtrack.Particles.from_dict(pickle.load(fid))
 
 part = partCO.copy() # pysixtrack.Particles(**partCO)
 part._m = pysixtrack.Particles()._m # to be sorted out later
@@ -64,9 +62,11 @@ plt.show()
 '''
 
 # get beta functions from twiss table
-spstwiss=tfs.open('madx/twiss_SPS_Q20_thin.tfs')
-beta_x = spstwiss['betx'][0]
-beta_y = spstwiss['bety'][0]
+with open('twiss_at_start.pkl', 'rb') as fid:
+    twiss_at_start = pickle.load(fid)
+
+beta_x = twiss_at_start['betx']
+beta_y = twiss_at_start['bety']
 
 sigmax = np.sqrt(beta_x * epsn_x / part.beta0 / part.gamma0)
 sigmay = np.sqrt(beta_y * epsn_y / part.beta0 / part.gamma0)
