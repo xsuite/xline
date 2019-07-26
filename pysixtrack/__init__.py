@@ -7,7 +7,7 @@ from .line import Line
 
 from .particles import Particles
 
-from .be_beambeam import BB6Ddata
+from .be_beamfields import BB6Ddata
 from .loader_mad import MadPoint
 
 elements.Line = Line
