@@ -1,5 +1,4 @@
 from pysixtrack import Particles
 
 
-p=Particles()
-
+p = Particles()
