@@ -8,11 +8,13 @@ import NAFFlib
 import example_helpers as hp
 import footprint
 import matplotlib.pyplot as plt
+import time
 
 track_with = 'PySixtrack'
-#track_with = 'Sixtracklib'
+# track_with = 'Sixtracklib'
 device = '0.0'
 device = None
+# device = 'opencl:0.0'
 
 n_turns = 100
 
@@ -30,7 +32,8 @@ DpxDpy_wrt_CO = temp_data['DpxDpy_wrt_CO']
 
 part = partCO.copy() # pysixtrack.Particles(**partCO)
 part._m = pysixtrack.Particles()._m # to be sorted out later
-part.sigma += 0.05
+
+start_time = time.time()
 
 if track_with == 'PySixtrack':
 
@@ -53,7 +56,7 @@ elif track_with == 'Sixtracklib':
     	info += ' (GPU %s)'%device
 else:
     raise ValueError('What?!')
-
+print("--- %s seconds ---" % (time.time() - start_time))
 
 # remove dispersive closed orbit from transverse coordinates
 # Dx = np.mean(x_tbt*delta_tbt,axis=0)/np.mean(delta_tbt*delta_tbt,axis=0)

@@ -27,7 +27,7 @@ neps_y=2e-6
 delta_rms=1.5e-3
 V_RF_MV = 4.5
 lag_RF_deg = 180.
-n_SCkicks = 10 #216 #80
+n_SCkicks = 108
 length_fuzzy = 1.5
 seq_name = 'sps'
 
