@@ -1,8 +1,10 @@
 import numpy as np
 
 from .base_classes import Element
-from .be_beambeam.beambeam import BeamBeam4D
-from .be_beambeam.beambeam import BeamBeam6D
+from .be_beamfields.beambeam import BeamBeam4D
+from .be_beamfields.beambeam import BeamBeam6D
+from .be_beamfields.spacecharge import SpaceChargeCoasting
+from .be_beamfields.spacecharge import SpaceChargeBunched
 
 _factorial = np.array(
     [

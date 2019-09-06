@@ -38,12 +38,14 @@ def _from_madx_sequence(
             "hmonitor",
             "vmonitor",
             "rcollimator",
-            "placeholder",
             "instrument",
             "solenoid",
             "drift",
         ]:
             newele = myDrift(length=ee.l)
+
+        elif mad_etype in ignored_madtypes:
+            pass
 
         elif mad_etype == "multipole":
             knl = ee.knl if hasattr(ee, "knl") else [0]
@@ -121,9 +123,28 @@ def _from_madx_sequence(
                     d_px=0.0,
                     d_py=0.0,
                 )
-        elif mad_etype in ignored_madtypes:
-            pass
-
+        elif mad_etype == "placeholder":
+            if ee.slot_id == 1:
+                newele = classes.SpaceChargeCoasting(
+                    line_density = 0.0, 
+                    sigma_x = 1.0,
+                    sigma_y = 1.0,
+                    length = 0.,
+                    x_co = 0., 
+                    y_co = 0.
+                )
+            elif ee.slot_id == 2:
+                newele = classes.SpaceChargeBunched(
+                    number_of_particles = 0.,
+                    bunchlength_rms = 0.,
+                    sigma_x = 1.,  
+                    sigma_y = 1.,
+                    length = 0.,
+                    x_co = 0.,
+                    y_co = 0.,
+                ) 
+            else: 
+                newele = myDrift(length=ee.l)
         else:
             raise ValueError("Not recognized")
 
@@ -140,21 +161,62 @@ def _from_madx_sequence(
 
 
 class MadPoint(object):
-    def __init__(self, name, mad, add_CO=True):
+
+    @classmethod
+    def from_survey(cls, name, mad):
+        return cls(name, mad, use_twiss=False, use_survey=True)
+
+    @classmethod
+    def from_twiss(cls, name, mad):
+        return cls(name, mad, use_twiss=True, use_survey=False)
+
+    def __init__(self, name, mad, use_twiss=True, use_survey=True):
+        
+        self.use_twiss = use_twiss 
+        self.use_survey = use_survey
+        
+        if not(use_survey) and not(use_twiss):
+            raise ValueError(
+                    'use_survey and use_twiss cannot be False at the same time') 
+
         self.name = name
-        twiss = mad.table.twiss
-        survey = mad.table.survey
-        idx = np.where(survey.name == name)[0][0]
-        self.tx = twiss.x[idx]
-        self.ty = twiss.y[idx]
-        self.tpx = twiss.px[idx]
-        self.tpy = twiss.py[idx]
-        self.sx = survey.x[idx]
-        self.sy = survey.y[idx]
-        self.sz = survey.z[idx]
-        theta = survey.theta[idx]
-        phi = survey.phi[idx]
-        psi = survey.psi[idx]
+        if use_twiss:
+            twiss = mad.table.twiss
+            names = twiss.name
+        if use_survey:
+            survey = mad.table.survey
+            names = survey.name 
+        
+        idx = np.where(names == name)[0][0]
+
+        if use_twiss:
+            self.tx = twiss.x[idx]
+            self.ty = twiss.y[idx]
+            self.tpx = twiss.px[idx]
+            self.tpy = twiss.py[idx]
+        else:
+            self.tx = None
+            self.ty = None
+            self.tpx = None
+            self.tpy = None
+
+        if use_survey:
+            self.sx = survey.x[idx]
+            self.sy = survey.y[idx]
+            self.sz = survey.z[idx]
+            self.sp = np.array([self.sx, self.sy, self.sz])
+            theta = survey.theta[idx]
+            phi = survey.phi[idx]
+            psi = survey.psi[idx]
+        else:
+            self.sx = None
+            self.sy = None
+            self.sz = None
+            self.sp = None
+            theta = 0.
+            phi = 0.
+            psi = 0.
+
         thetam = np.array(
             [
                 [np.cos(theta), 0, np.sin(theta)],
@@ -172,11 +234,14 @@ class MadPoint(object):
         self.ex = np.dot(wm, np.array([1, 0, 0]))
         self.ey = np.dot(wm, np.array([0, 1, 0]))
         self.ez = np.dot(wm, np.array([0, 0, 1]))
-        self.sp = np.array([self.sx, self.sy, self.sz])
-        if add_CO:
-            self.p = self.sp + self.ex * self.tx + self.ey * self.ty
-        else:
-            self.p = self.sp
+        
+        self.p = np.array([0., 0., 0.])
+
+        if use_twiss:
+            self.p += (self.ex * self.tx + self.ey * self.ty)
+        
+        if use_survey:
+            self.p += self.sp
 
     def dist(self, other):
         return np.sqrt(np.sum((self.p - other.p) ** 2))
