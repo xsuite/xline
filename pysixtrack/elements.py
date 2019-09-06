@@ -63,6 +63,12 @@ class DriftExact(Drift):
         p.s += length
 
 
+def _arrayofsize(ar,size):
+    ar=np.array(ar)
+    if len(ar)<size:
+        ar=np.hstack([ar,np.zeros(len(ar)-size,dtype=ar.dtype)])
+    return ar
+
 class Multipole(Element):
     """ Multipole """
 
@@ -91,16 +97,8 @@ class Multipole(Element):
     def track(self, p):
         order = self.order
         length = self.length
-        knl = np.array(self.knl)
-        ksl = np.array(self.ksl)
-        if len(knl) < len(ksl):
-            nknl = np.zeros(order + 1, dtype=knl.dtype)
-            nknl[: len(knl)] = knl
-            knl = nknl
-        elif len(knl) > len(ksl):
-            nksl = np.zeros(order + 1, dtype=ksl.dtype)
-            nksl[: len(ksl)] = ksl
-            ksl = nksl
+        knl = _arrayofsize(self.knl,order+1)
+        ksl = _arrayofsize(self.ksl,order+1)
         x = p.x
         y = p.y
         chi = p.chi
@@ -133,6 +131,71 @@ class Multipole(Element):
             p.zeta -= chi * (hxlx - hyly)
         p.px += dpx
         p.py += dpy
+
+class RFMultipole(Element):
+    _description = [
+        ("voltage", "volt", "Voltage", 0),
+        ("frequency", "hertz", "Frequency", 0),
+        ("knl", "", "...", [0]),
+        ("ksl", "", "...", []),
+        ("pn", "", "...", [0]),
+        ("ps", "", "...", []),
+    ]
+    @property
+    def order(self):
+        return max(len(self.knl), len(self.ksl)) - 1
+
+    def track(self, p):
+        sin = p._m.sin
+        cos = p._m.cos
+        pi = p._m.pi
+        order = self.order
+        length = self.length
+        k = 2 * pi * self.frequency / p.clight
+        tau = p.zeta / p.rvv / p.beta0
+        ktau = k * tau
+        deg2rad = pi / 180
+        knl = np.array(self.knl)
+        ksl = np.array(self.ksl)
+        pn  = np.array(self.pn)
+        ps  = np.array(self.ps)
+        knl = _arrayofsize(self.knl,order+1)
+        ksl = _arrayofsize(self.ksl,order+1)
+        pn = _arrayofsize(self.pn,order+1) * deg2rad - ktau
+        ps = _arrayofsize(self.ps,order+1) * deg2rad - ktau
+        x = p.x
+        y = p.y
+        fnr = knl[0]
+        fni = 0
+        fsr = ksl[0]
+        fsi = 0
+        dpx = 0
+        dpy = 0
+        dptr= 0
+        for ii in range(order):
+            cn = cos (self.pn[ii])
+            sn = sin (self.pn[ii])
+            cs = cos (self.ps[ii])
+            ss = sin (self.ps[ii])
+            # transverse kick order i!
+            dpx += cn * fnr -  cs * fsi
+            dpy += cs * fsr +  cn * fni
+            # compute z**(i+1)/(i+1)!
+            zret  = (zre * x - zim * y) / ii
+            zim  = (zim * y + zre * x) / ii
+            zre  = zret
+            fnr = knl[ii] * zre
+            fni = knl[ii] * zim
+            fsr = ksl[ii] * zre
+            fsi = ksl[ii] * zim
+            # enerfy kick order i+1
+            dptr += sn * fnr -  ss * fsi
+
+        chi = p.chi
+        p.px += -chi * dpx
+        p.py += chi *dpy
+        phase = self.lag * degtorad - ktau
+        p.add_to_energy(chi * (self.voltage * sin(phase) + dptr))
 
 
 class Cavity(Element):
@@ -185,18 +248,6 @@ class SRotation(Element):
         p.py = yn
 
 
-class RFMultipole(Element):
-    _description = [
-        ("voltage", "volt", "Voltage", 0),
-        ("frequency", "hertz", "Frequency", 0),
-        ("knl", "", "...", [0]),
-        ("ksl", "", "...", []),
-        ("pn", "", "...", [0]),
-        ("ps", "", "...", []),
-    ]
-
-    def track(self, p):
-        pass
 
 
 class BeamMonitor(Element):
