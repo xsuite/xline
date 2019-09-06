@@ -65,11 +65,12 @@ class DriftExact(Drift):
         p.s += length
 
 
-def _arrayofsize(ar,size):
-    ar=np.array(ar)
-    if len(ar)<size:
-        ar=np.hstack([ar,np.zeros(len(ar)-size,dtype=ar.dtype)])
+def _arrayofsize(ar, size):
+    ar = np.array(ar)
+    if len(ar) < size:
+        ar = np.hstack([ar, np.zeros(len(ar) - size, dtype=ar.dtype)])
     return ar
+
 
 class Multipole(Element):
     """ Multipole """
@@ -99,8 +100,8 @@ class Multipole(Element):
     def track(self, p):
         order = self.order
         length = self.length
-        knl = _arrayofsize(self.knl,order+1)
-        ksl = _arrayofsize(self.ksl,order+1)
+        knl = _arrayofsize(self.knl, order + 1)
+        ksl = _arrayofsize(self.ksl, order + 1)
         x = p.x
         y = p.y
         chi = p.chi
@@ -134,6 +135,7 @@ class Multipole(Element):
         p.px += dpx
         p.py += dpy
 
+
 class RFMultipole(Element):
     _description = [
         ("voltage", "volt", "Voltage", 0),
@@ -143,6 +145,7 @@ class RFMultipole(Element):
         ("pn", "", "...", [0]),
         ("ps", "", "...", []),
     ]
+
     @property
     def order(self):
         return max(len(self.knl), len(self.ksl)) - 1
@@ -159,12 +162,12 @@ class RFMultipole(Element):
         deg2rad = pi / 180
         knl = np.array(self.knl)
         ksl = np.array(self.ksl)
-        pn  = np.array(self.pn)
-        ps  = np.array(self.ps)
-        knl = _arrayofsize(self.knl,order+1)
-        ksl = _arrayofsize(self.ksl,order+1)
-        pn = _arrayofsize(self.pn,order+1) * deg2rad - ktau
-        ps = _arrayofsize(self.ps,order+1) * deg2rad - ktau
+        pn = np.array(self.pn)
+        ps = np.array(self.ps)
+        knl = _arrayofsize(self.knl, order + 1)
+        ksl = _arrayofsize(self.ksl, order + 1)
+        pn = _arrayofsize(self.pn, order + 1) * deg2rad - ktau
+        ps = _arrayofsize(self.ps, order + 1) * deg2rad - ktau
         x = p.x
         y = p.y
         fnr = knl[0]
@@ -173,29 +176,29 @@ class RFMultipole(Element):
         fsi = 0
         dpx = 0
         dpy = 0
-        dptr= 0
+        dptr = 0
         for ii in range(order):
-            cn = cos (self.pn[ii])
-            sn = sin (self.pn[ii])
-            cs = cos (self.ps[ii])
-            ss = sin (self.ps[ii])
+            cn = cos(self.pn[ii])
+            sn = sin(self.pn[ii])
+            cs = cos(self.ps[ii])
+            ss = sin(self.ps[ii])
             # transverse kick order i!
-            dpx += cn * fnr -  cs * fsi
-            dpy += cs * fsr +  cn * fni
+            dpx += cn * fnr - cs * fsi
+            dpy += cs * fsr + cn * fni
             # compute z**(i+1)/(i+1)!
-            zret  = (zre * x - zim * y) / ii
-            zim  = (zim * y + zre * x) / ii
-            zre  = zret
+            zret = (zre * x - zim * y) / ii
+            zim = (zim * y + zre * x) / ii
+            zre = zret
             fnr = knl[ii] * zre
             fni = knl[ii] * zim
             fsr = ksl[ii] * zre
             fsi = ksl[ii] * zim
             # enerfy kick order i+1
-            dptr += sn * fnr -  ss * fsi
+            dptr += sn * fnr - ss * fsi
 
         chi = p.chi
         p.px += -chi * dpx
-        p.py += chi *dpy
+        p.py += chi * dpy
         phase = self.lag * degtorad - ktau
         p.add_to_energy(chi * (self.voltage * sin(phase) + dptr))
 
@@ -248,8 +251,6 @@ class SRotation(Element):
         yn = -sz * p.px + cz * p.py
         p.px = xn
         p.py = yn
-
-
 
 
 class BeamMonitor(Element):
