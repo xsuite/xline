@@ -265,15 +265,17 @@ class LimitRect(Element):
 
     def track(self, particle):
 
-        if hasattr(particle, '__iter__'):
+        if not hasattr(particle, '__iter__'):
             particle.state = int(x >= self.min_x and x <= self.max_x \
-                or y >= self.min_y or y <= self.max_y)
+                and y >= self.min_y and y <= self.max_y)
             if particle.state != 1:
-                return 1
+                return particle.state
         else:
-            particle.state = np.int(np.logical_and(
-                np.logical_and(x >= self.min_x, x <= self.max_x),
-                np.logical_and(y >= self.min_y or y <= self.max_y))
+            particle.state = np.int_((x >= self.min_x) & (x <= self.max_x) \
+                & (y >= self.min_y) & (y <= self.max_y))
+            particle.remove_lost_particles()
+            if len(particle.state ==0):
+                return -1
 
 
 class BeamMonitor(Element):
