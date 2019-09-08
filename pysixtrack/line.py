@@ -69,7 +69,7 @@ class Line(Element):
             ret = el.track(p)
             if ret is not None:
                 break
-       return out
+        return out
 
     def append_element(self, element, name):
         self.elements.append(element)

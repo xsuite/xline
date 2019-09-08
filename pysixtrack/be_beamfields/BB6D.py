@@ -12,7 +12,7 @@ import numpy as np
 from scipy.constants import c as c_light
 
 
-def BB6D_track(x, px, y, py, sigma, delta, q0, p0, bb6ddata):
+def BB6D_track(x, px, y, py, sigma, delta, q0, p0, bb6ddata, mathlib):
 
     # print('Input px',px)
 
@@ -80,7 +80,7 @@ def BB6D_track(x, px, y, py, sigma, delta, q0, p0, bb6ddata):
             sigma_y=np.sqrt(Sig_33_hat_star),
             min_sigma_diff=min_sigma_diff,
             skip_Gs=False,
-            mathlib=np,
+            mathlib=mathlib,
         )
 
         # Compute kicks
