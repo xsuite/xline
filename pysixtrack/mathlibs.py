@@ -2,7 +2,7 @@ from scipy.special import wofz
 
 class MathlibDefault(object):
 
-    from numpy import sqrt, exp, sin, cos, abs, pi, vectorize
+    from numpy import sqrt, exp, sin, cos, abs, pi
    
     @classmethod
     def wfun(cls, z_re, z_im):
