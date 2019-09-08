@@ -209,6 +209,7 @@ class Particles(object):
         self.partid = partid
         self.turn = turn
         self.state = state
+        self.lost_particles = []
 
     Px = property(lambda p: p.px * p.p0c * p.mratio)
     Py = property(lambda p: p.py * p.p0c * p.mratio)
@@ -388,6 +389,24 @@ class Particles(object):
         + "mass0 q0 p0c chi mratio".split()
         + "partid turn state".split()
     )
+
+    def remove_lost_particles(self, keep_memory=True):
+        
+        if hasattr(self.state, '__iter__'):
+            mask_valid = (self.state == 1)
+           
+            if np.any(~mask_valid):
+                if keep_memory:
+                    to_trash = self.copy() # Not exactly efficient (but robust)
+                    for ff in self._dict_vars:
+                        if hasattr(getattr(self, ff), '__iter__'):
+                            setattr(to_trash, ff,
+                                    getattr(self, ff)[~mask_valid])
+                    self.lost_particles.append(to_trash)
+
+            for ff in self._dict_vars:
+                if hasattr(getattr(self, ff), '__iter__'):
+                    setattr(self, ff, getattr(self, ff)[mask_valid])
 
     def to_dict(self):
         return {kk: getattr(self, kk) for kk in self._dict_vars}
