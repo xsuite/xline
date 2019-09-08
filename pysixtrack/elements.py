@@ -255,6 +255,27 @@ class SRotation(Element):
         p.py = yn
 
 
+class LimitRect(Element):
+    _description = [
+        ("min_x", "m", 'Minimum horizontal aperture', -1.), 
+        ("max_x", "m", 'Maximum horizontal aperture', 1.),
+        ("min_y", "m", 'Minimum vertical aperture', -1.),
+        ("max_y", "m", 'Minimum vertical aperture', 1.)
+    ]
+
+    def track(self, particle):
+
+        if hasattr(particle, '__iter__'):
+            particle.state = int(x >= self.min_x and x <= self.max_x \
+                or y >= self.min_y or y <= self.max_y)
+            if particle.state != 1:
+                return 1
+        else:
+            particle.state = np.int(np.logical_and(
+                np.logical_and(x >= self.min_x, x <= self.max_x),
+                np.logical_and(y >= self.min_y or y <= self.max_y))
+
+
 class BeamMonitor(Element):
     _description = [
         ("num_stores", "", "...", 0),
