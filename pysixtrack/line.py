@@ -309,7 +309,7 @@ class Line(Element):
             line, sequence, classes, ignored_madtypes, exact_drift
         )
 
-    ### error handling (alignment, multipole orders, ...)
+    # error handling (alignment, multipole orders, ...):
 
     def add_offset_error_to(self, element, dx=0, dy=0):
         # will raise error if element not present:
@@ -387,7 +387,7 @@ class Line(Element):
                     order = int(''.join(c for c in error_type if c.isdigit()))
                     max_multipole_err = max(max_multipole_err, order)
                 else:
-                    print (f'Warning: MAD-X error type "{error_type}"'
+                    print(f'Warning: MAD-X error type "{error_type}"'
                            ' not implemented yet.')
 
         elements_not_found = []
@@ -416,8 +416,10 @@ class Line(Element):
                 pass
 
             # add multipole error
-            knl = [error_table[f'k{o}l' ][i_line] for o in range(max_multipole_err + 1)]
-            ksl = [error_table[f'k{o}sl'][i_line] for o in range(max_multipole_err + 1)]
+            knl = [error_table[f'k{o}l'][i_line]
+                   for o in range(max_multipole_err + 1)]
+            ksl = [error_table[f'k{o}sl'][i_line]
+                   for o in range(max_multipole_err + 1)]
             self.add_multipole_error_to(element, knl, ksl)
 
         return elements_not_found
