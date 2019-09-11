@@ -317,8 +317,8 @@ class Line(Element):
         el_name = self.element_names[idx_el]
         if not dx and not dy:
             return
-        xyshift = pysixtrack.elements.XYShift(dx=-dx, dy=-dy)
-        inv_xyshift = pysixtrack.elements.XYShift(dx=dx, dy=dy)
+        xyshift = elements.XYShift(dx=-dx, dy=-dy)
+        inv_xyshift = elements.XYShift(dx=dx, dy=dy)
         self.insert_element(idx_el, xyshift, el_name + '_offset_in')
         self.insert_element(idx_el + 2, inv_xyshift, el_name + '_offset_out')
 
@@ -328,8 +328,8 @@ class Line(Element):
         el_name = self.element_names[idx_el]
         if not angle:
             return
-        srot = pysixtrack.elements.SRotation(angle=-angle)
-        inv_srot = pysixtrack.elements.SRotation(angle=angle)
+        srot = elements.SRotation(angle=-angle)
+        inv_srot = elements.SRotation(angle=angle)
         self.insert_element(idx_el, srot, el_name + '_tilt_in')
         self.insert_element(idx_el + 2, inv_srot, el_name + '_tilt_out')
 
