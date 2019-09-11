@@ -65,6 +65,11 @@ class Line(Element):
             el.track(p)
         return out
 
+    def insert_element(self, idx, element, name):
+        self.elements.insert(idx, element)
+        self.element_names.insert(idx, name)
+        assert len(self.elements) == len(self.element_names)
+
     def append_element(self, element, name):
         self.elements.append(element)
         self.element_names.append(name)
