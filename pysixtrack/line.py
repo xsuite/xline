@@ -308,3 +308,44 @@ class Line(Element):
         return _from_madx_sequence(
             line, sequence, classes, ignored_madtypes, exact_drift
         )
+
+    ### error handling (alignment, multipole orders, ...)
+
+    def add_offset_error_to(self, element, dx=0, dy=0):
+        # will raise error if element not present:
+        idx_el = self.elements.index(element)
+        el_name = self.element_names[idx_el]
+        if not dx and not dy:
+            return
+        xyshift = pysixtrack.elements.XYShift(dx=-dx, dy=-dy)
+        inv_xyshift = pysixtrack.elements.XYShift(dx=dx, dy=dy)
+        self.insert_element(idx_el, xyshift, el_name + '_offset_in')
+        self.insert_element(idx_el + 2, inv_xyshift, el_name + '_offset_out')
+
+    def add_tilt_error_to(self, element, angle):
+        # will raise error if element not present:
+        idx_el = self.elements.index(element)
+        el_name = self.element_names[idx_el]
+        if not angle:
+            return
+        srot = pysixtrack.elements.SRotation(angle=-angle)
+        inv_srot = pysixtrack.elements.SRotation(angle=angle)
+        self.insert_element(idx_el, srot, el_name + '_tilt_in')
+        self.insert_element(idx_el + 2, inv_srot, el_name + '_tilt_out')
+
+    def add_multipole_error_to(self, element, knl=[], ksl=[]):
+        # will raise error if element not present:
+        idx_el = self.elements.index(element)
+        el_name = self.element_names[idx_el]
+        # normal components
+        knl = np.trim_zeros(knl, trim='b')
+        if len(element.knl) < len(knl):
+            element.knl += [0] * (len(knl) - len(element.knl))
+        for i, component in enumerate(knl):
+            element.knl[i] += component
+        # skew components
+        ksl = np.trim_zeros(ksl, trim='b')
+        if len(element.ksl) < len(ksl):
+            element.ksl += [0] * (len(ksl) - len(element.ksl))
+        for i, component in enumerate(ksl):
+            element.ksl[i] += component
