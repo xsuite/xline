@@ -126,24 +126,24 @@ def _from_madx_sequence(
         elif mad_etype == "placeholder":
             if ee.slot_id == 1:
                 newele = classes.SpaceChargeCoasting(
-                    line_density = 0.0, 
-                    sigma_x = 1.0,
-                    sigma_y = 1.0,
-                    length = 0.,
-                    x_co = 0., 
-                    y_co = 0.
+                    line_density=0.0,
+                    sigma_x=1.0,
+                    sigma_y=1.0,
+                    length=0.0,
+                    x_co=0.0,
+                    y_co=0.0,
                 )
             elif ee.slot_id == 2:
                 newele = classes.SpaceChargeBunched(
-                    number_of_particles = 0.,
-                    bunchlength_rms = 0.,
-                    sigma_x = 1.,  
-                    sigma_y = 1.,
-                    length = 0.,
-                    x_co = 0.,
-                    y_co = 0.,
-                ) 
-            else: 
+                    number_of_particles=0.0,
+                    bunchlength_rms=0.0,
+                    sigma_x=1.0,
+                    sigma_y=1.0,
+                    length=0.0,
+                    x_co=0.0,
+                    y_co=0.0,
+                )
+            else:
                 newele = myDrift(length=ee.l)
         else:
             raise ValueError("Not recognized")
@@ -161,7 +161,6 @@ def _from_madx_sequence(
 
 
 class MadPoint(object):
-
     @classmethod
     def from_survey(cls, name, mad):
         return cls(name, mad, use_twiss=False, use_survey=True)
@@ -171,13 +170,14 @@ class MadPoint(object):
         return cls(name, mad, use_twiss=True, use_survey=False)
 
     def __init__(self, name, mad, use_twiss=True, use_survey=True):
-        
-        self.use_twiss = use_twiss 
+
+        self.use_twiss = use_twiss
         self.use_survey = use_survey
-        
-        if not(use_survey) and not(use_twiss):
+
+        if not (use_survey) and not (use_twiss):
             raise ValueError(
-                    'use_survey and use_twiss cannot be False at the same time') 
+                "use_survey and use_twiss cannot be False at the same time"
+            )
 
         self.name = name
         if use_twiss:
@@ -185,8 +185,8 @@ class MadPoint(object):
             names = twiss.name
         if use_survey:
             survey = mad.table.survey
-            names = survey.name 
-        
+            names = survey.name
+
         idx = np.where(names == name)[0][0]
 
         if use_twiss:
@@ -213,9 +213,9 @@ class MadPoint(object):
             self.sy = None
             self.sz = None
             self.sp = None
-            theta = 0.
-            phi = 0.
-            psi = 0.
+            theta = 0.0
+            phi = 0.0
+            psi = 0.0
 
         thetam = np.array(
             [
@@ -234,12 +234,12 @@ class MadPoint(object):
         self.ex = np.dot(wm, np.array([1, 0, 0]))
         self.ey = np.dot(wm, np.array([0, 1, 0]))
         self.ez = np.dot(wm, np.array([0, 0, 1]))
-        
-        self.p = np.array([0., 0., 0.])
+
+        self.p = np.array([0.0, 0.0, 0.0])
 
         if use_twiss:
-            self.p += (self.ex * self.tx + self.ey * self.ty)
-        
+            self.p += self.ex * self.tx + self.ey * self.ty
+
         if use_survey:
             self.p += self.sp
 

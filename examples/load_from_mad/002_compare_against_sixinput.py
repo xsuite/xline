@@ -70,8 +70,8 @@ for ii, (ee_mad, ee_six, nn_mad, nn_six) in enumerate(
 
         # Exception: multipole lrad is not passed to sixtraxk
         if isinstance(ee_mad, pysixtrack.elements.Multipole):
-            if kk == 'length':
-                if np.abs(ee_mad.hxl) + np.abs(ee_mad.hyl) == 0.:
+            if kk == "length":
+                if np.abs(ee_mad.hxl) + np.abs(ee_mad.hyl) == 0.0:
                     continue
 
         # Exceptions BB4D (separations are recalculated)
