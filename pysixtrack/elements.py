@@ -67,7 +67,9 @@ class DriftExact(Drift):
 
 def _arrayofsize(ar, size):
     ar = np.array(ar)
-    if len(ar) < size:
+    if len(ar) == 0:
+        return np.zeros(size, dtype=ar.dtype)
+    elif len(ar) < size:
         ar = np.hstack([ar, np.zeros(len(ar) - size, dtype=ar.dtype)])
     return ar
 
@@ -140,9 +142,10 @@ class RFMultipole(Element):
     _description = [
         ("voltage", "volt", "Voltage", 0),
         ("frequency", "hertz", "Frequency", 0),
-        ("knl", "", "...", [0]),
+        ("lag", "degree", "Delay in the cavity sin(lag - w tau)", 0),
+        ("knl", "", "...", (0,)),
         ("ksl", "", "...", []),
-        ("pn", "", "...", [0]),
+        ("pn", "", "...", (0,)),
         ("ps", "", "...", []),
     ]
 
@@ -198,7 +201,7 @@ class RFMultipole(Element):
         chi = p.chi
         p.px += -chi * dpx
         p.py += chi * dpy
-        phase = self.lag * degtorad - ktau
+        phase = self.lag * deg2rad - ktau
         p.add_to_energy(chi * (self.voltage * sin(phase) + dptr))
 
 
