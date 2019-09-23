@@ -189,7 +189,7 @@ class BeamBeam6D(Element):
                 p.q0 * qe,
                 p.p0c / clight * qe,
                 bb6data,
-                mathlib=p._m
+                mathlib=p._m,
             )
             self._last_bb6data = bb6data
             p.x = x_ret

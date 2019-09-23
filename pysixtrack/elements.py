@@ -179,17 +179,19 @@ class RFMultipole(Element):
         dpx = 0
         dpy = 0
         dptr = 0
-        for ii in range(order+1):
-            cn = cos(self.pn[ii])
-            sn = sin(self.pn[ii])
-            cs = cos(self.ps[ii])
-            ss = sin(self.ps[ii])
+        zre = 1
+        zim = 0
+        for ii in range(order + 1):
+            cn = cos(pn[ii])
+            sn = sin(pn[ii])
+            cs = cos(ps[ii])
+            ss = sin(ps[ii])
             # transverse kick order i!
-            dpx += cn * fnr - cs * fsi
-            dpy += cs * fsr + cn * fni
+            dpx += cn * knl[ii] * zre - cs * ksl[ii] * zim
+            dpy += cs * ksl[ii] * zre + cn * knl[ii] * zim
             # compute z**(i+1)/(i+1)!
-            zret = (zre * x - zim * y) / ii
-            zim = (zim * y + zre * x) / ii
+            zret = (zre * x - zim * y) / (ii + 1)
+            zim = (zim * y + zre * x) / (ii + 1)
             zre = zret
             fnr = knl[ii] * zre
             fni = knl[ii] * zim
@@ -257,24 +259,35 @@ class SRotation(Element):
 
 class LimitRect(Element):
     _description = [
-        ("min_x", "m", 'Minimum horizontal aperture', -1.), 
-        ("max_x", "m", 'Maximum horizontal aperture', 1.),
-        ("min_y", "m", 'Minimum vertical aperture', -1.),
-        ("max_y", "m", 'Minimum vertical aperture', 1.)
+        ("min_x", "m", "Minimum horizontal aperture", -1.0),
+        ("max_x", "m", "Maximum horizontal aperture", 1.0),
+        ("min_y", "m", "Minimum vertical aperture", -1.0),
+        ("max_y", "m", "Minimum vertical aperture", 1.0),
     ]
 
     def track(self, particle):
 
-        if not hasattr(particle, '__iter__'):
-            particle.state = int(x >= self.min_x and x <= self.max_x \
-                and y >= self.min_y and y <= self.max_y)
+        x=particle.x
+        y=particle.y
+
+        if not hasattr(particle, "__iter__"):
+            particle.state = int(
+                x >= self.min_x
+                and x <= self.max_x
+                and y >= self.min_y
+                and y <= self.max_y
+            )
             if particle.state != 1:
                 return particle.state
         else:
-            particle.state = np.int_((x >= self.min_x) & (x <= self.max_x) \
-                & (y >= self.min_y) & (y <= self.max_y))
+            particle.state = np.int_(
+                (x >= self.min_x)
+                & (x <= self.max_x)
+                & (y >= self.min_y)
+                & (y <= self.max_y)
+            )
             particle.remove_lost_particles()
-            if len(particle.state ==0):
+            if len(particle.state == 0):
                 return -1
 
 
