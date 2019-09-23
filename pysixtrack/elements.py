@@ -70,7 +70,7 @@ def _arrayofsize(ar, size):
     if len(ar) == 0:
         return np.zeros(size, dtype=ar.dtype)
     elif len(ar) < size:
-        ar = np.hstack([ar, np.zeros(len(ar) - size, dtype=ar.dtype)])
+        ar = np.hstack([ar, np.zeros(size - len(ar), dtype=ar.dtype)])
     return ar
 
 
