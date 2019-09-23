@@ -179,7 +179,7 @@ class RFMultipole(Element):
         dpx = 0
         dpy = 0
         dptr = 0
-        for ii in range(order):
+        for ii in range(order+1):
             cn = cos(self.pn[ii])
             sn = sin(self.pn[ii])
             cs = cos(self.ps[ii])
@@ -195,7 +195,7 @@ class RFMultipole(Element):
             fni = knl[ii] * zim
             fsr = ksl[ii] * zre
             fsi = ksl[ii] * zim
-            # enerfy kick order i+1
+            # energy kick order i+1
             dptr += sn * fnr - ss * fsi
 
         chi = p.chi
