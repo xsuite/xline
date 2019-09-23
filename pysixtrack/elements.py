@@ -155,7 +155,6 @@ class RFMultipole(Element):
         cos = p._m.cos
         pi = p._m.pi
         order = self.order
-        length = self.length
         k = 2 * pi * self.frequency / p.clight
         tau = p.zeta / p.rvv / p.beta0
         ktau = k * tau
