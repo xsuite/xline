@@ -17,21 +17,19 @@ knl  = rf_mulitpole_mad.knl
 pnl  = np.array(rf_mulitpole_mad.pnl) * 360 # MAD units are 2pi
 lag  = rf_mulitpole_mad.lag * 360 # MAD units are 2pi
 
-my_rf_multipole = pysixtrack.elements.RFMultipole(voltage=0, frequency=freq, lag=lag, knl=knl, ksl=[0], pn=pnl, ps=[0])
+my_rf_multipole = pysixtrack.elements.RFMultipole(voltage=0, 
+    frequency=freq, lag=lag, knl=knl, ksl=[0], pn=pnl, ps=[0])
 
 p0c = mad_sequence.beam.pc * 1e9
-x   = tracksumm_madx.x[0]
-px  = tracksumm_madx.px[0]
-y   = tracksumm_madx.y[0]
-py  = tracksumm_madx.py[0]
-t   = tracksumm_madx.t[0]
-pt  = tracksumm_madx.pt[0]
+x = tracksumm_madx.x[0]
+px = tracksumm_madx.px[0]
+y = tracksumm_madx.y[0]
+py = tracksumm_madx.py[0]
+t = tracksumm_madx.t[0]
+pt = tracksumm_madx.pt[0]
 
 part = Particles(p0c=p0c, x=x, px=px, y=y, py=py, tau=t, pt=pt)
 # print(part)
 
 my_rf_multipole.track(part)
 print(part)
-
-# part(p0c=p0c, x=x, px=px, y=y, py=py, zeta=?, delta=?)
-''
