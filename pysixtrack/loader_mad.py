@@ -4,8 +4,9 @@ from . import elements as pysixtrack_elements
 
 
 def _from_madx_sequence(
-    line, sequence, classes=pysixtrack_elements, ignored_madtypes=[], exact_drift=False
-):
+    line, sequence, classes=pysixtrack_elements, ignored_madtypes=[], 
+    exact_drift=False, install_apertures=False
+    ):
 
     if exact_drift:
         myDrift = classes.ExactDrift
@@ -146,10 +147,24 @@ def _from_madx_sequence(
             else:
                 newele = myDrift(length=ee.l)
         else:
-            raise ValueError("Not recognized")
+            raise ValueError("Not recognized")          
 
         line.elements.append(newele)
         line.element_names.append(eename)
+
+        if install_apertures & (min(ee.aperture) > 0):
+            if ee.apertype == 'rectangle':
+                newaperture = pysixtrack_elements.LimitRect( 
+                    min_x=-ee.aperture[0], max_x=ee.aperture[0],
+                    min_y=-ee.aperture[1], max_y=ee.aperture[1])
+            elif ee.apertype == 'ellipse':
+                newaperture = pysixtrack_elements.LimitEllipse(
+                    a=ee.aperture[0], b=ee.aperture[1]) 
+            else:
+                raise ValueError("Aperture type not recognized")
+                
+            line.elements.append(newaperture)
+            line.element_names.append(eename + '_aperture')
 
     if hasattr(seq, "length") and seq.length > old_pp:
         line.elements.append(myDrift(length=(seq.length - old_pp)))
