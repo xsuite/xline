@@ -8,7 +8,7 @@ def _from_madx_sequence(
 ):
 
     if exact_drift:
-        myDrift = classes.ExactDrift
+        myDrift = classes.DriftExact
     else:
         myDrift = classes.Drift
     seq = sequence
