@@ -8,7 +8,7 @@ def _from_madx_sequence(
 ):
 
     if exact_drift:
-        myDrift = classes.ExactDrift
+        myDrift = classes.DriftExact
     else:
         myDrift = classes.Drift
     seq = sequence
@@ -146,7 +146,7 @@ def _from_madx_sequence(
             else:
                 newele = myDrift(length=ee.l)
         else:
-            raise ValueError("Not recognized")
+            raise ValueError(f"MAD element \"{mad_etype}\" not recognized")
 
         line.elements.append(newele)
         line.element_names.append(eename)

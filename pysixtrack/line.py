@@ -71,6 +71,11 @@ class Line(Element):
                 break
         return out
 
+    def insert_element(self, idx, element, name):
+        self.elements.insert(idx, element)
+        self.element_names.insert(idx, name)
+        assert len(self.elements) == len(self.element_names)
+
     def append_element(self, element, name):
         self.elements.append(element)
         self.element_names.append(name)
@@ -309,3 +314,118 @@ class Line(Element):
         return _from_madx_sequence(
             line, sequence, classes, ignored_madtypes, exact_drift
         )
+
+    # error handling (alignment, multipole orders, ...):
+
+    def add_offset_error_to(self, element, dx=0, dy=0):
+        # will raise error if element not present:
+        idx_el = self.elements.index(element)
+        el_name = self.element_names[idx_el]
+        if not dx and not dy:
+            return
+        xyshift = elements.XYShift(dx=dx, dy=dy)
+        inv_xyshift = elements.XYShift(dx=-dx, dy=-dy)
+        self.insert_element(idx_el, xyshift, el_name + '_offset_in')
+        self.insert_element(idx_el + 2, inv_xyshift, el_name + '_offset_out')
+
+    def add_tilt_error_to(self, element, angle):
+        # will raise error if element not present:
+        idx_el = self.elements.index(element)
+        el_name = self.element_names[idx_el]
+        if not angle:
+            return
+        srot = elements.SRotation(angle=angle)
+        inv_srot = elements.SRotation(angle=-angle)
+        self.insert_element(idx_el, srot, el_name + '_tilt_in')
+        self.insert_element(idx_el + 2, inv_srot, el_name + '_tilt_out')
+
+    def add_multipole_error_to(self, element, knl=[], ksl=[]):
+        # will raise error if element not present:
+        idx_el = self.elements.index(element)
+        el_name = self.element_names[idx_el]
+        # normal components
+        knl = np.trim_zeros(knl, trim='b')
+        if len(element.knl) < len(knl):
+            element.knl += [0] * (len(knl) - len(element.knl))
+        for i, component in enumerate(knl):
+            element.knl[i] += component
+        # skew components
+        ksl = np.trim_zeros(ksl, trim='b')
+        if len(element.ksl) < len(ksl):
+            element.ksl += [0] * (len(ksl) - len(element.ksl))
+        for i, component in enumerate(ksl):
+            element.ksl[i] += component
+
+    def apply_madx_errors(self, error_table):
+        '''Applies MAD-X error_table (with multipole errors,
+        dx and dy offset errors and dpsi tilt errors)
+        to existing elements in this Line instance.
+
+        Return error_table names which were not found in the
+        elements of this Line instance (and thus not treated).
+
+        Example via cpymad:
+            madx = cpymad.madx.Madx()
+
+            # (...set up lattice and errors in cpymad...)
+
+            seq = madx.sequence.some_lattice
+            # store already applied errors:
+            madx.command.esave(file='lattice_errors.err')
+            madx.command.readtable(
+                file='lattice_errors.err', table="errors")
+            errors = madx.table.errors
+
+            pysixtrack_line, _ = Line.from_madx_sequence(seq)
+            pysixtrack_line.apply_madx_errors(errors)
+        '''
+        max_multipole_err = 0
+        # check for errors in table which cannot be treated yet:
+        for error_type in error_table.keys():
+            if error_type == 'name':
+                continue
+            if any(error_table[error_type]):
+                if error_type in ['dx', 'dy', 'dpsi']:
+                    # available alignment error
+                    continue
+                elif error_type[:1] == 'k' and error_type[-1:] == 'l':
+                    # available multipole error
+                    order = int(''.join(c for c in error_type if c.isdigit()))
+                    max_multipole_err = max(max_multipole_err, order)
+                else:
+                    print(f'Warning: MAD-X error type "{error_type}"'
+                           ' not implemented yet.')
+
+        elements_not_found = []
+        for i_line, element_name in enumerate(error_table['name']):
+            if not element_name in self.element_names:
+                elements_not_found.append(element_name)
+                continue
+            element = self.elements[self.element_names.index(element_name)]
+
+            # add offset
+            try:
+                dx = error_table['dx'][i_line]
+            except KeyError:
+                dx = 0
+            try:
+                dy = error_table['dy'][i_line]
+            except KeyError:
+                dy = 0
+            self.add_offset_error_to(element, dx, dy)
+
+            # add tilt
+            try:
+                dpsi = error_table['dpsi'][i_line]
+                self.add_tilt_error_to(element, angle=dpsi * 180 / np.pi)
+            except KeyError:
+                pass
+
+            # add multipole error
+            knl = [error_table[f'k{o}l'][i_line]
+                   for o in range(max_multipole_err + 1)]
+            ksl = [error_table[f'k{o}sl'][i_line]
+                   for o in range(max_multipole_err + 1)]
+            self.add_multipole_error_to(element, knl, ksl)
+
+        return elements_not_found
