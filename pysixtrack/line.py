@@ -55,14 +55,20 @@ class Line(Element):
         return self
 
     def track(self, p):
+        ret = None
         for el in self.elements:
-            el.track(p)
+            ret = el.track(p)
+            if ret is not None:
+                break
+        return ret
 
     def track_elem_by_elem(self, p):
         out = []
         for el in self.elements:
             out.append(p.copy())
-            el.track(p)
+            ret = el.track(p)
+            if ret is not None:
+                break
         return out
 
     def insert_element(self, idx, element, name):

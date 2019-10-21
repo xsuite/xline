@@ -1,15 +1,5 @@
 import numpy as np
-
-# attaching faddeeva to np
-from scipy.special import wofz
-
-
-def wfun(z_re, z_im):
-    w = wofz(z_re + 1j * z_im)
-    return w.real, w.imag
-
-
-np.wfun = wfun
+from .mathlibs import MathlibDefault
 
 
 def count_not_none(*lst):
@@ -198,7 +188,7 @@ class Particles(object):
         turn=None,
         state=None,
         elemid=None,
-        mathlib=np,
+        mathlib=MathlibDefault,
         **args,
     ):
 
@@ -220,6 +210,7 @@ class Particles(object):
         self.partid = partid
         self.turn = turn
         self.state = state
+        self.lost_particles = []
 
     Px = property(lambda p: p.px * p.p0c * p.mratio)
     Py = property(lambda p: p.py * p.p0c * p.mratio)
@@ -400,9 +391,42 @@ class Particles(object):
         + "partid turn state".split()
     )
 
+    def remove_lost_particles(self, keep_memory=True):
+
+        if hasattr(self.state, "__iter__"):
+            mask_valid = self.state == 1
+
+            if np.any(~mask_valid):
+                if keep_memory:
+                    to_trash = self.copy()  # Not exactly efficient (but robust)
+                    for ff in self._dict_vars:
+                        if hasattr(getattr(self, ff), "__iter__"):
+                            setattr(to_trash, ff, getattr(self, ff)[~mask_valid])
+                    self.lost_particles.append(to_trash)
+
+            for ff in self._dict_vars:
+                if hasattr(getattr(self, ff), "__iter__"):
+                    setattr(self, ff, getattr(self, ff)[mask_valid])
+
     def to_dict(self):
         return {kk: getattr(self, kk) for kk in self._dict_vars}
 
     @classmethod
     def from_dict(cls, dct):
         return cls(**dct)
+
+    def compare(self, particle, rel_tol=1e-6, abs_tol=1e-15):
+        res=True
+        for kk in self._dict_vars:
+            v1=getattr(self,kk)
+            v2=getattr(particle,kk)
+            if v1 is not None and v2 is not None:
+               diff=v1-v2
+               if abs(diff)>abs_tol:
+                  print(kk,v1,v2,diff)
+                  res=False
+               if abs(v1)>0 and abs(diff)/v1>rel_tol:
+                  print(kk,v1,v2,abs(diff)/v1)
+                  res=False
+        return res
+

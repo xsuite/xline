@@ -67,8 +67,10 @@ class DriftExact(Drift):
 
 def _arrayofsize(ar, size):
     ar = np.array(ar)
-    if len(ar) < size:
-        ar = np.hstack([ar, np.zeros(len(ar) - size, dtype=ar.dtype)])
+    if len(ar) == 0:
+        return np.zeros(size, dtype=ar.dtype)
+    elif len(ar) < size:
+        ar = np.hstack([ar, np.zeros(size - len(ar), dtype=ar.dtype)])
     return ar
 
 
@@ -140,9 +142,10 @@ class RFMultipole(Element):
     _description = [
         ("voltage", "volt", "Voltage", 0),
         ("frequency", "hertz", "Frequency", 0),
-        ("knl", "", "...", [0]),
+        ("lag", "degree", "Delay in the cavity sin(lag - w tau)", 0),
+        ("knl", "", "...", (0,)),
         ("ksl", "", "...", []),
-        ("pn", "", "...", [0]),
+        ("pn", "", "...", (0,)),
         ("ps", "", "...", []),
     ]
 
@@ -155,7 +158,6 @@ class RFMultipole(Element):
         cos = p._m.cos
         pi = p._m.pi
         order = self.order
-        length = self.length
         k = 2 * pi * self.frequency / p.clight
         tau = p.zeta / p.rvv / p.beta0
         ktau = k * tau
@@ -177,29 +179,31 @@ class RFMultipole(Element):
         dpx = 0
         dpy = 0
         dptr = 0
-        for ii in range(order):
-            cn = cos(self.pn[ii])
-            sn = sin(self.pn[ii])
-            cs = cos(self.ps[ii])
-            ss = sin(self.ps[ii])
+        zre = 1
+        zim = 0
+        for ii in range(order + 1):
+            cn = cos(pn[ii])
+            sn = sin(pn[ii])
+            cs = cos(ps[ii])
+            ss = sin(ps[ii])
             # transverse kick order i!
-            dpx += cn * fnr - cs * fsi
-            dpy += cs * fsr + cn * fni
+            dpx += cn * knl[ii] * zre - cs * ksl[ii] * zim
+            dpy += cs * ksl[ii] * zre + cn * knl[ii] * zim
             # compute z**(i+1)/(i+1)!
-            zret = (zre * x - zim * y) / ii
-            zim = (zim * y + zre * x) / ii
+            zret = (zre * x - zim * y) / (ii + 1)
+            zim = (zim * y + zre * x) / (ii + 1)
             zre = zret
             fnr = knl[ii] * zre
             fni = knl[ii] * zim
             fsr = ksl[ii] * zre
             fsi = ksl[ii] * zim
-            # enerfy kick order i+1
+            # energy kick order i+1
             dptr += sn * fnr - ss * fsi
 
         chi = p.chi
         p.px += -chi * dpx
         p.py += chi * dpy
-        phase = self.lag * degtorad - ktau
+        phase = self.lag * deg2rad - ktau
         p.add_to_energy(chi * (self.voltage * sin(phase) + dptr))
 
 
@@ -251,6 +255,40 @@ class SRotation(Element):
         yn = -sz * p.px + cz * p.py
         p.px = xn
         p.py = yn
+
+
+class LimitRect(Element):
+    _description = [
+        ("min_x", "m", "Minimum horizontal aperture", -1.0),
+        ("max_x", "m", "Maximum horizontal aperture", 1.0),
+        ("min_y", "m", "Minimum vertical aperture", -1.0),
+        ("max_y", "m", "Minimum vertical aperture", 1.0),
+    ]
+
+    def track(self, particle):
+
+        x=particle.x
+        y=particle.y
+
+        if not hasattr(particle, "__iter__"):
+            particle.state = int(
+                x >= self.min_x
+                and x <= self.max_x
+                and y >= self.min_y
+                and y <= self.max_y
+            )
+            if particle.state != 1:
+                return particle.state
+        else:
+            particle.state = np.int_(
+                (x >= self.min_x)
+                & (x <= self.max_x)
+                & (y >= self.min_y)
+                & (y <= self.max_y)
+            )
+            particle.remove_lost_particles()
+            if len(particle.state == 0):
+                return -1
 
 
 class BeamMonitor(Element):
