@@ -267,8 +267,8 @@ class LimitRect(Element):
 
     def track(self, particle):
 
-        x=particle.x
-        y=particle.y
+        x = particle.x
+        y = particle.y
 
         if not hasattr(particle, "__iter__"):
             particle.state = int(

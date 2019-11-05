@@ -416,17 +416,16 @@ class Particles(object):
         return cls(**dct)
 
     def compare(self, particle, rel_tol=1e-6, abs_tol=1e-15):
-        res=True
+        res = True
         for kk in self._dict_vars:
-            v1=getattr(self,kk)
-            v2=getattr(particle,kk)
+            v1 = getattr(self, kk)
+            v2 = getattr(particle, kk)
             if v1 is not None and v2 is not None:
-               diff=v1-v2
-               if abs(diff)>abs_tol:
-                  print(kk,v1,v2,diff)
-                  res=False
-               if abs(v1)>0 and abs(diff)/v1>rel_tol:
-                  print(kk,v1,v2,abs(diff)/v1)
-                  res=False
+                diff = v1 - v2
+                if abs(diff) > abs_tol:
+                    print(kk, v1, v2, diff)
+                    res = False
+                if abs(v1) > 0 and abs(diff) / v1 > rel_tol:
+                    print(kk, v1, v2, abs(diff) / v1)
+                    res = False
         return res
-
