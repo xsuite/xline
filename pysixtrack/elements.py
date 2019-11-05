@@ -222,7 +222,7 @@ class Cavity(Element):
         k = 2 * pi * self.frequency / p.clight
         tau = p.zeta / p.rvv / p.beta0
         phase = self.lag * pi / 180 - k * tau
-        p.add_to_energy(p.chi * self.voltage * sin(phase))
+        p.add_to_energy(p.qratio * p.q0 * self.voltage * sin(phase))
 
 
 class XYShift(Element):
