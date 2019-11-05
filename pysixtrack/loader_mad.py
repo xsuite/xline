@@ -146,7 +146,7 @@ def _from_madx_sequence(
             else:
                 newele = myDrift(length=ee.l)
         else:
-            raise ValueError(f"MAD element \"{mad_etype}\" not recognized")
+            raise ValueError(f'MAD element "{mad_etype}" not recognized')
 
         line.elements.append(newele)
         line.element_names.append(eename)
