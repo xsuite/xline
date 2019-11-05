@@ -270,7 +270,7 @@ class LimitRect(Element):
         x = particle.x
         y = particle.y
 
-        if not hasattr(particle, "__iter__"):
+        if not hasattr(particle.state, "__iter__"):
             particle.state = int(
                 x >= self.min_x
                 and x <= self.max_x
@@ -286,6 +286,29 @@ class LimitRect(Element):
                 & (y >= self.min_y)
                 & (y <= self.max_y)
             )
+            particle.remove_lost_particles()
+            if len(particle.state == 0):
+                return -1
+
+class LimitEllipse(Element):
+    _description = [
+        ("a", "m^2", "Horizontal semiaxis", 1.0),
+        ("b", "m^2", "Vertical semiaxis", 1.0),
+    ]
+
+    def track(self, particle):
+
+        x=particle.x
+        y=particle.y
+
+        if not hasattr(particle.state, "__iter__"):
+            particle.state = int(
+                x*x/(self.a*self.a) + y*y/(self.b*self.b) <= 1.)
+            if particle.state != 1:
+                return particle.state
+        else:
+            particle.state = np.int_(
+                x*x/(self.a*self.a) + y*y/(self.b*self.b) <= 1.)
             particle.remove_lost_particles()
             if len(particle.state == 0):
                 return -1
