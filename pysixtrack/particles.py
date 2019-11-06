@@ -386,9 +386,9 @@ class Particles(object):
         return out
 
     _dict_vars = (
-        "s x px y py delta zeta".split()
-        + "mass0 q0 p0c chi mratio".split()
-        + "partid turn state".split()
+        's', 'x', 'px', 'y', 'py', 'delta', 'zeta',
+        'mass0', 'q0', 'p0c', 'chi', 'mratio',
+        'partid', 'turn', 'state'
     )
 
     def remove_lost_particles(self, keep_memory=True):
@@ -429,4 +429,30 @@ class Particles(object):
                   print(kk,v1,v2,abs(diff)/v1)
                   res=False
         return res
+
+    @classmethod
+    def from_twiss(cls,twiss):
+        out= cls(p0c=twiss.summary.pc*1e6,
+                 mass0=twiss.summary.mass*1e6,
+                 q0=twiss.summary.charge,
+                 s=twiss.s[:],
+                 x=twiss.x[:],
+                 px=twiss.px[:],
+                 y=twiss.py[:],
+                 py=twiss.py[:],
+                 tau=twiss.t[:],
+                 ptau=twiss.pt[:]
+                )
+        return out
+
+    @classmethod
+    def from_list(cls,lst):
+        ll=len(lst)
+        dct={ nn: np.zeros(ll) for nn in cls._dict_vars}
+        for ii,pp in enumerate(lst):
+            for nn in cls._dict_vars:
+               dct[nn][ii]=getattr(pp,nn,0)
+        return cls(**dct)
+
+
 
