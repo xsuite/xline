@@ -41,7 +41,9 @@ mad.use(seq_name)
 
 # Determine space charge locations
 temp_line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)
-sc_locations, sc_lengths = bt.determine_sc_locations(temp_line, n_SCkicks, length_fuzzy)
+sc_locations, sc_lengths = bt.determine_sc_locations(
+    temp_line, n_SCkicks, length_fuzzy
+)
 
 # Install spacecharge place holders
 sc_names = ["sc%d" % number for number in range(len(sc_locations))]
@@ -69,7 +71,9 @@ elif sc_mode == "Coasting":
     )
 else:
     raise ValueError("mode not understood")
-bt.check_spacecharge_consistency(sc_elements, sc_names, sc_lengths, mad_sc_names)
+bt.check_spacecharge_consistency(
+    sc_elements, sc_names, sc_lengths, mad_sc_names
+)
 
 # Setup spacecharge in the line
 if sc_mode == "Bunched":

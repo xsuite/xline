@@ -147,7 +147,9 @@ class BB6D_Data(object):
         buffer_list.append(self.parboost.tobuffer())
         buffer_list.append(self.Sigmas_0_star.tobuffer())
         buffer_list.append(np.array([self.min_sigma_diff], dtype=np.float64))
-        buffer_list.append(np.array([self.threshold_singular], dtype=np.float64))
+        buffer_list.append(
+            np.array([self.threshold_singular], dtype=np.float64)
+        )
         buffer_list.append(int_to_float64arr(self.N_slices))
 
         buffer_list.append(np.array([self.delta_x], dtype=np.float64))

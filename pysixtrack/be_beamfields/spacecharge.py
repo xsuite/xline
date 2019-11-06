@@ -39,7 +39,13 @@ class SpaceChargeCoasting(Element):
             p0c = p.p0c * qe
 
             Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(
-                x, y, sigma_x, sigma_y, min_sigma_diff=1e-10, skip_Gs=True, mathlib=p._m
+                x,
+                y,
+                sigma_x,
+                sigma_y,
+                min_sigma_diff=1e-10,
+                skip_Gs=True,
+                mathlib=p._m,
             )
 
             fact_kick = (
@@ -97,7 +103,13 @@ class SpaceChargeBunched(Element):
             p0c = p.p0c * qe
 
             Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(
-                x, y, sigma_x, sigma_y, min_sigma_diff=1e-10, skip_Gs=True, mathlib=p._m
+                x,
+                y,
+                sigma_x,
+                sigma_y,
+                min_sigma_diff=1e-10,
+                skip_Gs=True,
+                mathlib=p._m,
             )
 
             fact_kick = chi * charge * charge * (1 - beta * beta) / p0c * length
@@ -105,7 +117,9 @@ class SpaceChargeBunched(Element):
             fact_kick *= (
                 self.number_of_particles
                 / (bunchlength_rms * sqrt(2 * pi))
-                * exp(-0.5 * (sigma / bunchlength_rms) * (sigma / bunchlength_rms))
+                * exp(
+                    -0.5 * (sigma / bunchlength_rms) * (sigma / bunchlength_rms)
+                )
             )
 
             px += fact_kick * Ex

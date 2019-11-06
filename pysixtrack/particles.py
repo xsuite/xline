@@ -413,7 +413,9 @@ class Particles(object):
                     to_trash = self.copy()  # Not exactly efficient (but robust)
                     for ff in self._dict_vars:
                         if hasattr(getattr(self, ff), "__iter__"):
-                            setattr(to_trash, ff, getattr(self, ff)[~mask_valid])
+                            setattr(
+                                to_trash, ff, getattr(self, ff)[~mask_valid]
+                            )
                     self.lost_particles.append(to_trash)
 
             for ff in self._dict_vars:

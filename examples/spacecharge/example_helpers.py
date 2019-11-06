@@ -55,7 +55,14 @@ def track_particle_sixtrack(
     n_turns,
 ):
 
-    Dx_wrt_CO_m, Dpx_wrt_CO_rad, Dy_wrt_CO_m, Dpy_wrt_CO_rad, Dsigma_wrt_CO_m, Ddelta_wrt_CO = vectorize_all_coords(
+    (
+        Dx_wrt_CO_m,
+        Dpx_wrt_CO_rad,
+        Dy_wrt_CO_m,
+        Dpy_wrt_CO_rad,
+        Dsigma_wrt_CO_m,
+        Ddelta_wrt_CO,
+    ) = vectorize_all_coords(
         Dx_wrt_CO_m,
         Dpx_wrt_CO_rad,
         Dy_wrt_CO_m,
@@ -190,7 +197,14 @@ def track_particle_pysixtrack(
     verbose=False,
 ):
 
-    Dx_wrt_CO_m, Dpx_wrt_CO_rad, Dy_wrt_CO_m, Dpy_wrt_CO_rad, Dsigma_wrt_CO_m, Ddelta_wrt_CO = vectorize_all_coords(
+    (
+        Dx_wrt_CO_m,
+        Dpx_wrt_CO_rad,
+        Dy_wrt_CO_m,
+        Dpy_wrt_CO_rad,
+        Dsigma_wrt_CO_m,
+        Ddelta_wrt_CO,
+    ) = vectorize_all_coords(
         Dx_wrt_CO_m,
         Dpx_wrt_CO_rad,
         Dy_wrt_CO_m,
@@ -249,7 +263,14 @@ def track_particle_sixtracklib(
     device=None,
 ):
 
-    Dx_wrt_CO_m, Dpx_wrt_CO_rad, Dy_wrt_CO_m, Dpy_wrt_CO_rad, Dsigma_wrt_CO_m, Ddelta_wrt_CO = vectorize_all_coords(
+    (
+        Dx_wrt_CO_m,
+        Dpx_wrt_CO_rad,
+        Dy_wrt_CO_m,
+        Dpy_wrt_CO_rad,
+        Dsigma_wrt_CO_m,
+        Ddelta_wrt_CO,
+    ) = vectorize_all_coords(
         Dx_wrt_CO_m,
         Dpx_wrt_CO_rad,
         Dy_wrt_CO_m,

@@ -64,7 +64,8 @@ for nbb1, nbb2 in zip(bb_names_b1, bb_names_b2):
 
 # Check number of slices
 assert (
-    len([nn for nn in bb_names_b1 if nn.startswith("bb_ho.l1")]) == (n_slices - 1) / 2
+    len([nn for nn in bb_names_b1 if nn.startswith("bb_ho.l1")])
+    == (n_slices - 1) / 2
 )
 
 # Correct for small shifts between surveys of the two beams
@@ -85,7 +86,9 @@ mad_ft.call("mad/lhcwbb_fortracking.seq")
 mad_ft.use("lhcb1")  # without this the sequence does not work properly
 
 # Build pysixtrack line
-line_for_tracking, _ = pysixtrack.Line.from_madx_sequence(mad_ft.sequence["lhcb1"])
+line_for_tracking, _ = pysixtrack.Line.from_madx_sequence(
+    mad_ft.sequence["lhcb1"]
+)
 
 # Setup 4D and 6D beam beam lenses
 setup_beam_beam_in_line(
@@ -101,7 +104,9 @@ setup_beam_beam_in_line(
 )
 
 # A check
-assert np.abs(line_for_tracking.get_length() - mad.sequence.lhcb1.beam.circ) < 1e-6
+assert (
+    np.abs(line_for_tracking.get_length() - mad.sequence.lhcb1.beam.circ) < 1e-6
+)
 
 # There is a problem in the mask
 # (the RF frequancy is wrong in the machine for tracking
@@ -112,7 +117,9 @@ dct_correct_cavities = dict(
 )
 for ii, nn in enumerate(line_for_tracking.element_names):
     if nn in dct_correct_cavities.keys():
-        line_for_tracking.elements[ii].frequency = dct_correct_cavities[nn].frequency
+        line_for_tracking.elements[ii].frequency = dct_correct_cavities[
+            nn
+        ].frequency
 
 # Save line
 with open("line_from_mad.pkl", "wb") as fid:

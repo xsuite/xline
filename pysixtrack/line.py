@@ -200,7 +200,9 @@ class Line(Element):
             pcl.delta = coord[5]
 
             self.track(pcl)
-            coord_out = np.array([pcl.x, pcl.px, pcl.y, pcl.py, pcl.sigma, pcl.delta])
+            coord_out = np.array(
+                [pcl.x, pcl.px, pcl.y, pcl.py, pcl.sigma, pcl.delta]
+            )
 
             return coord_out
 
@@ -213,7 +215,9 @@ class Line(Element):
         else:
             import scipy.optimize as so
 
-            res = so.minimize(_CO_error, np.array(guess), tol=1e-20, method=method)
+            res = so.minimize(
+                _CO_error, np.array(guess), tol=1e-20, method=method
+            )
 
         pcl = Particles(p0c=p0c)
 
@@ -428,8 +432,14 @@ class Line(Element):
                 pass
 
             # add multipole error
-            knl = [error_table[f"k{o}l"][i_line] for o in range(max_multipole_err + 1)]
-            ksl = [error_table[f"k{o}sl"][i_line] for o in range(max_multipole_err + 1)]
+            knl = [
+                error_table[f"k{o}l"][i_line]
+                for o in range(max_multipole_err + 1)
+            ]
+            ksl = [
+                error_table[f"k{o}sl"][i_line]
+                for o in range(max_multipole_err + 1)
+            ]
             self.add_multipole_error_to(element, knl, ksl)
 
         return elements_not_found

@@ -11,7 +11,9 @@ def _get_transv_field_gauss_round(sigma, Delta_x, Delta_y, x, y, mathlib):
     if r2 < 1e-20:
         temp = sqrt(r2) / (2.0 * pi * epsilon_0 * sigma)  # linearised
     else:
-        temp = (1 - exp(-0.5 * r2 / (sigma * sigma))) / (2.0 * pi * epsilon_0 * r2)
+        temp = (1 - exp(-0.5 * r2 / (sigma * sigma))) / (
+            2.0 * pi * epsilon_0 * r2
+        )
 
     Ex = temp * (x - Delta_x)
     Ey = temp * (y - Delta_y)
@@ -24,7 +26,9 @@ get_transv_field_gauss_round = np.vectorize(
 )
 
 
-def _get_transv_field_gauss_ellip(sigmax, sigmay, Delta_x, Delta_y, x, y, mathlib):
+def _get_transv_field_gauss_ellip(
+    sigmax, sigmay, Delta_x, Delta_y, x, y, mathlib
+):
 
     abs = mathlib.abs
     exp = mathlib.exp
@@ -54,7 +58,8 @@ def _get_transv_field_gauss_ellip(sigmax, sigmay, Delta_x, Delta_y, x, y, mathli
         w_etaBE_re, w_etaBE_im = wfun(etaBE_re / S, etaBE_im / S)
 
         expBE = exp(
-            -abx * abx / (2 * sigmax * sigmax) - aby * aby / (2 * sigmay * sigmay)
+            -abx * abx / (2 * sigmax * sigmax)
+            - aby * aby / (2 * sigmay * sigmay)
         )
 
         Ex = factBE * (w_zetaBE_im - w_etaBE_im * expBE)
@@ -75,7 +80,8 @@ def _get_transv_field_gauss_ellip(sigmax, sigmay, Delta_x, Delta_y, x, y, mathli
         w_etaBE_re, w_etaBE_im = wfun(etaBE_re / S, etaBE_im / S)
 
         expBE = exp(
-            -aby * aby / (2 * sigmay * sigmay) - abx * abx / (2 * sigmax * sigmax)
+            -aby * aby / (2 * sigmay * sigmay)
+            - abx * abx / (2 * sigmax * sigmax)
         )
 
         Ey = factBE * (w_zetaBE_im - w_etaBE_im * expBE)
@@ -97,7 +103,9 @@ get_transv_field_gauss_ellip = np.vectorize(
 )
 
 
-def _get_Ex_Ey_Gx_Gy_gauss(x, y, sigma_x, sigma_y, min_sigma_diff, skip_Gs, mathlib):
+def _get_Ex_Ey_Gx_Gy_gauss(
+    x, y, sigma_x, sigma_y, min_sigma_diff, skip_Gs, mathlib
+):
 
     abs = mathlib.abs
     pi = mathlib.pi
@@ -109,7 +117,9 @@ def _get_Ex_Ey_Gx_Gy_gauss(x, y, sigma_x, sigma_y, min_sigma_diff, skip_Gs, math
         Delta_x = 0.0
         Delta_y = 0.0
 
-        Ex, Ey = get_transv_field_gauss_round(sigma, Delta_x, Delta_y, x, y, mathlib)
+        Ex, Ey = get_transv_field_gauss_round(
+            sigma, Delta_x, Delta_y, x, y, mathlib
+        )
 
         if not skip_Gs:
             Gx = (
@@ -191,4 +201,6 @@ def _get_Ex_Ey_Gx_Gy_gauss(x, y, sigma_x, sigma_y, min_sigma_diff, skip_Gs, math
         return Ex, Ey, Gx, Gy
 
 
-get_Ex_Ey_Gx_Gy_gauss = np.vectorize(_get_Ex_Ey_Gx_Gy_gauss, excluded=["mathlib"])
+get_Ex_Ey_Gx_Gy_gauss = np.vectorize(
+    _get_Ex_Ey_Gx_Gy_gauss, excluded=["mathlib"]
+)

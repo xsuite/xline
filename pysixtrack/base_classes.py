@@ -30,7 +30,8 @@ class _MetaElement(type):
             for name, unit, desc, default in description
         ]
         fields += [
-            f"{name:10} [{unit+']:':5} {desc} " for name, unit, desc, default in extra
+            f"{name:10} [{unit+']:':5} {desc} "
+            for name, unit, desc, default in extra
         ]
         doc += fields
         dct["__doc__"] = "\n".join(doc)

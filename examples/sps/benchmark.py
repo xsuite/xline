@@ -48,7 +48,9 @@ def trackn(n):
     for iel, el in enumerate(sps.elems[:n]):
         print(iel, el)
         el.track(p)
-        print("%12.9f %12.9f %12.9f %12.9f %12.9f" % (p.s, p.x, p.px, p.tau, p.pt))
+        print(
+            "%12.9f %12.9f %12.9f %12.9f %12.9f" % (p.s, p.x, p.px, p.tau, p.pt)
+        )
         if abs(p.x) > 1:
             break
     print((out[n - 1][0]))

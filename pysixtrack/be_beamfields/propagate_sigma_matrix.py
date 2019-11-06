@@ -155,7 +155,9 @@ def _propagate_Sigma_matrix(
 
             dS_cos2theta = mysign(a) * (
                 0.5 * b / sqrt_a2_c2
-                - a * (a * b + 2 * c * d) / (2 * sqrt_a2_c2 * sqrt_a2_c2 * sqrt_a2_c2)
+                - a
+                * (a * b + 2 * c * d)
+                / (2 * sqrt_a2_c2 * sqrt_a2_c2 * sqrt_a2_c2)
             )
 
             dS_costheta = 1 / (4 * costheta) * dS_cos2theta
@@ -184,7 +186,9 @@ def _propagate_Sigma_matrix(
         Sig_11_hat = 0.5 * (W + signR * sqrtT)
         Sig_33_hat = 0.5 * (W - signR * sqrtT)
 
-        dS_cos2theta = signR * (dS_R / sqrtT - R / (2 * sqrtT * sqrtT * sqrtT) * dS_T)
+        dS_cos2theta = signR * (
+            dS_R / sqrtT - R / (2 * sqrtT * sqrtT * sqrtT) * dS_T
+        )
         dS_costheta = 1 / (4 * costheta) * dS_cos2theta
 
         if np.abs(sintheta) < threshold_singular and handle_singularities:

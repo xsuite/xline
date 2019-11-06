@@ -78,8 +78,18 @@ class Multipole(Element):
     """ Multipole """
 
     _description = [
-        ("knl", "m^-n", "Normalized integrated strength of normal components", (0,)),
-        ("ksl", "m^-n", "Normalized integrated strength of skew components", ()),
+        (
+            "knl",
+            "m^-n",
+            "Normalized integrated strength of normal components",
+            (0,),
+        ),
+        (
+            "ksl",
+            "m^-n",
+            "Normalized integrated strength of skew components",
+            (),
+        ),
         (
             "hxl",
             "rad",
@@ -350,6 +360,8 @@ class DipoleEdge(Element):
         cos = p._m.cos
         corr = 2 * self.h * self.hgap * self.fint
         r21 = self.h * tan(self.e1)
-        r43 = -self.h * tan(self.e1 - corr / cos(self.e1) * (1 + sin(self.e1) ** 2))
+        r43 = -self.h * tan(
+            self.e1 - corr / cos(self.e1) * (1 + sin(self.e1) ** 2)
+        )
         p.px += r21 * p.x
         p.py += r43 * p.y

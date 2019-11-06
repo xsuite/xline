@@ -76,7 +76,9 @@ def _from_madx_sequence(
                 knl=[-ee.kick], ksl=[], length=ee.lrad, hxl=0, hyl=0
             )
         elif mad_etype == "dipedge":
-            newele = classes.DipoleEdge(h=ee.h, e1=ee.e1, hgap=ee.hgap, fint=ee.fint)
+            newele = classes.DipoleEdge(
+                h=ee.h, e1=ee.e1, hgap=ee.hgap, fint=ee.fint
+            )
 
         elif mad_etype == "rfcavity":
             newele = classes.Cavity(
@@ -230,10 +232,18 @@ class MadPoint(object):
             ]
         )
         phim = np.array(
-            [[1, 0, 0], [0, np.cos(phi), np.sin(phi)], [0, -np.sin(phi), np.cos(phi)]]
+            [
+                [1, 0, 0],
+                [0, np.cos(phi), np.sin(phi)],
+                [0, -np.sin(phi), np.cos(phi)],
+            ]
         )
         psim = np.array(
-            [[np.cos(psi), -np.sin(psi), 0], [np.sin(psi), np.cos(psi), 0], [0, 0, 1]]
+            [
+                [np.cos(psi), -np.sin(psi), 0],
+                [np.sin(psi), np.cos(psi), 0],
+                [0, 0, 1],
+            ]
         )
         wm = np.dot(thetam, np.dot(phim, psim))
         self.ex = np.dot(wm, np.array([1, 0, 0]))

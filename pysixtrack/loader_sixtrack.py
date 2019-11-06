@@ -39,7 +39,12 @@ def _expand_struct(sixinput, convert=elements):
     exclude = False
     # add special elenents
     if "CAV" in sixinput.iter_struct():
-        sixinput.single["CAV"] = [12 * sixinput.ition, sixinput.u0, sixinput.harm, 0]
+        sixinput.single["CAV"] = [
+            12 * sixinput.ition,
+            sixinput.u0,
+            sixinput.harm,
+            0,
+        ]
     for nnn in sixinput.iter_struct():
         exclude = False
         ccc = count.setdefault(nnn, 0)
