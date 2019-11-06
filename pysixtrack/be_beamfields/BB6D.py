@@ -52,7 +52,17 @@ def BB6D_track(x, px, y, py, sigma, delta, q0, p0, bb6ddata, mathlib):
         S = 0.5 * (sigma_star - sigma_slice_star)
 
         # Get strong beam shape at the CP
-        Sig_11_hat_star, Sig_33_hat_star, costheta, sintheta, dS_Sig_11_hat_star, dS_Sig_33_hat_star, dS_costheta, dS_sintheta, extra_data = psm.propagate_Sigma_matrix(
+        (
+            Sig_11_hat_star,
+            Sig_33_hat_star,
+            costheta,
+            sintheta,
+            dS_Sig_11_hat_star,
+            dS_Sig_33_hat_star,
+            dS_costheta,
+            dS_sintheta,
+            extra_data,
+        ) = psm.propagate_Sigma_matrix(
             Sigmas_0_star, S, threshold_singular=threshold_singular
         )
 

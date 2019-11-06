@@ -82,7 +82,18 @@ def _propagate_Sigma_matrix(
     # ~ Sig_33 = Sig_33_0 + 2.*Sig_34_0*S+Sig_44_0*S*S
     # ~ Sig_13 = Sig_13_0 + (Sig_14_0+Sig_23_0)*S+Sig_24_0*S*S
 
-    Sig_11, Sig_12, Sig_13, Sig_14, Sig_22, Sig_23, Sig_24, Sig_33, Sig_34, Sig_44 = propagate_full_Sigma_matrix_in_drift(
+    (
+        Sig_11,
+        Sig_12,
+        Sig_13,
+        Sig_14,
+        Sig_22,
+        Sig_23,
+        Sig_24,
+        Sig_33,
+        Sig_34,
+        Sig_44,
+    ) = propagate_full_Sigma_matrix_in_drift(
         Sig_11_0,
         Sig_12_0,
         Sig_13_0,

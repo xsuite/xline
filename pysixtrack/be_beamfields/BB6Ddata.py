@@ -249,7 +249,14 @@ def BB6D_init(
 
     # By boosting the strong z and all zeros, I get the transverse coordinates of the strong beam in the ref system of the weak
     boost_vect = np.vectorize(boost.boost, excluded="parboost")
-    x_slices_star, px_slices_star, y_slices_star, py_slices_star, sigma_slices_star, delta_slices_star = boost_vect(
+    (
+        x_slices_star,
+        px_slices_star,
+        y_slices_star,
+        py_slices_star,
+        sigma_slices_star,
+        delta_slices_star,
+    ) = boost_vect(
         x=0 * z_slices,
         px=0 * z_slices,
         y=0 * z_slices,
