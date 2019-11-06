@@ -4,7 +4,12 @@ from . import elements as pysixtrack_elements
 
 
 def _from_madx_sequence(
-    line, sequence, classes=pysixtrack_elements, ignored_madtypes=[], exact_drift=False
+    line,
+    sequence,
+    classes=pysixtrack_elements,
+    ignored_madtypes=[],
+    exact_drift=False,
+    drift_threshold=1e-6,
 ):
 
     if exact_drift:
@@ -20,7 +25,7 @@ def _from_madx_sequence(
     i_drift = 0
     for ee, pp in zip(elements, ele_pos):
 
-        if pp > old_pp:
+        if pp > old_pp + drift_threshold:
             line.elements.append(myDrift(length=(pp - old_pp)))
             line.element_names.append("drift_%d" % i_drift)
             old_pp = pp
@@ -146,7 +151,7 @@ def _from_madx_sequence(
             else:
                 newele = myDrift(length=ee.l)
         else:
-            raise ValueError(f"MAD element \"{mad_etype}\" not recognized")
+            raise ValueError(f'MAD element "{mad_etype}" not recognized')
 
         line.elements.append(newele)
         line.element_names.append(eename)
