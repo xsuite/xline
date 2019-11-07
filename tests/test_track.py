@@ -1,10 +1,26 @@
 import pysixtrack
 
+element_list = [
+    pysixtrack.elements.Drift,
+    pysixtrack.elements.DriftExact,
+    pysixtrack.elements.Multipole,
+    pysixtrack.elements.Cavity,
+    pysixtrack.elements.XYShift,
+    pysixtrack.elements.SRotation,
+    pysixtrack.elements.RFMultipole,
+    pysixtrack.elements.BeamMonitor,
+    pysixtrack.elements.DipoleEdge,
+    pysixtrack.elements.Line,
+    pysixtrack.elements.LimitRect,
+    pysixtrack.elements.LimitEllipse
+]
+
+
+
 def test_track_all():
-    for el in pysixtrack.element_list:
+    for el in element_list:
         p = pysixtrack.Particles()
         el().track(p)
-
 
 def test_track_rfmultipole():
     p1 = pysixtrack.Particles()

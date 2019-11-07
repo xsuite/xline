@@ -458,3 +458,5 @@ class Line(Element):
             self.add_multipole_error_to(element, knl, ksl)
 
         return elements_not_found
+
+elements.Line=Line
