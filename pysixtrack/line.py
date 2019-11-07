@@ -322,6 +322,7 @@ class Line(Element):
         ignored_madtypes=[],
         exact_drift=False,
         drift_threshold=1e-6,
+        install_apertures=False
     ):
 
         line = cls(elements=[], element_names=[])

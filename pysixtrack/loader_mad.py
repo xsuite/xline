@@ -155,6 +155,19 @@ def iter_from_madx_sequence(
 
         yield eename, newele
 
+        if install_apertures & (min(ee.aperture) > 0):
+            if ee.apertype == 'rectangle':
+                newaperture = pysixtrack_elements.LimitRect(
+                    min_x=-ee.aperture[0], max_x=ee.aperture[0],
+                    min_y=-ee.aperture[1], max_y=ee.aperture[1])
+            elif ee.apertype == 'ellipse':
+                newaperture = pysixtrack_elements.LimitEllipse(
+                    a=ee.aperture[0], b=ee.aperture[1])
+            else:
+                raise ValueError("Aperture type not recognized")
+
+            yield eename + '_aperture', newaperture
+
     if hasattr(seq, "length") and seq.length > old_pp:
         yield "drift_%d" % i_drift, myDrift(length=(seq.length - old_pp))
 
