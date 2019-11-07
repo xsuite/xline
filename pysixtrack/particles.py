@@ -7,6 +7,40 @@ def count_not_none(*lst):
 
 
 class Particles(object):
+    """
+    Coordinates:
+
+    **fields**
+
+    **properties
+
+    s       [m]  Reference accumulated pathlength
+    x       [m]  Horizontal offset
+    px      [1]  Px / (m/m0 * p0c)
+    y       [m   Vertical offset]
+    py      [1]  Py / (m/m0 * p0c)
+    delta   [1]  Pc / (m/m0 * p0c) - 1
+    ptau    [1]  Energy / (m/m0 * p0c) - 1
+    psigma  [1]  ptau/beta0
+    rvv     [1]  beta/beta0
+    rpp     [1]  1/(1+delta) = (m/m0 * p0c) / Pc
+    zeta    [m]  beta (s/beta0 - ct )
+    tau     [m]
+    sigma   [m]  s - beta0 ct = rvv * zeta
+    mass0   [eV]
+    q0      [e]  reference carge
+    p0c     [eV] reference momentum
+    energy0 [eV] refernece energy
+    gamma0  [1]  reference relativistic gamma
+    beta0   [1]  reference relativistix beta
+    chi     [1]  
+    mratio  [1]  mass/mass0
+    qratio  [1]
+    partid  int
+    turn    int
+    state   int
+    elemid  int
+    """
     clight = 299792458
     pi = 3.141592653589793238
     echarge = 1.602176565e-19

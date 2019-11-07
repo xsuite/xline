@@ -66,6 +66,7 @@ class DriftExact(Drift):
 
 
 def _arrayofsize(ar, size):
+    print(ar,size)
     ar = np.array(ar)
     if len(ar) == 0:
         return np.zeros(size, dtype=ar.dtype)
@@ -82,13 +83,13 @@ class Multipole(Element):
             "knl",
             "m^-n",
             "Normalized integrated strength of normal components",
-            (0,),
+            lambda: [0],
         ),
         (
             "ksl",
             "m^-n",
             "Normalized integrated strength of skew components",
-            (),
+            lambda: [0],
         ),
         (
             "hxl",
@@ -111,6 +112,7 @@ class Multipole(Element):
 
     def track(self, p):
         order = self.order
+        print(self.knl)
         length = self.length
         knl = _arrayofsize(self.knl, order + 1)
         ksl = _arrayofsize(self.ksl, order + 1)
@@ -153,10 +155,10 @@ class RFMultipole(Element):
         ("voltage", "volt", "Voltage", 0),
         ("frequency", "hertz", "Frequency", 0),
         ("lag", "degree", "Delay in the cavity sin(lag - w tau)", 0),
-        ("knl", "", "...", (0,)),
-        ("ksl", "", "...", []),
-        ("pn", "", "...", (0,)),
-        ("ps", "", "...", []),
+        ("knl", "", "...", lambda: [0]),
+        ("ksl", "", "...", lambda: [0]),
+        ("pn", "", "...", lambda: [0]),
+        ("ps", "", "...", lambda: [0]),
     ]
 
     @property
@@ -172,10 +174,6 @@ class RFMultipole(Element):
         tau = p.zeta / p.rvv / p.beta0
         ktau = k * tau
         deg2rad = pi / 180
-        knl = np.array(self.knl)
-        ksl = np.array(self.ksl)
-        pn = np.array(self.pn)
-        ps = np.array(self.ps)
         knl = _arrayofsize(self.knl, order + 1)
         ksl = _arrayofsize(self.ksl, order + 1)
         pn = _arrayofsize(self.pn, order + 1) * deg2rad - ktau
@@ -310,7 +308,7 @@ class BeamMonitor(Element):
         ("min_particle_id", "", "", 0),
         ("is_rolling", "", "", False),
         ("is_turn_ordered", "", "", True),
-        ("data", "", "...", []),
+        ("data", "", "...", lambda: []),
     ]
 
     def offset(self, particle):

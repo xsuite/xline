@@ -3,8 +3,7 @@ import numpy as np
 from . import elements as pysixtrack_elements
 
 
-def _from_madx_sequence(
-    line,
+def iter_from_madx_sequence(
     sequence,
     classes=pysixtrack_elements,
     ignored_madtypes=[],
@@ -26,8 +25,7 @@ def _from_madx_sequence(
     for ee, pp in zip(elements, ele_pos):
 
         if pp > old_pp + drift_threshold:
-            line.elements.append(myDrift(length=(pp - old_pp)))
-            line.element_names.append("drift_%d" % i_drift)
+            yield "drift_%d" % i_drift, myDrift(length=(pp - old_pp))
             old_pp = pp
             i_drift += 1
 
@@ -155,16 +153,10 @@ def _from_madx_sequence(
         else:
             raise ValueError(f'MAD element "{mad_etype}" not recognized')
 
-        line.elements.append(newele)
-        line.element_names.append(eename)
+        yield eename, newele
 
     if hasattr(seq, "length") and seq.length > old_pp:
-        line.elements.append(myDrift(length=(seq.length - old_pp)))
-        line.element_names.append("drift_%d" % i_drift)
-
-    other_info = {}
-
-    return line, other_info
+        yield "drift_%d" % i_drift, myDrift(length=(seq.length - old_pp))
 
 
 class MadPoint(object):

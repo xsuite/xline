@@ -5,7 +5,7 @@ from . import elements
 from .particles import Particles
 
 from .loader_sixtrack import _expand_struct
-from .loader_mad import _from_madx_sequence
+from .loader_mad import iter_from_madx_sequence
 
 
 class Line(Element):
@@ -78,12 +78,14 @@ class Line(Element):
     def insert_element(self, idx, element, name):
         self.elements.insert(idx, element)
         self.element_names.insert(idx, name)
-        assert len(self.elements) == len(self.element_names)
+        # assert len(self.elements) == len(self.element_names)
+        return self
 
     def append_element(self, element, name):
         self.elements.append(element)
         self.element_names.append(name)
-        assert len(self.elements) == len(self.element_names)
+        # assert len(self.elements) == len(self.element_names)
+        return self
 
     def get_length(self):
         thick_element_types = (elements.Drift, elements.DriftExact)
@@ -314,14 +316,26 @@ class Line(Element):
 
     @classmethod
     def from_madx_sequence(
-        cls, sequence, classes=elements, ignored_madtypes=[], exact_drift=False
+        cls,
+        sequence,
+        classes=elements,
+        ignored_madtypes=[],
+        exact_drift=False,
+        drift_threshold=1e-6,
     ):
 
         line = cls(elements=[], element_names=[])
 
-        return _from_madx_sequence(
-            line, sequence, classes, ignored_madtypes, exact_drift
-        )
+        for el_name, el in iter_from_madx_sequence(
+            sequence,
+            classes=classes,
+            ignored_madtypes=ignored_madtypes,
+            exact_drift=exact_drift,
+            drift_threshold=drift_threshold,
+        ):
+            line.append_element(el_name, el)
+
+        return line
 
     # error handling (alignment, multipole orders, ...):
 
