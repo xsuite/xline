@@ -49,10 +49,9 @@ def _expand_struct(sixinput, convert=elements):
         exclude = False
         ccc = count.setdefault(nnn, 0)
         if len(sixinput.single[nnn]) == 7:
-            etype, d1, d2, d3, d4, d5, d6 = sixinput.single[nnn]
+            etype, d1, d2, d3, _, _, _ = sixinput.single[nnn]
         else:
             etype, d1, d2, d3, = sixinput.single[nnn]
-            d4, d5, d6 = None, None, None
         elem = None
         if nnn in sixinput.align:
             dx, dy, tilt = sixinput.align[nnn][ccc]
@@ -87,18 +86,18 @@ def _expand_struct(sixinput, convert=elements):
             knl, ksl = sixinput.get_knl(nnn, ccc)
             hxl = 0
             hyl = 0
-            l = 0
+            length = 0
             # beaware of the case of thick bend
             # see beambeam example where mbw has the length
             if d3 == -1:
                 hxl = -d1
-                l = d2
+                length = d2
                 knl[0] = hxl
             elif d3 == -2:
                 hyl = -d1  # strange sign!!!
-                l = d2
+                length = d2
                 ksl[0] = hyl
-            elem = Multipole(knl=knl, ksl=ksl, hxl=hxl, hyl=hyl, length=l)
+            elem = Multipole(knl=knl, ksl=ksl, hxl=hxl, hyl=hyl, length=length)
         elif etype == 12:
             # e0=sixinput.initialconditions[-1]
             # p0c=np.sqrt(e0**2-sixinput.pma**2)

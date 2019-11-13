@@ -1,15 +1,13 @@
-import sys
-
-sys.path.append("../../../NAFFlib/")
-
 import pickle
-import pysixtrack
+import time
+
 import numpy as np
+import matplotlib.pyplot as plt
+
+import pysixtrack
 import NAFFlib
 import example_helpers as hp
 import footprint
-import matplotlib.pyplot as plt
-import time
 
 track_with = "PySixtrack"
 # track_with = 'Sixtracklib'

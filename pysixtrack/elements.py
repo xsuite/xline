@@ -66,7 +66,7 @@ class DriftExact(Drift):
 
 
 def _arrayofsize(ar, size):
-    print(ar,size)
+    print(ar, size)
     ar = np.array(ar)
     if len(ar) == 0:
         return np.zeros(size, dtype=ar.dtype)
@@ -180,10 +180,10 @@ class RFMultipole(Element):
         ps = _arrayofsize(self.ps, order + 1) * deg2rad - ktau
         x = p.x
         y = p.y
-        fnr = knl[0]
-        fni = 0
-        fsr = ksl[0]
-        fsi = 0
+        # fnr = knl[0]
+        # fni = 0
+        # fsr = ksl[0]
+        # fsi = 0
         dpx = 0
         dpy = 0
         dptr = 0
@@ -202,8 +202,8 @@ class RFMultipole(Element):
             zim = (zim * y + zre * x) / (ii + 1)
             zre = zret
             fnr = knl[ii] * zre
-            fni = knl[ii] * zim
-            fsr = ksl[ii] * zre
+            # fni = knl[ii] * zim
+            # fsr = ksl[ii] * zre
             fsi = ksl[ii] * zim
             # energy kick order i+1
             dptr += sn * fnr - ss * fsi
@@ -307,17 +307,19 @@ class LimitEllipse(Element):
 
     def track(self, particle):
 
-        x=particle.x
-        y=particle.y
+        x = particle.x
+        y = particle.y
 
         if not hasattr(particle.state, "__iter__"):
             particle.state = int(
-                x*x/(self.a*self.a) + y*y/(self.b*self.b) <= 1.)
+                x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
+            )
             if particle.state != 1:
                 return particle.state
         else:
             particle.state = np.int_(
-                x*x/(self.a*self.a) + y*y/(self.b*self.b) <= 1.)
+                x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
+            )
             particle.remove_lost_particles()
             if len(particle.state == 0):
                 return -1
@@ -382,8 +384,6 @@ class DipoleEdge(Element):
         cos = p._m.cos
         corr = 2 * self.h * self.hgap * self.fint
         r21 = self.h * tan(self.e1)
-        r43 = -self.h * tan(
-            self.e1 - corr / cos(self.e1) * (1 + sin(self.e1) ** 2)
-        )
+        r43 = -self.h * tan(self.e1 - corr / cos(self.e1) * (1 + sin(self.e1) ** 2))
         p.px += r21 * p.x
         p.py += r43 * p.y

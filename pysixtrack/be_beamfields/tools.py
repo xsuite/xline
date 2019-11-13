@@ -21,8 +21,6 @@ def get_points_twissdata_for_elements(
     if use_survey:
         mad.survey()
 
-    seq = mad.sequence[seq_name]
-
     bb_xyz_points = []
     bb_twissdata = {
         kk: []
@@ -87,7 +85,11 @@ def get_points_twissdata_for_element_type(
     )
 
     points, twissdata = get_points_twissdata_for_elements(
-        element_names, mad, seq_name, use_survey=use_survey, use_twiss=use_twiss
+        element_names,
+        mad,
+        seq_name,
+        use_survey=use_survey,
+        use_twiss=use_twiss,
     )
 
     return elements, element_names, points, twissdata
@@ -217,7 +219,7 @@ def setup_beam_beam_in_line(
     )
 
     i_bb = 0
-    assert bb_coupling == False  # Not implemented
+    assert bb_coupling is False  # Not implemented
     for ee, eename in zip(line.elements, line.element_names):
         if isinstance(ee, pysixtrack.elements.BeamBeam4D):
             assert eename == bb_names[i_bb]

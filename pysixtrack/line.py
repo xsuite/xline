@@ -312,7 +312,7 @@ class Line(Element):
         other_info["rest"] = rest
         other_info["iconv"] = iconv
 
-        line.other_info=other_info
+        line.other_info = other_info
 
         return line
 
@@ -324,7 +324,7 @@ class Line(Element):
         ignored_madtypes=[],
         exact_drift=False,
         drift_threshold=1e-6,
-        install_apertures=False
+        install_apertures=False,
     ):
 
         line = cls(elements=[], element_names=[])
@@ -366,8 +366,7 @@ class Line(Element):
 
     def add_multipole_error_to(self, element, knl=[], ksl=[]):
         # will raise error if element not present:
-        idx_el = self.elements.index(element)
-        el_name = self.element_names[idx_el]
+        assert element in self.elements
         # normal components
         knl = np.trim_zeros(knl, trim="b")
         if len(element.knl) < len(knl):
@@ -425,7 +424,7 @@ class Line(Element):
 
         elements_not_found = []
         for i_line, element_name in enumerate(error_table["name"]):
-            if not element_name in self.element_names:
+            if element_name not in self.element_names:
                 elements_not_found.append(element_name)
                 continue
             element = self.elements[self.element_names.index(element_name)]
@@ -461,4 +460,5 @@ class Line(Element):
 
         return elements_not_found
 
-elements.Line=Line
+
+elements.Line = Line

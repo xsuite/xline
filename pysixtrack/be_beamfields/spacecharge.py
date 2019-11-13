@@ -1,6 +1,3 @@
-from scipy.constants import e as qe
-from scipy.constants import c as clight
-
 from pysixtrack.base_classes import Element
 from .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
 
@@ -27,7 +24,7 @@ class SpaceChargeCoasting(Element):
             sigma_x = self.sigma_x
             sigma_y = self.sigma_y
 
-            charge = p.qratio * p.q0 * qe
+            charge = p.qratio * p.q0 * p.echarge
             x = p.x - self.x_co
             px = p.px
             y = p.y - self.y_co
@@ -36,7 +33,7 @@ class SpaceChargeCoasting(Element):
             chi = p.chi
 
             beta = p.beta0 / p.rvv
-            p0c = p.p0c * qe
+            p0c = p.p0c * p.echarge
 
             Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(
                 x,
@@ -55,7 +52,7 @@ class SpaceChargeCoasting(Element):
                 * charge
                 * (1 - beta * beta)
                 / p0c
-                * self.length
+                * length
             )
 
             px += fact_kick * Ex
@@ -90,7 +87,7 @@ class SpaceChargeBunched(Element):
             sigma_x = self.sigma_x
             sigma_y = self.sigma_y
 
-            charge = p.qratio * p.q0 * qe
+            charge = p.qratio * p.q0 * p.echarge
             x = p.x - self.x_co
             px = p.px
             y = p.y - self.y_co
@@ -100,7 +97,7 @@ class SpaceChargeBunched(Element):
             chi = p.chi
 
             beta = p.beta0 / p.rvv
-            p0c = p.p0c * qe
+            p0c = p.p0c * p.echarge
 
             Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(
                 x,
@@ -112,13 +109,17 @@ class SpaceChargeBunched(Element):
                 mathlib=p._m,
             )
 
-            fact_kick = chi * charge * charge * (1 - beta * beta) / p0c * length
+            fact_kick = (
+                chi * charge * charge * (1 - beta * beta) / p0c * length
+            )
 
             fact_kick *= (
                 self.number_of_particles
                 / (bunchlength_rms * sqrt(2 * pi))
                 * exp(
-                    -0.5 * (sigma / bunchlength_rms) * (sigma / bunchlength_rms)
+                    -0.5
+                    * (sigma / bunchlength_rms)
+                    * (sigma / bunchlength_rms)
                 )
             )
 

@@ -166,7 +166,9 @@ class BB6D_Data(object):
         buffer_list.append(np.array([self.Dpy_sub], dtype=np.float64))
         buffer_list.append(np.array([self.Dsigma_sub], dtype=np.float64))
         buffer_list.append(np.array([self.Ddelta_sub], dtype=np.float64))
-        buffer_list.append(int_to_float64arr({True: 1, False: 0}[self.enabled]))
+        buffer_list.append(
+            int_to_float64arr({True: 1, False: 0}[self.enabled])
+        )
 
         buffer_list.append(int_to_float64arr(3))  # offset to N_part_per_slice
         # offset to x_slices_star

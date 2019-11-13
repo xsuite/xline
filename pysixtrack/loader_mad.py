@@ -9,7 +9,7 @@ def iter_from_madx_sequence(
     ignored_madtypes=[],
     exact_drift=False,
     drift_threshold=1e-6,
-    install_apertures=False
+    install_apertures=False,
 ):
 
     if exact_drift:
@@ -81,7 +81,9 @@ def iter_from_madx_sequence(
 
         elif mad_etype == "rfcavity":
             newele = classes.Cavity(
-                voltage=ee.volt * 1e6, frequency=ee.freq * 1e6, lag=ee.lag * 360
+                voltage=ee.volt * 1e6,
+                frequency=ee.freq * 1e6,
+                lag=ee.lag * 360,
             )
 
         elif mad_etype == "beambeam":
@@ -157,17 +159,21 @@ def iter_from_madx_sequence(
         yield eename, newele
 
         if install_apertures & (min(ee.aperture) > 0):
-            if ee.apertype == 'rectangle':
+            if ee.apertype == "rectangle":
                 newaperture = pysixtrack_elements.LimitRect(
-                    min_x=-ee.aperture[0], max_x=ee.aperture[0],
-                    min_y=-ee.aperture[1], max_y=ee.aperture[1])
-            elif ee.apertype == 'ellipse':
+                    min_x=-ee.aperture[0],
+                    max_x=ee.aperture[0],
+                    min_y=-ee.aperture[1],
+                    max_y=ee.aperture[1],
+                )
+            elif ee.apertype == "ellipse":
                 newaperture = pysixtrack_elements.LimitEllipse(
-                    a=ee.aperture[0], b=ee.aperture[1])
+                    a=ee.aperture[0], b=ee.aperture[1]
+                )
             else:
                 raise ValueError("Aperture type not recognized")
 
-            yield eename + '_aperture', newaperture
+            yield eename + "_aperture", newaperture
 
     if hasattr(seq, "length") and seq.length > old_pp:
         yield "drift_%d" % i_drift, myDrift(length=(seq.length - old_pp))

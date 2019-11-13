@@ -2,8 +2,8 @@ import sixtracktools
 import pysixtrack
 
 six = sixtracktools.SixInput(".")
-line, other = pysixtrack.Line.from_sixinput(six)
-iconv = other["iconv"]
+line = pysixtrack.Line.from_sixinput(six)
+iconv = line.other_info["iconv"]
 
 sixdump = sixtracktools.SixDump101("res/dump3.dat")[1::2]
 

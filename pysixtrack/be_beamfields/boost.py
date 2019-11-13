@@ -11,11 +11,17 @@ def boost(x, px, y, py, sigma, delta, parboost):
     salpha = parboost.salpha
     calpha = parboost.calpha
 
-    h = delta + 1.0 - np.sqrt((1.0 + delta) * (1.0 + delta) - px * px - py * py)
+    h = (
+        delta
+        + 1.0
+        - np.sqrt((1.0 + delta) * (1.0 + delta) - px * px - py * py)
+    )
 
     px_st = px / cphi - h * calpha * tphi / cphi
     py_st = py / cphi - h * salpha * tphi / cphi
-    delta_st = delta - px * calpha * tphi - py * salpha * tphi + h * tphi * tphi
+    delta_st = (
+        delta - px * calpha * tphi - py * salpha * tphi + h * tphi * tphi
+    )
 
     pz_st = np.sqrt(
         (1.0 + delta_st) * (1.0 + delta_st) - px_st * px_st - py_st * py_st
@@ -59,7 +65,8 @@ def inv_boost(x_st, px_st, y_st, py_st, sigma_st, delta_st, parboost):
     hsigma_st = 1.0 - (delta_st + 1) / pz_st
 
     Det_L = (
-        1.0 / cphi + (hx_st * calpha + hy_st * salpha - hsigma_st * sphi) * tphi
+        1.0 / cphi
+        + (hx_st * calpha + hy_st * salpha - hsigma_st * sphi) * tphi
     )
 
     Linv_11 = (
@@ -104,7 +111,10 @@ def inv_boost(x_st, px_st, y_st, py_st, sigma_st, delta_st, parboost):
     py_i = py_st * cphi + h * salpha * tphi
 
     delta_i = (
-        delta_st + px_i * calpha * tphi + py_i * salpha * tphi - h * tphi * tphi
+        delta_st
+        + px_i * calpha * tphi
+        + py_i * salpha * tphi
+        - h * tphi * tphi
     )
 
     return x_i, px_i, y_i, py_i, sigma_i, delta_i

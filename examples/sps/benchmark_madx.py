@@ -1,11 +1,10 @@
 from pyoptics import madlang, optics
+import pysixtrack
 
 # see sps/madx/a001_track_thin.madx
 mad = madlang.open("madx/SPS_Q20_thin.seq")
 mad.acta_31637.volt = 4.5
 mad.acta_31637.lag = 0.5
-
-import pysixtrack
 
 elems, rest, iconv = mad.sps.expand_struct(pysixtrack.element_types)
 

@@ -41,6 +41,7 @@ class Particles(object):
     state   int
     elemid  int
     """
+
     clight = 299792458
     pi = 3.141592653589793238
     echarge = 1.602176565e-19
@@ -444,7 +445,9 @@ class Particles(object):
 
             if np.any(~mask_valid):
                 if keep_memory:
-                    to_trash = self.copy()  # Not exactly efficient (but robust)
+                    to_trash = (
+                        self.copy()
+                    )  # Not exactly efficient (but robust)
                     for ff in self._dict_vars:
                         if hasattr(getattr(self, ff), "__iter__"):
                             setattr(

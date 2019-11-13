@@ -1,12 +1,13 @@
 from dataclasses import dataclass, field
 from typing import List, Dict
 
-_function=type(lambda : None)
+_function = type(lambda: None)
+
 
 def _pro_default(default):
     type_default = type(default)
     if type_default is _function:
-        mut= default()
+        mut = default()
         if type(mut) is list:
             return List, field(default_factory=default)
         elif type(mut) is dict:
