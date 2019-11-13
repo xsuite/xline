@@ -399,7 +399,7 @@ class Line(Element):
                 file='lattice_errors.err', table="errors")
             errors = madx.table.errors
 
-            pysixtrack_line, _ = Line.from_madx_sequence(seq)
+            pysixtrack_line = Line.from_madx_sequence(seq)
             pysixtrack_line.apply_madx_errors(errors)
         """
         max_multipole_err = 0
