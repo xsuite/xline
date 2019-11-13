@@ -40,7 +40,7 @@ mad.call("sps_thin.madx")
 mad.use(seq_name)
 
 # Determine space charge locations
-temp_line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)
+temp_line = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)
 sc_locations, sc_lengths = bt.determine_sc_locations(
     temp_line, n_SCkicks, length_fuzzy
 )
@@ -53,7 +53,7 @@ bt.install_sc_placeholders(mad, seq_name, sc_names, sc_locations, mode=sc_mode)
 twtable = mad.twiss()
 
 # Generate line with spacecharge
-line, other = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)
+line = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)
 
 # Get sc info from optics
 mad_sc_names, sc_points, sc_twdata = bt.get_spacecharge_names_madpoints_twdata(
