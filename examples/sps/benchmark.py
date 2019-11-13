@@ -1,4 +1,10 @@
+import pickle
+import time
+
+import numpy as np
+
 from pyoptics import madlang, optics
+import pysixtrack
 
 # see sps/madx/a001_track_thin.madx
 mad = madlang.open("madx/SPS_Q20_thin.seq")
@@ -6,19 +12,14 @@ mad.acta_31637.volt = 4.5
 mad.acta_31637.lag = 0.5
 out, rest = mad.sps.expand_struct()
 
-import pysixtrack
 
 out, rest = mad.sps.expand_struct(pysixtrack.convert)
 elems = list(zip(*out))[1]
 sps = pysixtrack.Block(elems)
 
-import pickle
 
 pickle.dump(sps, open("sps.pickle", "w"))
 
-import numpy as np
-
-import time
 
 npart = 10
 
@@ -48,7 +49,10 @@ def trackn(n):
     for iel, el in enumerate(sps.elems[:n]):
         print(iel, el)
         el.track(p)
-        print("%12.9f %12.9f %12.9f %12.9f %12.9f" % (p.s, p.x, p.px, p.tau, p.pt))
+        print(
+            "%12.9f %12.9f %12.9f %12.9f %12.9f"
+            % (p.s, p.x, p.px, p.tau, p.pt)
+        )
         if abs(p.x) > 1:
             break
     print((out[n - 1][0]))

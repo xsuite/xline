@@ -21,22 +21,26 @@ def get_points_twissdata_for_elements(
     if use_survey:
         mad.survey()
 
-    seq = mad.sequence[seq_name]
-
     bb_xyz_points = []
     bb_twissdata = {
         kk: []
-        for kk in _sigma_names + _beta_names + "dispersion_x dispersion_y x y".split()
+        for kk in _sigma_names
+        + _beta_names
+        + "dispersion_x dispersion_y x y".split()
     }
     for eename in ele_names:
         bb_xyz_points.append(
-            MadPoint(eename + ":1", mad, use_twiss=use_twiss, use_survey=use_survey)
+            MadPoint(
+                eename + ":1", mad, use_twiss=use_twiss, use_survey=use_survey
+            )
         )
 
         i_twiss = np.where(mad.table.twiss.name == (eename + ":1"))[0][0]
 
         for sn in _sigma_names:
-            bb_twissdata[sn].append(getattr(mad.table.twiss, "sig%d" % sn)[i_twiss])
+            bb_twissdata[sn].append(
+                getattr(mad.table.twiss, "sig%d" % sn)[i_twiss]
+            )
 
         for kk in ["betx", "bety"]:
             bb_twissdata[kk].append(mad.table.twiss[kk][i_twiss])
@@ -81,7 +85,11 @@ def get_points_twissdata_for_element_type(
     )
 
     points, twissdata = get_points_twissdata_for_elements(
-        element_names, mad, seq_name, use_survey=use_survey, use_twiss=use_twiss
+        element_names,
+        mad,
+        seq_name,
+        use_survey=use_survey,
+        use_twiss=use_twiss,
     )
 
     return elements, element_names, points, twissdata
@@ -107,7 +115,9 @@ def find_alpha_and_phi(dpx, dpy):
     return alpha, phi
 
 
-def get_bb_names_madpoints_sigmas(mad, seq_name, use_survey=True, use_twiss=True):
+def get_bb_names_madpoints_sigmas(
+    mad, seq_name, use_survey=True, use_twiss=True
+):
     _, element_names, points, twissdata = get_points_twissdata_for_element_type(
         mad,
         seq_name,
@@ -203,11 +213,13 @@ def setup_beam_beam_in_line(
 ):
 
     sep_x, sep_y = find_bb_separations(
-        points_weak=bb_points_weak, points_strong=bb_points_strong, names=bb_names
+        points_weak=bb_points_weak,
+        points_strong=bb_points_strong,
+        names=bb_names,
     )
 
     i_bb = 0
-    assert bb_coupling == False  # Not implemented
+    assert bb_coupling is False  # Not implemented
     for ee, eename in zip(line.elements, line.element_names):
         if isinstance(ee, pysixtrack.elements.BeamBeam4D):
             assert eename == bb_names[i_bb]
@@ -269,7 +281,9 @@ def determine_sc_locations(line, n_SCkicks, length_fuzzy):
             sc_locations.append(s_closest)
         else:
             sc_locations.append(s)
-    sc_lengths = np.diff(sc_locations).tolist() + [s_elements[-1] - sc_locations[-1]]
+    sc_lengths = np.diff(sc_locations).tolist() + [
+        s_elements[-1] - sc_locations[-1]
+    ]
     return sc_locations, sc_lengths
 
 
@@ -371,7 +385,9 @@ def setup_spacecharge_coasting_in_line(
         ss.enabled = True
 
 
-def check_spacecharge_consistency(sc_elements, sc_names, sc_lengths, mad_sc_names):
+def check_spacecharge_consistency(
+    sc_elements, sc_names, sc_lengths, mad_sc_names
+):
     assert len(sc_elements) == len(mad_sc_names)
     assert len(sc_lengths) == len(mad_sc_names)
     for ii, (ss, nn) in enumerate(zip(sc_elements, sc_names)):

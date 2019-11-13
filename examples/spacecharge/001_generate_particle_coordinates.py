@@ -2,7 +2,6 @@ import pickle
 import pysixtrack
 import numpy as np
 
-import example_helpers as hp
 import footprint
 
 
@@ -20,46 +19,6 @@ with open("particle_on_CO.pkl", "rb") as fid:
 
 part = partCO.copy()  # pysixtrack.Particles(**partCO)
 part._m = pysixtrack.Particles()._m  # to be sorted out later
-
-"""
-# get beta functions from tracking
-n_turns_beta = 150
-
-# Track a particle to get betas
-part.x += 1e-5
-part.y += 1e-5
-
-x_tbt, px_tbt, y_tbt, py_tbt, sigma_tbt, delta_tbt = hp.track_particle_pysixtrack(
-    line, part=part, Dx_wrt_CO_m=0., Dpx_wrt_CO_rad=0.,
-    Dy_wrt_CO_m=0., Dpy_wrt_CO_rad=0.,
-    Dsigma_wrt_CO_m=0., Ddelta_wrt_CO=0., n_turns=n_turns_beta, verbose=True)
-
-
-beta_x, x_max, px_cut = hp.betafun_from_ellip(x_tbt, px_tbt)
-beta_y, y_max, py_cut = hp.betafun_from_ellip(y_tbt, py_tbt)
-
-import matplotlib.pyplot as plt
-plt.close('all')
-fig1 = plt.figure(1)
-spx = fig1.add_subplot(2, 1, 1)
-spy = fig1.add_subplot(2, 1, 2, sharex=spx)
-
-spx.plot(x_tbt)
-spy.plot(y_tbt)
-
-fig2 = plt.figure(2)
-spex = fig2.add_subplot(2, 1, 1)
-spey = fig2.add_subplot(2, 1, 2)
-
-spex.plot(x_tbt, px_tbt, '.')
-spey.plot(y_tbt, py_tbt, '.')
-
-spex.plot(0, px_cut, 'xr')
-spey.plot(0, py_cut, 'xr')
-
-plt.show()
-
-"""
 
 # get beta functions from twiss table
 with open("twiss_at_start.pkl", "rb") as fid:

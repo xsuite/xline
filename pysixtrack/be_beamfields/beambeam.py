@@ -11,7 +11,12 @@ class BeamBeam4D(Element):
     """Interaction with a transverse-Gaussian strong beam (4D modelling)."""
 
     _description = [
-        ("charge", "e", "Charge of the interacting distribution (strong beam)", 0),
+        (
+            "charge",
+            "e",
+            "Charge of the interacting distribution (strong beam)",
+            0,
+        ),
         ("sigma_x", "m", "Horizontal size of the strong beam (r.m.s.)", 0),
         ("sigma_y", "m", "Vertical size of the strong beam (r.m.s.)", 0),
         ("beta_r", "", "Relativistic beta of the stron beam", 0),
@@ -90,9 +95,24 @@ class BeamBeam6D(Element):
             0,
         ),
         ("alpha", "rad", "Crossing plane tilt angle (>0 x tends to y)", 0),
-        ("x_bb_co", "m", "H. position of the strong beam w.r.t. the closed orbit", 0),
-        ("y_bb_co", "m", "V. position of the strong beam w.r.t. the closed orbit", 0),
-        ("charge_slices", "qe", "Charge of the interacting slices (strong beam)", ()),
+        (
+            "x_bb_co",
+            "m",
+            "H. position of the strong beam w.r.t. the closed orbit",
+            0,
+        ),
+        (
+            "y_bb_co",
+            "m",
+            "V. position of the strong beam w.r.t. the closed orbit",
+            0,
+        ),
+        (
+            "charge_slices",
+            "qe",
+            "Charge of the interacting slices (strong beam)",
+            (),
+        ),
         (
             "zeta_slices",
             "m",
@@ -105,25 +125,60 @@ class BeamBeam6D(Element):
             "Sigma_11 element of the sigma matrix of the strong beam",
             0,
         ),
-        ("sigma_12", "m", "Sigma_12 element of the sigma matrix of the strong beam", 0),
+        (
+            "sigma_12",
+            "m",
+            "Sigma_12 element of the sigma matrix of the strong beam",
+            0,
+        ),
         (
             "sigma_13",
             "m^2",
             "Sigma_13 element of the sigma matrix of the strong beam",
             0,
         ),
-        ("sigma_14", "m", "Sigma_14 element of the sigma matrix of the strong beam", 0),
-        ("sigma_22", "", "Sigma_22 element of the sigma matrix of the strong beam", 0),
-        ("sigma_23", "m", "Sigma_23 element of the sigma matrix of the strong beam", 0),
-        ("sigma_24", "", "Sigma_24 element of the sigma matrix of the strong beam", 0),
+        (
+            "sigma_14",
+            "m",
+            "Sigma_14 element of the sigma matrix of the strong beam",
+            0,
+        ),
+        (
+            "sigma_22",
+            "",
+            "Sigma_22 element of the sigma matrix of the strong beam",
+            0,
+        ),
+        (
+            "sigma_23",
+            "m",
+            "Sigma_23 element of the sigma matrix of the strong beam",
+            0,
+        ),
+        (
+            "sigma_24",
+            "",
+            "Sigma_24 element of the sigma matrix of the strong beam",
+            0,
+        ),
         (
             "sigma_33",
             "m^2",
             "Sigma_33 element of the sigma matrix of the strong beam",
             0,
         ),
-        ("sigma_34", "m", "Sigma_34 element of the sigma matrix of the strong beam", 0),
-        ("sigma_44", "", "Sigma_44 element of the sigma matrix of the strong beam", 0),
+        (
+            "sigma_34",
+            "m",
+            "Sigma_34 element of the sigma matrix of the strong beam",
+            0,
+        ),
+        (
+            "sigma_44",
+            "",
+            "Sigma_44 element of the sigma matrix of the strong beam",
+            0,
+        ),
         ("x_co", "m", "x coordinate the closed orbit (weak beam).", 0),
         ("px_co", "", "px coordinate the closed orbit (weak beam).", 0),
         ("y_co", "m", "y coordinate the closed orbit (weaek beam).", 0),
@@ -134,12 +189,27 @@ class BeamBeam6D(Element):
         ("d_px", "", "Quantity subtracted from px after the interaction.", 0),
         ("d_y", "m", "Quantity subtracted from y after the interaction.", 0),
         ("d_py", "", "Quantity subtracted from py after the interaction.", 0),
-        ("d_zeta", "m", "Quantity subtracted from sigma after the interaction.", 0),
-        ("d_delta", "", "Quantity subtracted from delta after the interaction.", 0),
+        (
+            "d_zeta",
+            "m",
+            "Quantity subtracted from sigma after the interaction.",
+            0,
+        ),
+        (
+            "d_delta",
+            "",
+            "Quantity subtracted from delta after the interaction.",
+            0,
+        ),
     ]
     _extra = [
         ("min_sigma_diff", "m", "Threshold to detect round beam", 1e-28),
-        ("threshold_singular", "", "Threshold to detect small denominator", 1e-28),
+        (
+            "threshold_singular",
+            "",
+            "Threshold to detect small denominator",
+            1e-28,
+        ),
         ("enabled", "", "Switch for closed orbit search", True),
     ]
 

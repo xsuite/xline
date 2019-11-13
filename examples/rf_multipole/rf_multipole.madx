@@ -14,11 +14,11 @@ my_rfmultipole : RFMULTIPOLE, VOLT=0, FREQ=freq, lag=lag, TILT=0, KNL={kick}, PN
 my_crabcavity : CRABCAVITY, L=0.0, VOLT=volt, LAG=lag, FREQ=freq, rv1=0, rv2=0, rv3=1000, rv4=0, rph1=0, rph2=0, lagf=lag;
 
 sequ_rfmultipole:  sequence,l=0.1;
-   my_rfmultipole, at=0.1;   
+   my_rfmultipole, at=0.1;
 endsequence;
 
 sequ_crabcavity:  sequence,l=0.1;
-   my_crabcavity, at=0.1;   
+   my_crabcavity, at=0.1;
 endsequence;
 
 

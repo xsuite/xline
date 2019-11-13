@@ -1,11 +1,21 @@
 from dataclasses import dataclass, field
+from typing import List, Dict
+
+_function = type(lambda: None)
 
 
 def _pro_default(default):
     type_default = type(default)
-    if type_default in [list, dict]:
-        default = field(default_factory=type_default)
-    return type_default, default
+    if type_default is _function:
+        mut = default()
+        if type(mut) is list:
+            return List, field(default_factory=default)
+        elif type(mut) is dict:
+            return Dict, field(default_factory=default)
+    elif type_default in [list, dict]:
+        raise ValueError(f"Mutable default {default} not allowed")
+    else:
+        return type_default, default
 
 
 class _MetaElement(type):
@@ -30,7 +40,8 @@ class _MetaElement(type):
             for name, unit, desc, default in description
         ]
         fields += [
-            f"{name:10} [{unit+']:':5} {desc} " for name, unit, desc, default in extra
+            f"{name:10} [{unit+']:':5} {desc} "
+            for name, unit, desc, default in extra
         ]
         doc += fields
         dct["__doc__"] = "\n".join(doc)

@@ -37,7 +37,13 @@ def BB6D_track(x, px, y, py, sigma, delta, q0, p0, bb6ddata, mathlib):
 
     # Boost coordinates of the weak beam
     x_star, px_star, y_star, py_star, sigma_star, delta_star = boost.boost(
-        x_subCO, px_subCO, y_subCO, py_subCO, sigma_subCO, delta_subCO, parboost
+        x_subCO,
+        px_subCO,
+        y_subCO,
+        py_subCO,
+        sigma_subCO,
+        delta_subCO,
+        parboost,
     )
     # ~ x_star, px_star, y_star, py_star, sigma_star, delta_star = (x, px, y, py, sigma, delta)
     for i_slice in range(N_slices):
@@ -52,7 +58,17 @@ def BB6D_track(x, px, y, py, sigma, delta, q0, p0, bb6ddata, mathlib):
         S = 0.5 * (sigma_star - sigma_slice_star)
 
         # Get strong beam shape at the CP
-        Sig_11_hat_star, Sig_33_hat_star, costheta, sintheta, dS_Sig_11_hat_star, dS_Sig_33_hat_star, dS_costheta, dS_sintheta, extra_data = psm.propagate_Sigma_matrix(
+        (
+            Sig_11_hat_star,
+            Sig_33_hat_star,
+            costheta,
+            sintheta,
+            dS_Sig_11_hat_star,
+            dS_Sig_33_hat_star,
+            dS_costheta,
+            dS_sintheta,
+            extra_data,
+        ) = psm.propagate_Sigma_matrix(
             Sigmas_0_star, S, threshold_singular=threshold_singular
         )
 
@@ -66,7 +82,9 @@ def BB6D_track(x, px, y, py, sigma, delta, q0, p0, bb6ddata, mathlib):
 
         # Compute derivatives of the transformation
         dS_x_bar_hat_star = x_bar_star * dS_costheta + y_bar_star * dS_sintheta
-        dS_y_bar_hat_star = -x_bar_star * dS_sintheta + y_bar_star * dS_costheta
+        dS_y_bar_hat_star = (
+            -x_bar_star * dS_sintheta + y_bar_star * dS_costheta
+        )
 
         # Compute normalized field
         # Ex, Ey, Gx, Gy = tef.get_Ex_Ey_Gx_Gy_gauss(x=x_bar_hat_star, y=y_bar_hat_star,

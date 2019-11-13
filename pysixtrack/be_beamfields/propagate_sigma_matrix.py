@@ -82,7 +82,18 @@ def _propagate_Sigma_matrix(
     # ~ Sig_33 = Sig_33_0 + 2.*Sig_34_0*S+Sig_44_0*S*S
     # ~ Sig_13 = Sig_13_0 + (Sig_14_0+Sig_23_0)*S+Sig_24_0*S*S
 
-    Sig_11, Sig_12, Sig_13, Sig_14, Sig_22, Sig_23, Sig_24, Sig_33, Sig_34, Sig_44 = propagate_full_Sigma_matrix_in_drift(
+    (
+        Sig_11,
+        Sig_12,
+        Sig_13,
+        Sig_14,
+        Sig_22,
+        Sig_23,
+        Sig_24,
+        Sig_33,
+        Sig_34,
+        Sig_44,
+    ) = propagate_full_Sigma_matrix_in_drift(
         Sig_11_0,
         Sig_12_0,
         Sig_13_0,
@@ -117,7 +128,8 @@ def _propagate_Sigma_matrix(
         sqrt_a2_c2 = np.sqrt(a * a + c * c)
 
         if sqrt_a2_c2 * sqrt_a2_c2 * sqrt_a2_c2 < threshold_singular:
-            # equivalent to: if np.abs(c)<threshold_singular and np.abs(a)<threshold_singular:
+            # equivalent to: if np.abs(c)<threshold_singular and
+            #                   np.abs(a)<threshold_singular:
 
             if np.abs(d) > threshold_singular:
                 cos2theta = np.abs(b) / np.sqrt(b * b + 4 * d * d)
@@ -144,7 +156,9 @@ def _propagate_Sigma_matrix(
 
             dS_cos2theta = mysign(a) * (
                 0.5 * b / sqrt_a2_c2
-                - a * (a * b + 2 * c * d) / (2 * sqrt_a2_c2 * sqrt_a2_c2 * sqrt_a2_c2)
+                - a
+                * (a * b + 2 * c * d)
+                / (2 * sqrt_a2_c2 * sqrt_a2_c2 * sqrt_a2_c2)
             )
 
             dS_costheta = 1 / (4 * costheta) * dS_cos2theta
@@ -173,7 +187,9 @@ def _propagate_Sigma_matrix(
         Sig_11_hat = 0.5 * (W + signR * sqrtT)
         Sig_33_hat = 0.5 * (W - signR * sqrtT)
 
-        dS_cos2theta = signR * (dS_R / sqrtT - R / (2 * sqrtT * sqrtT * sqrtT) * dS_T)
+        dS_cos2theta = signR * (
+            dS_R / sqrtT - R / (2 * sqrtT * sqrtT * sqrtT) * dS_T
+        )
         dS_costheta = 1 / (4 * costheta) * dS_cos2theta
 
         if np.abs(sintheta) < threshold_singular and handle_singularities:
@@ -216,12 +232,16 @@ def _propagate_Sigma_matrix(
 propagate_Sigma_matrix = np.vectorize(_propagate_Sigma_matrix)
 
 # def propagate_Sigma_matrix(Sigmas_at_0,
-#                                       S, threshold_singular=1e-16, handle_singularities=True):
+#                                       S,
+#                                       threshold_singular=1e-16,
+#                                       handle_singularities=True):
 #
 #     Sig_11_hat, Sig_33_hat, costheta, sintheta,\
 #         dS_Sig_11_hat, dS_Sig_33_hat, dS_costheta, dS_sintheta,\
 #         extra_data_list = np.vectorize(_propagate_Sigma_matrix,
-#                                        excluded=['Sigmas_at_0', 'threshold_singular', 'handle_singularities'])(
+#                                        excluded=['Sigmas_at_0',
+#                                                  'threshold_singular',
+#                                                  'handle_singularities'])(
 #             Sigmas_at_0, S, threshold_singular, handle_singularities)
 #
 #     extra_data = {}
@@ -250,7 +270,8 @@ def propagate_full_Sigma_matrix_in_drift(
     S,
 ):
 
-    # Can be found in matrix form in A. Wolsky, "Beam dynamics in high energy particle accelerators"
+    # Can be found in matrix form in A. Wolsky,
+    # "Beam dynamics in high energy particle accelerators"
 
     Sig_11 = Sig_11_0 + 2.0 * Sig_12_0 * S + Sig_22_0 * S * S
     Sig_33 = Sig_33_0 + 2.0 * Sig_34_0 * S + Sig_44_0 * S * S

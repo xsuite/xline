@@ -66,6 +66,7 @@ class DriftExact(Drift):
 
 
 def _arrayofsize(ar, size):
+    print(ar, size)
     ar = np.array(ar)
     if len(ar) == 0:
         return np.zeros(size, dtype=ar.dtype)
@@ -78,8 +79,18 @@ class Multipole(Element):
     """ Multipole """
 
     _description = [
-        ("knl", "m^-n", "Normalized integrated strength of normal components", (0,)),
-        ("ksl", "m^-n", "Normalized integrated strength of skew components", ()),
+        (
+            "knl",
+            "m^-n",
+            "Normalized integrated strength of normal components",
+            lambda: [0],
+        ),
+        (
+            "ksl",
+            "m^-n",
+            "Normalized integrated strength of skew components",
+            lambda: [0],
+        ),
         (
             "hxl",
             "rad",
@@ -101,6 +112,7 @@ class Multipole(Element):
 
     def track(self, p):
         order = self.order
+        print(self.knl)
         length = self.length
         knl = _arrayofsize(self.knl, order + 1)
         ksl = _arrayofsize(self.ksl, order + 1)
@@ -143,10 +155,10 @@ class RFMultipole(Element):
         ("voltage", "volt", "Voltage", 0),
         ("frequency", "hertz", "Frequency", 0),
         ("lag", "degree", "Delay in the cavity sin(lag - w tau)", 0),
-        ("knl", "", "...", (0,)),
-        ("ksl", "", "...", []),
-        ("pn", "", "...", (0,)),
-        ("ps", "", "...", []),
+        ("knl", "", "...", lambda: [0]),
+        ("ksl", "", "...", lambda: [0]),
+        ("pn", "", "...", lambda: [0]),
+        ("ps", "", "...", lambda: [0]),
     ]
 
     @property
@@ -162,20 +174,16 @@ class RFMultipole(Element):
         tau = p.zeta / p.rvv / p.beta0
         ktau = k * tau
         deg2rad = pi / 180
-        knl = np.array(self.knl)
-        ksl = np.array(self.ksl)
-        pn = np.array(self.pn)
-        ps = np.array(self.ps)
         knl = _arrayofsize(self.knl, order + 1)
         ksl = _arrayofsize(self.ksl, order + 1)
         pn = _arrayofsize(self.pn, order + 1) * deg2rad - ktau
         ps = _arrayofsize(self.ps, order + 1) * deg2rad - ktau
         x = p.x
         y = p.y
-        fnr = knl[0]
-        fni = 0
-        fsr = ksl[0]
-        fsi = 0
+        # fnr = knl[0]
+        # fni = 0
+        # fsr = ksl[0]
+        # fsi = 0
         dpx = 0
         dpy = 0
         dptr = 0
@@ -194,8 +202,8 @@ class RFMultipole(Element):
             zim = (zim * y + zre * x) / (ii + 1)
             zre = zret
             fnr = knl[ii] * zre
-            fni = knl[ii] * zim
-            fsr = ksl[ii] * zre
+            # fni = knl[ii] * zim
+            # fsr = ksl[ii] * zre
             fsi = ksl[ii] * zim
             # energy kick order i+1
             dptr += sn * fnr - ss * fsi
@@ -222,7 +230,7 @@ class Cavity(Element):
         k = 2 * pi * self.frequency / p.clight
         tau = p.zeta / p.rvv / p.beta0
         phase = self.lag * pi / 180 - k * tau
-        p.add_to_energy(p.chi * self.voltage * sin(phase))
+        p.add_to_energy(p.qratio * p.q0 * self.voltage * sin(phase))
 
 
 class XYShift(Element):
@@ -267,8 +275,8 @@ class LimitRect(Element):
 
     def track(self, particle):
 
-        x=particle.x
-        y=particle.y
+        x = particle.x
+        y = particle.y
 
         if not hasattr(particle.state, "__iter__"):
             particle.state = int(
@@ -314,6 +322,32 @@ class LimitEllipse(Element):
                 return -1
 
 
+class LimitEllipse(Element):
+    _description = [
+        ("a", "m^2", "Horizontal semiaxis", 1.0),
+        ("b", "m^2", "Vertical semiaxis", 1.0),
+    ]
+
+    def track(self, particle):
+
+        x = particle.x
+        y = particle.y
+
+        if not hasattr(particle.state, "__iter__"):
+            particle.state = int(
+                x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
+            )
+            if particle.state != 1:
+                return particle.state
+        else:
+            particle.state = np.int_(
+                x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
+            )
+            particle.remove_lost_particles()
+            if len(particle.state == 0):
+                return -1
+
+
 class BeamMonitor(Element):
     _description = [
         ("num_stores", "", "...", 0),
@@ -323,7 +357,7 @@ class BeamMonitor(Element):
         ("min_particle_id", "", "", 0),
         ("is_rolling", "", "", False),
         ("is_turn_ordered", "", "", True),
-        ("data", "", "...", []),
+        ("data", "", "...", lambda: []),
     ]
 
     def offset(self, particle):
