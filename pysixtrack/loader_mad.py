@@ -9,6 +9,7 @@ def iter_from_madx_sequence(
     ignored_madtypes=[],
     exact_drift=False,
     drift_threshold=1e-6,
+    install_aperture=False
 ):
 
     if exact_drift:
