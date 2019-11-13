@@ -66,7 +66,7 @@ class DriftExact(Drift):
 
 
 def _arrayofsize(ar, size):
-    print(ar,size)
+    print(ar, size)
     ar = np.array(ar)
     if len(ar) == 0:
         return np.zeros(size, dtype=ar.dtype)
@@ -307,17 +307,19 @@ class LimitEllipse(Element):
 
     def track(self, particle):
 
-        x=particle.x
-        y=particle.y
+        x = particle.x
+        y = particle.y
 
         if not hasattr(particle.state, "__iter__"):
             particle.state = int(
-                x*x/(self.a*self.a) + y*y/(self.b*self.b) <= 1.)
+                x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
+            )
             if particle.state != 1:
                 return particle.state
         else:
             particle.state = np.int_(
-                x*x/(self.a*self.a) + y*y/(self.b*self.b) <= 1.)
+                x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
+            )
             particle.remove_lost_particles()
             if len(particle.state == 0):
                 return -1

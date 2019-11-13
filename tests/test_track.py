@@ -12,15 +12,15 @@ element_list = [
     pysixtrack.elements.DipoleEdge,
     pysixtrack.elements.Line,
     pysixtrack.elements.LimitRect,
-    pysixtrack.elements.LimitEllipse
+    pysixtrack.elements.LimitEllipse,
 ]
-
 
 
 def test_track_all():
     for el in element_list:
         p = pysixtrack.Particles()
         el().track(p)
+
 
 def test_track_rfmultipole():
     p1 = pysixtrack.Particles()

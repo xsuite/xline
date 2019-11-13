@@ -3,18 +3,19 @@ import pysixtrack
 
 p = pysixtrack.Particles()
 
-rect_aperture = pysixtrack.elements.LimitRect( min_x=-1e-2, max_x=2e-2,
-        min_y=-0.5e-2, max_y=2.5e-2)
+rect_aperture = pysixtrack.elements.LimitRect(
+    min_x=-1e-2, max_x=2e-2, min_y=-0.5e-2, max_y=2.5e-2
+)
 
-ellip_aperture = pysixtrack.elements.LimitEllipse(a=1.5e-2, b=.3e-2)
+ellip_aperture = pysixtrack.elements.LimitEllipse(a=1.5e-2, b=0.3e-2)
 
 # Test scalar
-assert(rect_aperture.track(p) is None)
-assert(ellip_aperture.track(p) is None)
+assert rect_aperture.track(p) is None
+assert ellip_aperture.track(p) is None
 
-p.x= 100.
-assert(rect_aperture.track(p)==0)
-assert(ellip_aperture.track(p)==0)
+p.x = 100.0
+assert rect_aperture.track(p) == 0
+assert ellip_aperture.track(p) == 0
 
 # Test vector
 from numpy.random import uniform
@@ -31,13 +32,12 @@ ellip_aperture.track(p)
 
 import matplotlib.pyplot as plt
 
-plt.close('all')
+plt.close("all")
 fig1 = plt.figure(1)
 ax = fig1.add_subplot(111)
 
-ax.plot(p.x, p.y, '.b')
-ax.plot(p.lost_particles[0].x, p.lost_particles[0].y, 'r.')
-ax.plot(p.lost_particles[1].x, p.lost_particles[1].y, 'g.')
+ax.plot(p.x, p.y, ".b")
+ax.plot(p.lost_particles[0].x, p.lost_particles[0].y, "r.")
+ax.plot(p.lost_particles[1].x, p.lost_particles[1].y, "g.")
 
 plt.show()
-

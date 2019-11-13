@@ -41,6 +41,7 @@ class Particles(object):
     state   int
     elemid  int
     """
+
     clight = 299792458
     pi = 3.141592653589793238
     echarge = 1.602176565e-19
