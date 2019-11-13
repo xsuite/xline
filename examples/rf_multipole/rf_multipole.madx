@@ -14,11 +14,11 @@ my_rfmultipole : RFMULTIPOLE, VOLT=0, FREQ=freq, lag=lag, TILT=0, KNL={kick}, PN
 my_crabcavity : CRABCAVITY, L=0.0, VOLT=volt, LAG=lag, FREQ=freq, rv1=0, rv2=0, rv3=1000, rv4=0, rph1=0, rph2=0, lagf=lag;
 
 sequ_rfmultipole:  sequence,l=0.1;
-   my_rfmultipole, at=0.1;   
+   my_rfmultipole, at=0.1;
 endsequence;
 
 sequ_crabcavity:  sequence,l=0.1;
-   my_crabcavity, at=0.1;   
+   my_crabcavity, at=0.1;
 endsequence;
 
 
@@ -31,9 +31,8 @@ TRACK, deltap= 0.0, onepass, dump;
 START, x=0.1, px=0.00, y=0.05, py=0.0, t=0.5, pt=0;
 RUN, track_harmon=1e-16;
 
-
-!TRACK, deltap= 0.0, onepass, dump;
-!START, x=0.1, px=0.00, y=0.05, py=0.0, t=0, pt=0;
+use, sequence = sequ_rfmultipole;
+RUN, track_harmon=1e-16;
 
 use, sequence = sequ_crabcavity;
 RUN, track_harmon=1e-16;

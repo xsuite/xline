@@ -7,6 +7,41 @@ def count_not_none(*lst):
 
 
 class Particles(object):
+    """
+    Coordinates:
+
+    **fields**
+
+    **properties
+
+    s       [m]  Reference accumulated pathlength
+    x       [m]  Horizontal offset
+    px      [1]  Px / (m/m0 * p0c)
+    y       [m   Vertical offset]
+    py      [1]  Py / (m/m0 * p0c)
+    delta   [1]  Pc / (m/m0 * p0c) - 1
+    ptau    [1]  Energy / (m/m0 * p0c) - 1
+    psigma  [1]  ptau/beta0
+    rvv     [1]  beta/beta0
+    rpp     [1]  1/(1+delta) = (m/m0 * p0c) / Pc
+    zeta    [m]  beta (s/beta0 - ct )
+    tau     [m]
+    sigma   [m]  s - beta0 ct = rvv * zeta
+    mass0   [eV]
+    q0      [e]  reference carge
+    p0c     [eV] reference momentum
+    energy0 [eV] refernece energy
+    gamma0  [1]  reference relativistic gamma
+    beta0   [1]  reference relativistix beta
+    chi     [1]  
+    mratio  [1]  mass/mass0
+    qratio  [1]
+    partid  int
+    turn    int
+    state   int
+    elemid  int
+    """
+
     clight = 299792458
     pi = 3.141592653589793238
     echarge = 1.602176565e-19
@@ -386,9 +421,21 @@ class Particles(object):
         return out
 
     _dict_vars = (
-        "s x px y py delta zeta".split()
-        + "mass0 q0 p0c chi mratio".split()
-        + "partid turn state".split()
+        "s",
+        "x",
+        "px",
+        "y",
+        "py",
+        "delta",
+        "zeta",
+        "mass0",
+        "q0",
+        "p0c",
+        "chi",
+        "mratio",
+        "partid",
+        "turn",
+        "state",
     )
 
     def remove_lost_particles(self, keep_memory=True):
@@ -398,10 +445,14 @@ class Particles(object):
 
             if np.any(~mask_valid):
                 if keep_memory:
-                    to_trash = self.copy()  # Not exactly efficient (but robust)
+                    to_trash = (
+                        self.copy()
+                    )  # Not exactly efficient (but robust)
                     for ff in self._dict_vars:
                         if hasattr(getattr(self, ff), "__iter__"):
-                            setattr(to_trash, ff, getattr(self, ff)[~mask_valid])
+                            setattr(
+                                to_trash, ff, getattr(self, ff)[~mask_valid]
+                            )
                     self.lost_particles.append(to_trash)
 
             for ff in self._dict_vars:
@@ -429,3 +480,28 @@ class Particles(object):
                     print(kk, v1, v2, abs(diff) / v1)
                     res = False
         return res
+
+    @classmethod
+    def from_twiss(cls, twiss):
+        out = cls(
+            p0c=twiss.summary.pc * 1e6,
+            mass0=twiss.summary.mass * 1e6,
+            q0=twiss.summary.charge,
+            s=twiss.s[:],
+            x=twiss.x[:],
+            px=twiss.px[:],
+            y=twiss.py[:],
+            py=twiss.py[:],
+            tau=twiss.t[:],
+            ptau=twiss.pt[:],
+        )
+        return out
+
+    @classmethod
+    def from_list(cls, lst):
+        ll = len(lst)
+        dct = {nn: np.zeros(ll) for nn in cls._dict_vars}
+        for ii, pp in enumerate(lst):
+            for nn in cls._dict_vars:
+                dct[nn][ii] = getattr(pp, nn, 0)
+        return cls(**dct)

@@ -6,7 +6,7 @@ from pysixtrack.particles import Particles
 
 # run MADX tests
 mad = Madx()
-mad.call("test_rf_multipole.madx")
+mad.call("rf_multipole.madx")
 tracksumm_madx = mad.table.tracksumm
 
 # same test in pysixtrack

@@ -5,7 +5,7 @@ from . import elements
 from .particles import Particles
 
 from .loader_sixtrack import _expand_struct
-from .loader_mad import _from_madx_sequence
+from .loader_mad import iter_from_madx_sequence
 
 
 class Line(Element):
@@ -62,24 +62,30 @@ class Line(Element):
                 break
         return ret
 
-    def track_elem_by_elem(self, p):
+    def track_elem_by_elem(self, p, start=True, end=False):
         out = []
-        for el in self.elements:
+        if start:
             out.append(p.copy())
+        for el in self.elements:
             ret = el.track(p)
             if ret is not None:
                 break
+            out.append(p.copy())
+        if end:
+            out.append(p.copy())
         return out
 
     def insert_element(self, idx, element, name):
         self.elements.insert(idx, element)
         self.element_names.insert(idx, name)
-        assert len(self.elements) == len(self.element_names)
+        # assert len(self.elements) == len(self.element_names)
+        return self
 
     def append_element(self, element, name):
         self.elements.append(element)
         self.element_names.append(name)
-        assert len(self.elements) == len(self.element_names)
+        # assert len(self.elements) == len(self.element_names)
+        return self
 
     def get_length(self):
         thick_element_types = (elements.Drift, elements.DriftExact)
@@ -196,7 +202,9 @@ class Line(Element):
             pcl.delta = coord[5]
 
             self.track(pcl)
-            coord_out = np.array([pcl.x, pcl.px, pcl.y, pcl.py, pcl.sigma, pcl.delta])
+            coord_out = np.array(
+                [pcl.x, pcl.px, pcl.y, pcl.py, pcl.sigma, pcl.delta]
+            )
 
             return coord_out
 
@@ -209,7 +217,9 @@ class Line(Element):
         else:
             import scipy.optimize as so
 
-            res = so.minimize(_CO_error, np.array(guess), tol=1e-20, method=method)
+            res = so.minimize(
+                _CO_error, np.array(guess), tol=1e-20, method=method
+            )
 
         pcl = Particles(p0c=p0c)
 
@@ -302,18 +312,33 @@ class Line(Element):
         other_info["rest"] = rest
         other_info["iconv"] = iconv
 
-        return line, other_info
+        line.other_info = other_info
+
+        return line
 
     @classmethod
     def from_madx_sequence(
-        cls, sequence, classes=elements, ignored_madtypes=[], exact_drift=False
+        cls,
+        sequence,
+        classes=elements,
+        ignored_madtypes=[],
+        exact_drift=False,
+        drift_threshold=1e-6,
+        install_apertures=False,
     ):
 
         line = cls(elements=[], element_names=[])
 
-        return _from_madx_sequence(
-            line, sequence, classes, ignored_madtypes, exact_drift
-        )
+        for el_name, el in iter_from_madx_sequence(
+            sequence,
+            classes=classes,
+            ignored_madtypes=ignored_madtypes,
+            exact_drift=exact_drift,
+            drift_threshold=drift_threshold,
+        ):
+            line.append_element(el, el_name)
+
+        return line
 
     # error handling (alignment, multipole orders, ...):
 
@@ -341,8 +366,7 @@ class Line(Element):
 
     def add_multipole_error_to(self, element, knl=[], ksl=[]):
         # will raise error if element not present:
-        idx_el = self.elements.index(element)
-        el_name = self.element_names[idx_el]
+        assert element in self.elements
         # normal components
         knl = np.trim_zeros(knl, trim="b")
         if len(element.knl) < len(knl):
@@ -376,7 +400,7 @@ class Line(Element):
                 file='lattice_errors.err', table="errors")
             errors = madx.table.errors
 
-            pysixtrack_line, _ = Line.from_madx_sequence(seq)
+            pysixtrack_line = Line.from_madx_sequence(seq)
             pysixtrack_line.apply_madx_errors(errors)
         """
         max_multipole_err = 0
@@ -400,7 +424,7 @@ class Line(Element):
 
         elements_not_found = []
         for i_line, element_name in enumerate(error_table["name"]):
-            if not element_name in self.element_names:
+            if element_name not in self.element_names:
                 elements_not_found.append(element_name)
                 continue
             element = self.elements[self.element_names.index(element_name)]
@@ -424,8 +448,17 @@ class Line(Element):
                 pass
 
             # add multipole error
-            knl = [error_table[f"k{o}l"][i_line] for o in range(max_multipole_err + 1)]
-            ksl = [error_table[f"k{o}sl"][i_line] for o in range(max_multipole_err + 1)]
+            knl = [
+                error_table[f"k{o}l"][i_line]
+                for o in range(max_multipole_err + 1)
+            ]
+            ksl = [
+                error_table[f"k{o}sl"][i_line]
+                for o in range(max_multipole_err + 1)
+            ]
             self.add_multipole_error_to(element, knl, ksl)
 
         return elements_not_found
+
+
+elements.Line = Line
