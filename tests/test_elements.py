@@ -7,6 +7,7 @@ def test_other():
     el = elements.Cavity()
     el = elements.Line()
     el = elements.DipoleEdge()
+    print(el)
 
 
 def test_drift():

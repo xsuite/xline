@@ -125,7 +125,9 @@ def compare(prun, pbench, pbench_prev):
         vbench = getattr(pbench, att)
         vbench_prev = getattr(pbench_prev, att)
         diff = vrun - vbench
-        diffrel = abs(1.0 - abs(vrun - vbench_prev) / abs(vbench - vbench_prev))
+        diffrel = abs(
+            1.0 - abs(vrun - vbench_prev) / abs(vbench - vbench_prev)
+        )
         out.append(abs(diff))
         out_rel.append(diffrel)
         print(

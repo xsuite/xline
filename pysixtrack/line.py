@@ -366,7 +366,7 @@ class Line(Element):
 
     def add_multipole_error_to(self, element, knl=[], ksl=[]):
         # will raise error if element not present:
-        idx_el = self.elements.index(element)
+        assert element in self.elements
         # normal components
         knl = np.trim_zeros(knl, trim="b")
         if len(element.knl) < len(knl):

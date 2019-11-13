@@ -81,7 +81,9 @@ def iter_from_madx_sequence(
 
         elif mad_etype == "rfcavity":
             newele = classes.Cavity(
-                voltage=ee.volt * 1e6, frequency=ee.freq * 1e6, lag=ee.lag * 360
+                voltage=ee.volt * 1e6,
+                frequency=ee.freq * 1e6,
+                lag=ee.lag * 360,
             )
 
         elif mad_etype == "beambeam":

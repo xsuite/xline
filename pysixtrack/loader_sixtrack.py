@@ -49,10 +49,9 @@ def _expand_struct(sixinput, convert=elements):
         exclude = False
         ccc = count.setdefault(nnn, 0)
         if len(sixinput.single[nnn]) == 7:
-            etype, d1, d2, d3, d4, d5, d6 = sixinput.single[nnn]
+            etype, d1, d2, d3, _, _, _ = sixinput.single[nnn]
         else:
             etype, d1, d2, d3, = sixinput.single[nnn]
-            d4, d5, d6 = None, None, None
         elem = None
         if nnn in sixinput.align:
             dx, dy, tilt = sixinput.align[nnn][ccc]

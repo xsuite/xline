@@ -1,4 +1,7 @@
 import numpy as np
+from numpy.random import uniform
+import matplotlib.pyplot as plt
+
 import pysixtrack
 
 p = pysixtrack.Particles()
@@ -18,7 +21,6 @@ assert rect_aperture.track(p) == 0
 assert ellip_aperture.track(p) == 0
 
 # Test vector
-from numpy.random import uniform
 
 N_part = 10000
 
@@ -30,7 +32,6 @@ p.state = np.ones_like(p.x, dtype=np.int)
 rect_aperture.track(p)
 ellip_aperture.track(p)
 
-import matplotlib.pyplot as plt
 
 plt.close("all")
 fig1 = plt.figure(1)

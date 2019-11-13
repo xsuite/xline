@@ -201,8 +201,8 @@ class RFMultipole(Element):
             zret = (zre * x - zim * y) / (ii + 1)
             zim = (zim * y + zre * x) / (ii + 1)
             zre = zret
-            fnr = knl[ii] * zre
-            fni = knl[ii] * zim
+            # fnr = knl[ii] * zre
+            # fni = knl[ii] * zim
             fsr = ksl[ii] * zre
             fsi = ksl[ii] * zim
             # energy kick order i+1

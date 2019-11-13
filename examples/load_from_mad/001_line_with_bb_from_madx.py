@@ -86,7 +86,9 @@ mad_ft.call("mad/lhcwbb_fortracking.seq")
 mad_ft.use("lhcb1")  # without this the sequence does not work properly
 
 # Build pysixtrack line
-line_for_tracking = pysixtrack.Line.from_madx_sequence(mad_ft.sequence["lhcb1"])
+line_for_tracking = pysixtrack.Line.from_madx_sequence(
+    mad_ft.sequence["lhcb1"]
+)
 
 # Setup 4D and 6D beam beam lenses
 setup_beam_beam_in_line(
@@ -103,7 +105,8 @@ setup_beam_beam_in_line(
 
 # A check
 assert (
-    np.abs(line_for_tracking.get_length() - mad.sequence.lhcb1.beam.circ) < 1e-6
+    np.abs(line_for_tracking.get_length() - mad.sequence.lhcb1.beam.circ)
+    < 1e-6
 )
 
 # There is a problem in the mask

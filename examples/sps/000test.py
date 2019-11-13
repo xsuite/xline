@@ -3,15 +3,7 @@ import gzip
 
 import numpy as np
 
-from pysixtrack import (
-    Drift,
-    DriftExact,
-    Multipole,
-    Align,
-    Cavity,
-    Block,
-    Particles,
-)
+from pysixtrack import Particles
 
 
 def savedata(out, fname):

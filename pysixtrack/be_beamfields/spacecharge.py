@@ -52,7 +52,7 @@ class SpaceChargeCoasting(Element):
                 * charge
                 * (1 - beta * beta)
                 / p0c
-                * self.length
+                * length
             )
 
             px += fact_kick * Ex
@@ -109,13 +109,17 @@ class SpaceChargeBunched(Element):
                 mathlib=p._m,
             )
 
-            fact_kick = chi * charge * charge * (1 - beta * beta) / p0c * length
+            fact_kick = (
+                chi * charge * charge * (1 - beta * beta) / p0c * length
+            )
 
             fact_kick *= (
                 self.number_of_particles
                 / (bunchlength_rms * sqrt(2 * pi))
                 * exp(
-                    -0.5 * (sigma / bunchlength_rms) * (sigma / bunchlength_rms)
+                    -0.5
+                    * (sigma / bunchlength_rms)
+                    * (sigma / bunchlength_rms)
                 )
             )
 

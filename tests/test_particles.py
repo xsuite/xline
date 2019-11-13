@@ -3,6 +3,7 @@ from pysixtrack import Particles
 
 def test_particle_init():
     p = Particles()
+    print(p)
 
 
 def test_particle_reference():
