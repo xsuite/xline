@@ -312,7 +312,9 @@ class Line(Element):
         other_info["rest"] = rest
         other_info["iconv"] = iconv
 
-        return line, other_info
+        line.other_info=other_info
+
+        return line
 
     @classmethod
     def from_madx_sequence(
@@ -334,7 +336,7 @@ class Line(Element):
             exact_drift=exact_drift,
             drift_threshold=drift_threshold,
         ):
-            line.append_element(el_name, el)
+            line.append_element(el, el_name)
 
         return line
 
