@@ -3,6 +3,7 @@ from numpy.random import uniform
 import matplotlib.pyplot as plt
 
 import pysixtrack
+from numpy.random import uniform
 
 p = pysixtrack.Particles()
 
@@ -32,7 +33,6 @@ p.state = np.ones_like(p.x, dtype=np.int)
 rect_aperture.track(p)
 ellip_aperture.track(p)
 
-
 plt.close("all")
 fig1 = plt.figure(1)
 ax = fig1.add_subplot(111)
@@ -40,5 +40,3 @@ ax = fig1.add_subplot(111)
 ax.plot(p.x, p.y, ".b")
 ax.plot(p.lost_particles[0].x, p.lost_particles[0].y, "r.")
 ax.plot(p.lost_particles[1].x, p.lost_particles[1].y, "g.")
-
-plt.show()
