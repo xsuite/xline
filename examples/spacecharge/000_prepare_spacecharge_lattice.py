@@ -7,7 +7,6 @@ from scipy.constants import physical_constants
 from cpymad.madx import Madx
 
 import pysixtrack
-from pysixtrack.particles import Particles
 import pysixtrack.be_beamfields.tools as bt
 
 # sc_mode = 'Coasting'
@@ -136,8 +135,6 @@ with open("twiss_at_start.pkl", "wb") as fid:
     pickle.dump({"betx": twtable.betx[0], "bety": twtable.bety[0]}, fid)
 
 ""
-
-import matplotlib.patches as patches
 
 if 0:
     plt.close("all")

@@ -1,5 +1,7 @@
 from cpymad.madx import Madx
 
+import pysixtrack
+
 
 class Madout:
     def __init__(self):
@@ -31,7 +33,6 @@ print(mad.table.summ.q1, mad.table.summ.q2)
 twiss = mad.twiss()
 print(mad.table.summ.q1, mad.table.summ.q2)
 
-import pysixtrack
 
 twissout = pysixtrack.Particles.from_twiss(mad.twiss(betx=1, bety=1, x=0.001))
 

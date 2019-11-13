@@ -180,10 +180,10 @@ class RFMultipole(Element):
         ps = _arrayofsize(self.ps, order + 1) * deg2rad - ktau
         x = p.x
         y = p.y
-        fnr = knl[0]
-        fni = 0
-        fsr = ksl[0]
-        fsi = 0
+        # fnr = knl[0]
+        # fni = 0
+        # fsr = ksl[0]
+        # fsi = 0
         dpx = 0
         dpy = 0
         dptr = 0
@@ -201,9 +201,9 @@ class RFMultipole(Element):
             zret = (zre * x - zim * y) / (ii + 1)
             zim = (zim * y + zre * x) / (ii + 1)
             zre = zret
-            # fnr = knl[ii] * zre
+            fnr = knl[ii] * zre
             # fni = knl[ii] * zim
-            fsr = ksl[ii] * zre
+            # fsr = ksl[ii] * zre
             fsi = ksl[ii] * zim
             # energy kick order i+1
             dptr += sn * fnr - ss * fsi
@@ -384,8 +384,6 @@ class DipoleEdge(Element):
         cos = p._m.cos
         corr = 2 * self.h * self.hgap * self.fint
         r21 = self.h * tan(self.e1)
-        r43 = -self.h * tan(
-            self.e1 - corr / cos(self.e1) * (1 + sin(self.e1) ** 2)
-        )
+        r43 = -self.h * tan(self.e1 - corr / cos(self.e1) * (1 + sin(self.e1) ** 2))
         p.px += r21 * p.x
         p.py += r43 * p.y
