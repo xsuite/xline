@@ -8,9 +8,11 @@ requirements={
 if sys.version_info < (3,7):
     requirements['install'].append('dataclasses')
     
+version = open("pysixtrack/__init__.py").readline().split('=')[1].strip()
+    
 setuptools.setup(
     name="pysixtrack",
-    version="0.0.4",
+    version=version,
     description="6D Tracking Code",
     author="Riccardo De Maria",
     author_email="riccardo.de.maria@cern.ch",
