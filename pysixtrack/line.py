@@ -335,6 +335,7 @@ class Line(Element):
             ignored_madtypes=ignored_madtypes,
             exact_drift=exact_drift,
             drift_threshold=drift_threshold,
+            install_apertures=install_apertures,
         ):
             line.append_element(el, el_name)
 
