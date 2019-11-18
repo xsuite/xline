@@ -7,9 +7,9 @@ requirements={
  
 if sys.version_info < (3,7):
     requirements['install'].append('dataclasses')
-    
-version = open("pysixtrack/__init__.py").readline().split('=')[1].strip()
-    
+
+version = open("pysixtrack/__init__.py").readline().split('"')[1]
+
 setuptools.setup(
     name="pysixtrack",
     version=version,
