@@ -149,6 +149,13 @@ class Multipole(Element):
 
 
 class RFMultipole(Element):
+    """
+    H= -l sum   Re[ (kn[n](zeta) + i ks[n](zeta) ) (x+iy)**(n+1)/ n ]
+
+    kn[n](z) = k_n cos(2pi w tau + pn/180*pi)
+    ks[n](z) = k_n cos(2pi w tau + pn/180*pi)
+
+    """
     _description = [
         ("voltage", "volt", "Voltage", 0),
         ("frequency", "hertz", "Frequency", 0),
@@ -178,10 +185,6 @@ class RFMultipole(Element):
         ps = _arrayofsize(self.ps, order + 1) * deg2rad - ktau
         x = p.x
         y = p.y
-        # fnr = knl[0]
-        # fni = 0
-        # fsr = ksl[0]
-        # fsi = 0
         dpx = 0
         dpy = 0
         dptr = 0
@@ -209,8 +212,8 @@ class RFMultipole(Element):
         chi = p.chi
         p.px += -chi * dpx
         p.py += chi * dpy
-        phase = self.lag * deg2rad - ktau
-        p.add_to_energy(chi * (self.voltage * sin(phase) + dptr))
+        dv0 = self.voltage * sin(self.lag * deg2rad - ktau)
+        p.add_to_energy(chi * (dv0 - p.p0c*k*dptr))
 
 
 class Cavity(Element):

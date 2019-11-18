@@ -86,6 +86,17 @@ def iter_from_madx_sequence(
                 lag=ee.lag * 360,
             )
 
+        elif mad_etype == "rfmultipole":
+            newele = classes.RFMultipole(
+                voltage=ee.volt * 1e6,
+                frequency=ee.freq * 1e6,
+                lag=ee.lag * 360,
+                knl=ee.knl,
+                ksl=ee.ksl,
+                pn=ee.pnl,
+                ps=ee.psl,
+            )
+
         elif mad_etype == "beambeam":
             if ee.slot_id == 6 or ee.slot_id == 60:
                 # BB interaction is 6D

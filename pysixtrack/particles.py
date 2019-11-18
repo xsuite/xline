@@ -86,11 +86,14 @@ class Particles(object):
         beta0 = sqrt(1 - 1 / gamma0 ** 2)
         return self._g2(mass0, beta0, gamma0)
 
-    def copy(self):
+    def copy(self,index=None):
         p = Particles()
         for k, v in list(self.__dict__.items()):
             if type(v) in [np.ndarray, dict]:
-                v = v.copy()
+                if index is None:
+                    v = v.copy()
+                else:
+                    v= v[index]
             p.__dict__[k] = v
         return p
 
@@ -474,10 +477,10 @@ class Particles(object):
             if v1 is not None and v2 is not None:
                 diff = v1 - v2
                 if abs(diff) > abs_tol:
-                    print(kk, v1, v2, diff)
+                    print(f"{kk} {v1} {v2}  diff:{diff}")
                     res = False
                 if abs(v1) > 0 and abs(diff) / v1 > rel_tol:
-                    print(kk, v1, v2, abs(diff) / v1)
+                    print(f"{kk} {v1} {v2} rdiff:{diff/v1}")
                     res = False
         return res
 
@@ -498,18 +501,20 @@ class Particles(object):
         return out
 
     @classmethod
-    def from_mad_track(cls, tracksumm):
+    def from_mad_track(cls, mad):
+        tracksumm=mad.table.tracksumm
+        mad_beam=mad.sequence().beam
         out = cls(
-            p0c=twiss.summary.pc * 1e6,
-            mass0=twiss.summary.mass * 1e6,
-            q0=twiss.summary.charge,
-            s=twiss.s[:],
-            x=twiss.x[:],
-            px=twiss.px[:],
-            y=twiss.py[:],
-            py=twiss.py[:],
-            tau=twiss.t[:],
-            ptau=twiss.pt[:],
+            p0c=mad_beam.pc * 1e6,
+            mass0=mad_beam.mass * 1e6,
+            q0=mad_beam.charge,
+            s=tracksumm.s[:],
+            x=tracksumm.x[:],
+            px=tracksumm.px[:],
+            y=tracksumm.py[:],
+            py=tracksumm.py[:],
+            tau=tracksumm.t[:],
+            ptau=tracksumm.pt[:],
         )
         return out
 
