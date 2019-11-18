@@ -93,8 +93,8 @@ def iter_from_madx_sequence(
                 lag=ee.lag * 360,
                 knl=ee.knl,
                 ksl=ee.ksl,
-                pn=ee.pnl,
-                ps=ee.psl,
+                pn=[v*360 for v in ee.pnl],
+                ps=[v*360 for v in ee.psl],
             )
 
         elif mad_etype == "beambeam":
