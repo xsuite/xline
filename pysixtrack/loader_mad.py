@@ -297,7 +297,7 @@ def mad_benchmark(mtype, attrs, pc=0.2, x=0, px=0, y=0, py=0, t=0, pt=0):
     madtype = mad.command[mtype]
     mad.beam(particle="proton", pc=pc)
     madtype.clone("mm", **attrs)
-    mad_seq = mad.input("bench: line=(mm)")
+    mad.input("bench: line=(mm)")
     mad.use(sequence="bench")
     mad.track(onepass=True, dump=False)
     mad.start(x=x, px=px, y=y, py=py, t=t, pt=pt)

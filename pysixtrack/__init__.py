@@ -9,3 +9,13 @@ from .particles import Particles
 
 from .be_beamfields import BB6Ddata
 from .loader_mad import MadPoint, mad_benchmark
+
+__all__ = [
+    "base_classes",
+    "elements",
+    "Line",
+    "Particles",
+    "BB6Ddata",
+    "MadPoint",
+    "mad_benchmark",
+]

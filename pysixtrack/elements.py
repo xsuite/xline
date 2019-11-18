@@ -327,32 +327,6 @@ class LimitEllipse(Element):
                 return -1
 
 
-class LimitEllipse(Element):
-    _description = [
-        ("a", "m^2", "Horizontal semiaxis", 1.0),
-        ("b", "m^2", "Vertical semiaxis", 1.0),
-    ]
-
-    def track(self, particle):
-
-        x = particle.x
-        y = particle.y
-
-        if not hasattr(particle.state, "__iter__"):
-            particle.state = int(
-                x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
-            )
-            if particle.state != 1:
-                return particle.state
-        else:
-            particle.state = np.int_(
-                x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
-            )
-            particle.remove_lost_particles()
-            if len(particle.state == 0):
-                return -1
-
-
 class BeamMonitor(Element):
     _description = [
         ("num_stores", "", "...", 0),
@@ -417,3 +391,23 @@ class DipoleEdge(Element):
         )
         p.px += r21 * p.x
         p.py += r43 * p.y
+
+
+__all__ = [
+    "BeamBeam4D",
+    "BeamBeam6D",
+    "BeamMonitor",
+    "Cavity",
+    "DipoleEdge",
+    "Drift",
+    "DriftExact",
+    "Element",
+    "LimitEllipse",
+    "LimitRect",
+    "Multipole",
+    "RFMultipole",
+    "SRotation",
+    "SpaceChargeBunched",
+    "SpaceChargeCoasting",
+    "XYShift",
+]
