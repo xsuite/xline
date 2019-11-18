@@ -66,7 +66,6 @@ class DriftExact(Drift):
 
 
 def _arrayofsize(ar, size):
-    print(ar, size)
     ar = np.array(ar)
     if len(ar) == 0:
         return np.zeros(size, dtype=ar.dtype)

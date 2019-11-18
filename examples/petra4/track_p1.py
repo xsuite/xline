@@ -34,7 +34,7 @@ twiss = mad.twiss()
 print(mad.table.summ.q1, mad.table.summ.q2)
 
 
-twissout = pysixtrack.Particles.from_twiss(mad.twiss(betx=1, bety=1, x=0.001))
+twissout = pysixtrack.Particles.from_mad_twiss(mad.twiss(betx=1, bety=1, x=0.001))
 
 line = pysixtrack.Line.from_madx_sequence(mad.sequence.ring)
 part = pysixtrack.Particles()
