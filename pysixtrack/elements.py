@@ -111,7 +111,6 @@ class Multipole(Element):
 
     def track(self, p):
         order = self.order
-        print(self.knl)
         length = self.length
         knl = _arrayofsize(self.knl, order + 1)
         ksl = _arrayofsize(self.ksl, order + 1)
