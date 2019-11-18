@@ -93,8 +93,8 @@ def iter_from_madx_sequence(
                 lag=ee.lag * 360,
                 knl=ee.knl,
                 ksl=ee.ksl,
-                pn=[v*360 for v in ee.pnl],
-                ps=[v*360 for v in ee.psl],
+                pn=[v * 360 for v in ee.pnl],
+                ps=[v * 360 for v in ee.psl],
             )
 
         elif mad_etype == "beambeam":
@@ -287,3 +287,27 @@ class MadPoint(object):
     def distxy(self, other):
         dd = self.p - other.p
         return np.dot(dd, self.ex), np.dot(dd, self.ey)
+
+
+def mad_benchmark(mtype, attrs, pc=0.2, x=0, px=0, y=0, py=0, t=0, pt=0):
+    import pysixtrack
+    from cpymad.madx import Madx
+
+    mad = Madx(stdout=False)
+    madtype = mad.command[mtype]
+    mad.beam(particle="proton", pc=pc)
+    madtype.clone("mm", **attrs)
+    mad_seq = mad.input("bench: line=(mm)")
+    mad.use(sequence="bench")
+    mad.track(onepass=True, dump=False)
+    mad.start(x=x, px=px, y=y, py=py, t=t, pt=pt)
+    mad.run()
+    mad.endtrack()
+    p_mad = pysixtrack.Particles.from_madx_track(mad)
+    p_six = p_mad.copy(0)
+    line = pysixtrack.Line.from_madx_sequence(
+        mad.sequence.bench, exact_drift=True
+    )
+    line.track(p_six)
+    p_mad.copy(1).compare(p_six, rel_tol=0)
+    return mad, line, p_mad, p_six

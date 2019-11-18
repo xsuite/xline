@@ -105,9 +105,9 @@ def track_particle_sixtrack(
     lines_f3[i_start_ini + 7 + 6] = "    0.\n"
 
     lines_f13 = []
-    
+
     prev_part = None
-    
+
     for i_part in range(n_part):
         temp_part = pysixtrack.Particles(**partCO)
         temp_part.x += Dx_wrt_CO_m[i_part]

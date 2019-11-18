@@ -86,14 +86,14 @@ class Particles(object):
         beta0 = sqrt(1 - 1 / gamma0 ** 2)
         return self._g2(mass0, beta0, gamma0)
 
-    def copy(self,index=None):
+    def copy(self, index=None):
         p = Particles()
         for k, v in list(self.__dict__.items()):
             if type(v) in [np.ndarray, dict]:
                 if index is None:
                     v = v.copy()
                 else:
-                    v= v[index]
+                    v = v[index]
             p.__dict__[k] = v
         return p
 
@@ -478,13 +478,15 @@ class Particles(object):
                 diff = v1 - v2
                 if hasattr(diff, "__iter__"):
                     for nn in range(len(diff)):
-                        vv1=v1[nn] if hasattr(v1, "__iter__") else v1
-                        vv2=v2[nn] if hasattr(v2, "__iter__") else v2
+                        vv1 = v1[nn] if hasattr(v1, "__iter__") else v1
+                        vv2 = v2[nn] if hasattr(v2, "__iter__") else v2
                         if abs(diff[nn]) > abs_tol:
                             print(f"{kk}[{nn}] {vv1} {vv2}  diff:{diff[nn]}")
                             res = False
                         if abs(vv1) > 0 and abs(diff[nn]) / vv1 > rel_tol:
-                            print(f"{kk}[{nn}] {vv1} {vv2} rdiff:{diff[nn]/vv1}")
+                            print(
+                                f"{kk}[{nn}] {vv1} {vv2} rdiff:{diff[nn]/vv1}"
+                            )
                             res = False
                 else:
                     if abs(diff) > abs_tol:
@@ -513,8 +515,8 @@ class Particles(object):
 
     @classmethod
     def from_madx_track(cls, mad):
-        tracksumm=mad.table.tracksumm
-        mad_beam=mad.sequence().beam
+        tracksumm = mad.table.tracksumm
+        mad_beam = mad.sequence().beam
         out = cls(
             p0c=mad_beam.pc * 1e6,
             mass0=mad_beam.mass * 1e6,
