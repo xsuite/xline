@@ -97,6 +97,13 @@ def iter_from_madx_sequence(
                 ps=[v * 360 for v in ee.psl],
             )
 
+        elif mad_etype == "crabcavity":
+            newele = classes.RFMultipole(
+                frequency=ee.freq * 1e6,
+                knl=[ee.volt / sequence.beam.pc],
+                pn=[ee.lag * 360 - 90],
+            )
+
         elif mad_etype == "beambeam":
             if ee.slot_id == 6 or ee.slot_id == 60:
                 # BB interaction is 6D
