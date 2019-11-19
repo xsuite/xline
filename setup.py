@@ -6,7 +6,8 @@ requirements = {"install": ["numpy"]}
 if sys.version_info < (3, 7):
     requirements["install"].append("dataclasses")
 
-version = open("pysixtrack/__init__.py").readline().split('"')[1]
+#version = open("pysixtrack/__init__.py").readline().split('"')[1]
+version = "0.0.4"
 
 setuptools.setup(
     name="pysixtrack",
