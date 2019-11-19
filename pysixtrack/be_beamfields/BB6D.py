@@ -45,7 +45,8 @@ def BB6D_track(x, px, y, py, sigma, delta, q0, p0, bb6ddata, mathlib):
         delta_subCO,
         parboost,
     )
-    # ~ x_star, px_star, y_star, py_star, sigma_star, delta_star = (x, px, y, py, sigma, delta)
+    # ~ x_star, px_star, y_star, py_star, sigma_star, delta_star =
+    #      (x, px, y, py, sigma, delta)
     for i_slice in range(N_slices):
         sigma_slice_star = sigma_slices_star[i_slice]
         x_slice_star = x_slices_star[i_slice]
@@ -72,7 +73,8 @@ def BB6D_track(x, px, y, py, sigma, delta, q0, p0, bb6ddata, mathlib):
             Sigmas_0_star, S, threshold_singular=threshold_singular
         )
 
-        # Evaluate transverse coordinates of the weake baem w.r.t. the strong beam centroid
+        # Evaluate transverse coordinates of the weake baem w.r.t.
+        # the strong beam centroid
         x_bar_star = x_star + px_star * S - x_slice_star
         y_bar_star = y_star + py_star * S - y_slice_star
 
@@ -87,8 +89,10 @@ def BB6D_track(x, px, y, py, sigma, delta, q0, p0, bb6ddata, mathlib):
         )
 
         # Compute normalized field
-        # Ex, Ey, Gx, Gy = tef.get_Ex_Ey_Gx_Gy_gauss(x=x_bar_hat_star, y=y_bar_hat_star,
-        #                     sigma_x=np.sqrt(Sig_11_hat_star), sigma_y=np.sqrt(Sig_33_hat_star),
+        # Ex, Ey, Gx, Gy = tef.get_Ex_Ey_Gx_Gy_gauss(
+        #                     x=x_bar_hat_star, y=y_bar_hat_star,
+        #                     sigma_x=np.sqrt(Sig_11_hat_star),
+        #                     sigma_y=np.sqrt(Sig_33_hat_star),
         #                     min_sigma_diff = min_sigma_diff)
 
         Ex, Ey, Gx, Gy = gf.get_Ex_Ey_Gx_Gy_gauss(

@@ -3,7 +3,6 @@ from numpy.random import uniform
 import matplotlib.pyplot as plt
 
 import pysixtrack
-from numpy.random import uniform
 
 p = pysixtrack.Particles()
 

@@ -33,7 +33,7 @@ class Particles(object):
     energy0 [eV] refernece energy
     gamma0  [1]  reference relativistic gamma
     beta0   [1]  reference relativistix beta
-    chi     [1]  
+    chi     [1]
     mratio  [1]  mass/mass0
     qratio  [1]
     partid  int

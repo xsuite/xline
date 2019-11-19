@@ -91,7 +91,8 @@ class BeamBeam6D(Element):
         (
             "phi",
             "rad",
-            "Crossing angle (>0 weak beam increases x in the direction motion)",
+            "Crossing angle (>0 weak beam increases"
+            "x in the direction motion)",
             0,
         ),
         ("alpha", "rad", "Crossing plane tilt angle (>0 x tends to y)", 0),
@@ -116,7 +117,8 @@ class BeamBeam6D(Element):
         (
             "zeta_slices",
             "m",
-            "Longitudinal position of the interacting slices (>0 head of the strong).",
+            "Longitudinal position of the interacting"
+            "slices (>0 head of the strong).",
             (),
         ),
         (

@@ -93,7 +93,8 @@ class Multipole(Element):
         (
             "hxl",
             "rad",
-            "Rotation angle of the reference trajectory in the horizzontal plane",
+            "Rotation angle of the reference trajectory"
+            "in the horizzontal plane",
             0,
         ),
         (

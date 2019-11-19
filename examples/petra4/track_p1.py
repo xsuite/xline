@@ -57,7 +57,8 @@ for ii in range(len(twissout.s)):
     sm = twissout.s[ii]
     sp = pysixout.s[ii]
     print(
-        f"{ii:3} {twiss.name[ii]:20} {line.element_names[ii]:20} {line.elements[ii]}"
+        f"{ii:3} {twiss.name[ii]:20}"
+        "{line.element_names[ii]:20} {line.elements[ii]}"
     )
     res = mkd("s", twissout, pysixout, ii, ii)
     if abs(res) > 1e-6:
