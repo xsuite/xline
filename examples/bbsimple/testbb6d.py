@@ -131,7 +131,8 @@ def compare(prun, pbench, pbench_prev):
         out.append(abs(diff))
         out_rel.append(diffrel)
         print(
-            f"{att:<5} {vrun:22.13e} {vbench:22.13e} {diff:22.13g} {diffrel:22.13g}"
+            f"{att:<5} {vrun:22.13e} {vbench:22.13e}"
+            "{diff:22.13g} {diffrel:22.13g}"
         )
         if diffrel > 1e-5 or np.isnan(diffrel):
             if np.abs(diff) > 9e-10:

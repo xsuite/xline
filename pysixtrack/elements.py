@@ -93,7 +93,8 @@ class Multipole(Element):
         (
             "hxl",
             "rad",
-            "Rotation angle of the reference trajectory in the horizzontal plane",
+            "Rotation angle of the reference trajectory"
+            "in the horizzontal plane",
             0,
         ),
         (
@@ -156,6 +157,7 @@ class RFMultipole(Element):
     ks[n](z) = k_n cos(2pi w tau + pn/180*pi)
 
     """
+
     _description = [
         ("voltage", "volt", "Voltage", 0),
         ("frequency", "hertz", "Frequency", 0),
@@ -213,7 +215,7 @@ class RFMultipole(Element):
         p.px += -chi * dpx
         p.py += chi * dpy
         dv0 = self.voltage * sin(self.lag * deg2rad - ktau)
-        p.add_to_energy(chi * (dv0 - p.p0c*k*dptr))
+        p.add_to_energy(chi * (dv0 - p.p0c * k * dptr))
 
 
 class Cavity(Element):
@@ -318,29 +320,6 @@ class LimitRect(Element):
             if len(particle.state == 0):
                 return -1
 
-class LimitEllipse(Element):
-    _description = [
-        ("a", "m^2", "Horizontal semiaxis", 1.0),
-        ("b", "m^2", "Vertical semiaxis", 1.0),
-    ]
-
-    def track(self, particle):
-
-        x=particle.x
-        y=particle.y
-
-        if not hasattr(particle.state, "__iter__"):
-            particle.state = int(
-                x*x/(self.a*self.a) + y*y/(self.b*self.b) <= 1.)
-            if particle.state != 1:
-                return particle.state
-        else:
-            particle.state = np.int_(
-                x*x/(self.a*self.a) + y*y/(self.b*self.b) <= 1.)
-            particle.remove_lost_particles()
-            if len(particle.state == 0):
-                return -1
-
 
 class LimitEllipse(Element):
     _description = [
@@ -427,6 +406,28 @@ class DipoleEdge(Element):
         cos = p._m.cos
         corr = 2 * self.h * self.hgap * self.fint
         r21 = self.h * tan(self.e1)
-        r43 = -self.h * tan(self.e1 - corr / cos(self.e1) * (1 + sin(self.e1) ** 2))
+        r43 = -self.h * tan(
+            self.e1 - corr / cos(self.e1) * (1 + sin(self.e1) ** 2)
+        )
         p.px += r21 * p.x
         p.py += r43 * p.y
+
+
+__all__ = [
+    "BeamBeam4D",
+    "BeamBeam6D",
+    "BeamMonitor",
+    "Cavity",
+    "DipoleEdge",
+    "Drift",
+    "DriftExact",
+    "Element",
+    "LimitEllipse",
+    "LimitRect",
+    "Multipole",
+    "RFMultipole",
+    "SRotation",
+    "SpaceChargeBunched",
+    "SpaceChargeCoasting",
+    "XYShift",
+]

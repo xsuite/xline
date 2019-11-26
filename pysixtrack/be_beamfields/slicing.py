@@ -30,7 +30,8 @@ def constant_charge_slicing_gaussian(N_part_tot, sigmaz, N_slices):
                 )
                 * float(N_slices)
             )
-            # the multiplication times n slices comes from the fact that we have to divide by the slice charge, i.e. 1./N
+            # the multiplication times n slices comes from the fact that
+            # we have to divide by the slice charge, i.e. 1./N
             z_centroids.append(this_centroid)
 
         last_centroid = (

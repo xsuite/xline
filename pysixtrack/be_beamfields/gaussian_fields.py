@@ -38,7 +38,8 @@ def _get_transv_field_gauss_ellip(
     sqrt_pi = sqrt(pi)
 
     # I always go to the first quadrant and then apply the signs a posteriori
-    # numerically more stable (see http://inspirehep.net/record/316705/files/slac-pub-5582.pdf)
+    # numerically more stable
+    # (see http://inspirehep.net/record/316705/files/slac-pub-5582.pdf)
 
     abx = abs(x - Delta_x)
     aby = abs(y - Delta_y)

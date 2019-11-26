@@ -1,12 +1,10 @@
 import setuptools
 import sys
 
-requirements={
-    "install": ['numpy']
-}
- 
-if sys.version_info < (3,7):
-    requirements['install'].append('dataclasses')
+requirements = {"install": ["numpy"]}
+
+if sys.version_info < (3, 7):
+    requirements["install"].append("dataclasses")
 
 version = open("pysixtrack/__init__.py").readline().split('"')[1]
 
@@ -19,5 +17,5 @@ setuptools.setup(
     url="https://github.com/rdemaria/pysixtrack",
     packages=["pysixtrack", "pysixtrack.be_beamfields"],
     package_dir={"pysixtrack": "pysixtrack"},
-    install_requires=requirements['install'],
+    install_requires=requirements["install"],
 )
