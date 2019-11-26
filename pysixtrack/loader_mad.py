@@ -91,10 +91,10 @@ def iter_from_madx_sequence(
                 voltage=ee.volt * 1e6,
                 frequency=ee.freq * 1e6,
                 lag=ee.lag * 360,
-                knl=ee.knl,
-                ksl=ee.ksl,
-                pn=ee.pnl,
-                ps=ee.psl,
+                knl=ee.knl[:],
+                ksl=ee.ksl[:],
+                pn=ee.pnl[:],
+                ps=ee.psl[:],
             )
 
         elif mad_etype == "beambeam":
