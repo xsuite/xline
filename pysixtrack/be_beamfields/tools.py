@@ -118,7 +118,12 @@ def find_alpha_and_phi(dpx, dpy):
 def get_bb_names_madpoints_sigmas(
     mad, seq_name, use_survey=True, use_twiss=True
 ):
-    _, element_names, points, twissdata = get_points_twissdata_for_element_type(
+    (
+        _,
+        element_names,
+        points,
+        twissdata,
+    ) = get_points_twissdata_for_element_type(
         mad,
         seq_name,
         ele_type="beambeam",

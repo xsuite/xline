@@ -93,7 +93,8 @@ class Multipole(Element):
         (
             "hxl",
             "rad",
-            "Rotation angle of the reference trajectory in the horizzontal plane",
+            "Rotation angle of the reference trajectory"
+            "in the horizzontal plane",
             0,
         ),
         (
@@ -156,6 +157,7 @@ class RFMultipole(Element):
     ks[n](z) = k_n cos(2pi w tau + pn/180*pi)
 
     """
+
     _description = [
         ("voltage", "volt", "Voltage", 0),
         ("frequency", "hertz", "Frequency", 0),
@@ -181,8 +183,8 @@ class RFMultipole(Element):
         deg2rad = pi / 180
         knl = _arrayofsize(self.knl, order + 1)
         ksl = _arrayofsize(self.ksl, order + 1)
-        pn = _arrayofsize(self.pn, order + 1) * deg2rad - ktau
-        ps = _arrayofsize(self.ps, order + 1) * deg2rad - ktau
+        pn = _arrayofsize(self.pn, order + 1) * deg2rad
+        ps = _arrayofsize(self.ps, order + 1) * deg2rad
         x = p.x
         y = p.y
         dpx = 0
@@ -191,10 +193,12 @@ class RFMultipole(Element):
         zre = 1
         zim = 0
         for ii in range(order + 1):
-            cn = cos(pn[ii])
-            sn = sin(pn[ii])
-            cs = cos(ps[ii])
-            ss = sin(ps[ii])
+            pn_ii = pn[ii] - ktau
+            ps_ii = ps[ii] - ktau
+            cn = cos(pn_ii)
+            sn = sin(pn_ii)
+            cs = cos(ps_ii)
+            ss = sin(ps_ii)
             # transverse kick order i!
             dpx += cn * knl[ii] * zre - cs * ksl[ii] * zim
             dpy += cs * ksl[ii] * zre + cn * knl[ii] * zim
@@ -213,7 +217,7 @@ class RFMultipole(Element):
         p.px += -chi * dpx
         p.py += chi * dpy
         dv0 = self.voltage * sin(self.lag * deg2rad - ktau)
-        p.add_to_energy(chi * (dv0 - p.p0c*k*dptr))
+        p.add_to_energy(chi * (dv0 - p.p0c * k * dptr))
 
 
 class Cavity(Element):
@@ -232,6 +236,25 @@ class Cavity(Element):
         tau = p.zeta / p.rvv / p.beta0
         phase = self.lag * pi / 180 - k * tau
         p.add_to_energy(p.qratio * p.q0 * self.voltage * sin(phase))
+
+
+class SawtoothCavity(Element):
+    """Radio-frequency cavity"""
+
+    _description = [
+        ("voltage", "V", "Integrated energy change", 0),
+        ("frequency", "Hz", "Equivalent Frequency of the cavity", 0),
+        ("lag", "degree", "Delay in the cavity sin(lag - w tau)", 0),
+    ]
+
+    def track(self, p):
+        sin = p._m.sin
+        pi = p._m.pi
+        k = 2 * pi * self.frequency / p.clight
+        tau = p.zeta / p.rvv / p.beta0
+        phase = self.lag * pi / 180 - k * tau
+        phase = (phase + pi)%(2*pi) - pi
+        p.add_to_energy(p.qratio * p.q0 * self.voltage * phase)
 
 
 class XYShift(Element):
@@ -295,29 +318,6 @@ class LimitRect(Element):
                 & (y >= self.min_y)
                 & (y <= self.max_y)
             )
-            particle.remove_lost_particles()
-            if len(particle.state == 0):
-                return -1
-
-class LimitEllipse(Element):
-    _description = [
-        ("a", "m^2", "Horizontal semiaxis", 1.0),
-        ("b", "m^2", "Vertical semiaxis", 1.0),
-    ]
-
-    def track(self, particle):
-
-        x=particle.x
-        y=particle.y
-
-        if not hasattr(particle.state, "__iter__"):
-            particle.state = int(
-                x*x/(self.a*self.a) + y*y/(self.b*self.b) <= 1.)
-            if particle.state != 1:
-                return particle.state
-        else:
-            particle.state = np.int_(
-                x*x/(self.a*self.a) + y*y/(self.b*self.b) <= 1.)
             particle.remove_lost_particles()
             if len(particle.state == 0):
                 return -1
@@ -408,6 +408,28 @@ class DipoleEdge(Element):
         cos = p._m.cos
         corr = 2 * self.h * self.hgap * self.fint
         r21 = self.h * tan(self.e1)
-        r43 = -self.h * tan(self.e1 - corr / cos(self.e1) * (1 + sin(self.e1) ** 2))
+        r43 = -self.h * tan(
+            self.e1 - corr / cos(self.e1) * (1 + sin(self.e1) ** 2)
+        )
         p.px += r21 * p.x
         p.py += r43 * p.y
+
+
+__all__ = [
+    "BeamBeam4D",
+    "BeamBeam6D",
+    "BeamMonitor",
+    "Cavity",
+    "DipoleEdge",
+    "Drift",
+    "DriftExact",
+    "Element",
+    "LimitEllipse",
+    "LimitRect",
+    "Multipole",
+    "RFMultipole",
+    "SRotation",
+    "SpaceChargeBunched",
+    "SpaceChargeCoasting",
+    "XYShift",
+]
