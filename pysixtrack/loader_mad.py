@@ -91,8 +91,8 @@ def iter_from_madx_sequence(
                 voltage=ee.volt * 1e6,
                 frequency=ee.freq * 1e6,
                 lag=ee.lag * 360,
-                knl=ee.knl,
-                ksl=ee.ksl,
+                knl=ee.knl[:],
+                ksl=ee.ksl[:],
                 pn=[v * 360 for v in ee.pnl],
                 ps=[v * 360 for v in ee.psl],
             )
