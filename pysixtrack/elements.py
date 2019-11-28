@@ -183,8 +183,8 @@ class RFMultipole(Element):
         deg2rad = pi / 180
         knl = _arrayofsize(self.knl, order + 1)
         ksl = _arrayofsize(self.ksl, order + 1)
-        pn = _arrayofsize(self.pn, order + 1) * deg2rad - ktau
-        ps = _arrayofsize(self.ps, order + 1) * deg2rad - ktau
+        pn = _arrayofsize(self.pn, order + 1) * deg2rad
+        ps = _arrayofsize(self.ps, order + 1) * deg2rad
         x = p.x
         y = p.y
         dpx = 0
@@ -193,10 +193,12 @@ class RFMultipole(Element):
         zre = 1
         zim = 0
         for ii in range(order + 1):
-            cn = cos(pn[ii])
-            sn = sin(pn[ii])
-            cs = cos(ps[ii])
-            ss = sin(ps[ii])
+            pn_ii = pn[ii] - ktau
+            ps_ii = ps[ii] - ktau
+            cn = cos(pn_ii)
+            sn = sin(pn_ii)
+            cs = cos(ps_ii)
+            ss = sin(ps_ii)
             # transverse kick order i!
             dpx += cn * knl[ii] * zre - cs * ksl[ii] * zim
             dpy += cs * ksl[ii] * zre + cn * knl[ii] * zim
