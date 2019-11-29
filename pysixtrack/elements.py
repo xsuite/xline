@@ -244,16 +244,15 @@ class SawtoothCavity(Element):
     _description = [
         ("voltage", "V", "Integrated energy change", 0),
         ("frequency", "Hz", "Equivalent Frequency of the cavity", 0),
-        ("lag", "degree", "Delay in the cavity sin(lag - w tau)", 0),
+        ("lag", "degree", "Delay in the cavity `lag - w tau`", 0),
     ]
 
     def track(self, p):
-        sin = p._m.sin
         pi = p._m.pi
         k = 2 * pi * self.frequency / p.clight
         tau = p.zeta / p.rvv / p.beta0
         phase = self.lag * pi / 180 - k * tau
-        phase = (phase + pi)%(2*pi) - pi
+        phase = (phase + pi) % (2 * pi) - pi
         p.add_to_energy(p.qratio * p.q0 * self.voltage * phase)
 
 

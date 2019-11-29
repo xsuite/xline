@@ -264,19 +264,17 @@ class Particles(object):
         self.lost_particles = []
 
     def _check_array_length(self):
-        names=['x','px','y','py','zeta','_mass0',
-               'q0','p0c']
-        length=None
+        names = ["x", "px", "y", "py", "zeta", "_mass0", "q0", "p0c"]
+        length = None
         for nn in names:
-            xx=getattr(self,nn)
-            if hasattr(xx,'__iter__'):
+            xx = getattr(self, nn)
+            if hasattr(xx, "__iter__"):
                 if length is None:
-                    length=len(xx)
+                    length = len(xx)
                 else:
-                    if length!=len(xx):
-                        raise ValueError(f'invalid length len({nn})={len(xx)}')
+                    if length != len(xx):
+                        raise ValueError(f"invalid length len({nn})={len(xx)}")
         return length
-
 
     Px = property(lambda p: p.px * p.p0c * p.mratio)
     Py = property(lambda p: p.py * p.p0c * p.mratio)
