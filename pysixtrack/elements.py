@@ -319,7 +319,7 @@ class LimitRect(Element):
                 & (y <= self.max_y)
             )
             particle.remove_lost_particles()
-            if len(particle.state == 0):
+            if len(particle.state) == 0:
                 return -1
 
 
@@ -339,14 +339,14 @@ class LimitEllipse(Element):
                 x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
             )
             if particle.state != 1:
-                return particle.state
+                return "Particle lost"
         else:
             particle.state = np.int_(
                 x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
             )
             particle.remove_lost_particles()
-            if len(particle.state == 0):
-                return -1
+            if len(particle.state) == 0:
+                return "All particle lost"
 
 
 class BeamMonitor(Element):
