@@ -16,7 +16,7 @@ class Particles(object):
 
     s       [m]  Reference accumulated pathlength
     x       [m]  Horizontal offset
-    px      [1]  Px / (m/m0 * p0c)
+    px      [1]  Px / (m/m0 * p0c) = beta_x gamma /(beta0 gamma0)
     y       [m   Vertical offset]
     py      [1]  Py / (m/m0 * p0c)
     delta   [1]  Pc / (m/m0 * p0c) - 1
@@ -33,9 +33,9 @@ class Particles(object):
     energy0 [eV] refernece energy
     gamma0  [1]  reference relativistic gamma
     beta0   [1]  reference relativistix beta
-    chi     [1]
+    chi     [1]  q/ q0 * m0/m = qratio / mratio
     mratio  [1]  mass/mass0
-    qratio  [1]
+    qratio  [1]  q / q0
     partid  int
     turn    int
     state   int
