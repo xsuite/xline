@@ -16,7 +16,7 @@ class Particles(object):
 
     s       [m]  Reference accumulated pathlength
     x       [m]  Horizontal offset
-    px      [1]  Px / (m/m0 * p0c)
+    px      [1]  Px / (m/m0 * p0c) = beta_x gamma /(beta0 gamma0)
     y       [m   Vertical offset]
     py      [1]  Py / (m/m0 * p0c)
     delta   [1]  Pc / (m/m0 * p0c) - 1
@@ -33,9 +33,9 @@ class Particles(object):
     energy0 [eV] refernece energy
     gamma0  [1]  reference relativistic gamma
     beta0   [1]  reference relativistix beta
-    chi     [1]
+    chi     [1]  q/ q0 * m0/m = qratio / mratio
     mratio  [1]  mass/mass0
-    qratio  [1]
+    qratio  [1]  q / q0
     partid  int
     turn    int
     state   int
@@ -224,7 +224,7 @@ class Particles(object):
         qratio=None,
         partid=None,
         turn=None,
-        state=None,
+        state=None,  # ==1 particle lost
         elemid=None,
         mathlib=MathlibDefault,
         **args,
@@ -245,10 +245,36 @@ class Particles(object):
         self.__init__zeta(zeta, tau, sigma)
         self.__init__chi(chi, mratio, qratio)
         self._update_coordinates = True
+        length = self._check_array_length()
+        if partid is None:
+            if length is not None:
+                partid = np.arange(length)
         self.partid = partid
+
+        if turn is None:
+            if length is not None:
+                turn = np.zeros(length)
         self.turn = turn
+
+        if state is None:
+            if length is not None:
+                state = np.zeros(length)
         self.state = state
+
         self.lost_particles = []
+
+    def _check_array_length(self):
+        names = ["x", "px", "y", "py", "zeta", "_mass0", "q0", "p0c"]
+        length = None
+        for nn in names:
+            xx = getattr(self, nn)
+            if hasattr(xx, "__iter__"):
+                if length is None:
+                    length = len(xx)
+                else:
+                    if length != len(xx):
+                        raise ValueError(f"invalid length len({nn})={len(xx)}")
+        return length
 
     Px = property(lambda p: p.px * p.p0c * p.mratio)
     Py = property(lambda p: p.py * p.p0c * p.mratio)
