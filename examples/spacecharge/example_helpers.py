@@ -55,7 +55,14 @@ def track_particle_sixtrack(
     n_turns,
 ):
 
-    Dx_wrt_CO_m, Dpx_wrt_CO_rad, Dy_wrt_CO_m, Dpy_wrt_CO_rad, Dsigma_wrt_CO_m, Ddelta_wrt_CO = vectorize_all_coords(
+    (
+        Dx_wrt_CO_m,
+        Dpx_wrt_CO_rad,
+        Dy_wrt_CO_m,
+        Dpy_wrt_CO_rad,
+        Dsigma_wrt_CO_m,
+        Ddelta_wrt_CO,
+    ) = vectorize_all_coords(
         Dx_wrt_CO_m,
         Dpx_wrt_CO_rad,
         Dy_wrt_CO_m,
@@ -98,6 +105,8 @@ def track_particle_sixtrack(
     lines_f3[i_start_ini + 7 + 6] = "    0.\n"
 
     lines_f13 = []
+
+    prev_part = None
 
     for i_part in range(n_part):
         temp_part = pysixtrack.Particles(**partCO)
@@ -190,7 +199,14 @@ def track_particle_pysixtrack(
     verbose=False,
 ):
 
-    Dx_wrt_CO_m, Dpx_wrt_CO_rad, Dy_wrt_CO_m, Dpy_wrt_CO_rad, Dsigma_wrt_CO_m, Ddelta_wrt_CO = vectorize_all_coords(
+    (
+        Dx_wrt_CO_m,
+        Dpx_wrt_CO_rad,
+        Dy_wrt_CO_m,
+        Dpy_wrt_CO_rad,
+        Dsigma_wrt_CO_m,
+        Ddelta_wrt_CO,
+    ) = vectorize_all_coords(
         Dx_wrt_CO_m,
         Dpx_wrt_CO_rad,
         Dy_wrt_CO_m,
@@ -249,7 +265,14 @@ def track_particle_sixtracklib(
     device=None,
 ):
 
-    Dx_wrt_CO_m, Dpx_wrt_CO_rad, Dy_wrt_CO_m, Dpy_wrt_CO_rad, Dsigma_wrt_CO_m, Ddelta_wrt_CO = vectorize_all_coords(
+    (
+        Dx_wrt_CO_m,
+        Dpx_wrt_CO_rad,
+        Dy_wrt_CO_m,
+        Dpy_wrt_CO_rad,
+        Dsigma_wrt_CO_m,
+        Ddelta_wrt_CO,
+    ) = vectorize_all_coords(
         Dx_wrt_CO_m,
         Dpx_wrt_CO_rad,
         Dy_wrt_CO_m,
@@ -305,7 +328,8 @@ def track_particle_sixtracklib(
     sigma_tbt = res.particles[0].sigma.reshape(n_turns, n_part)
     delta_tbt = res.particles[0].delta.reshape(n_turns, n_part)
 
-    # For now data are saved at the end of the turn by STlib and at the beginning by the others
+    # For now data are saved at the end of the turn by STlib
+    # and at the beginning by the others
     # x_tbt[1:, :] = x_tbt[:-1, :]
     # px_tbt[1:, :] = px_tbt[:-1, :]
     # y_tbt[1:, :] = y_tbt[:-1, :]

@@ -1,15 +1,13 @@
-import sys
-
-sys.path.append("../../../NAFFlib/")
-
 import pickle
-import pysixtrack
+import time
+
 import numpy as np
+import matplotlib.pyplot as plt
+
+import pysixtrack
 import NAFFlib
 import example_helpers as hp
 import footprint
-import matplotlib.pyplot as plt
-import time
 
 track_with = "PySixtrack"
 # track_with = 'Sixtracklib'
@@ -38,7 +36,14 @@ start_time = time.time()
 
 if track_with == "PySixtrack":
 
-    x_tbt, px_tbt, y_tbt, py_tbt, sigma_tbt, delta_tbt = hp.track_particle_pysixtrack(
+    (
+        x_tbt,
+        px_tbt,
+        y_tbt,
+        py_tbt,
+        sigma_tbt,
+        delta_tbt,
+    ) = hp.track_particle_pysixtrack(
         line,
         part=part,
         Dx_wrt_CO_m=0.0,
@@ -54,7 +59,14 @@ if track_with == "PySixtrack":
     info = track_with
 
 elif track_with == "Sixtracklib":
-    x_tbt, px_tbt, y_tbt, py_tbt, sigma_tbt, delta_tbt = hp.track_particle_sixtracklib(
+    (
+        x_tbt,
+        px_tbt,
+        y_tbt,
+        py_tbt,
+        sigma_tbt,
+        delta_tbt,
+    ) = hp.track_particle_sixtracklib(
         line=line,
         partCO=part,
         Dx_wrt_CO_m=0.0,

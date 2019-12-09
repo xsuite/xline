@@ -2,7 +2,7 @@ import time
 import gzip
 import math
 
-from pysixtrack import Drift, DriftExact, Multipole, Align, Cavity, Block, Particles
+from pysixtrack import Particles
 
 
 def savedata(out, fname):

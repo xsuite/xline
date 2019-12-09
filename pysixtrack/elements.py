@@ -78,12 +78,23 @@ class Multipole(Element):
     """ Multipole """
 
     _description = [
-        ("knl", "m^-n", "Normalized integrated strength of normal components", (0,)),
-        ("ksl", "m^-n", "Normalized integrated strength of skew components", ()),
+        (
+            "knl",
+            "m^-n",
+            "Normalized integrated strength of normal components",
+            lambda: [0],
+        ),
+        (
+            "ksl",
+            "m^-n",
+            "Normalized integrated strength of skew components",
+            lambda: [0],
+        ),
         (
             "hxl",
             "rad",
-            "Rotation angle of the reference trajectory in the horizzontal plane",
+            "Rotation angle of the reference trajectory"
+            "in the horizzontal plane",
             0,
         ),
         (
@@ -139,14 +150,22 @@ class Multipole(Element):
 
 
 class RFMultipole(Element):
+    """
+    H= -l sum   Re[ (kn[n](zeta) + i ks[n](zeta) ) (x+iy)**(n+1)/ n ]
+
+    kn[n](z) = k_n cos(2pi w tau + pn/180*pi)
+    ks[n](z) = k_n cos(2pi w tau + pn/180*pi)
+
+    """
+
     _description = [
         ("voltage", "volt", "Voltage", 0),
         ("frequency", "hertz", "Frequency", 0),
         ("lag", "degree", "Delay in the cavity sin(lag - w tau)", 0),
-        ("knl", "", "...", (0,)),
-        ("ksl", "", "...", []),
-        ("pn", "", "...", (0,)),
-        ("ps", "", "...", []),
+        ("knl", "", "...", lambda: [0]),
+        ("ksl", "", "...", lambda: [0]),
+        ("pn", "", "...", lambda: [0]),
+        ("ps", "", "...", lambda: [0]),
     ]
 
     @property
@@ -162,30 +181,24 @@ class RFMultipole(Element):
         tau = p.zeta / p.rvv / p.beta0
         ktau = k * tau
         deg2rad = pi / 180
-        knl = np.array(self.knl)
-        ksl = np.array(self.ksl)
-        pn = np.array(self.pn)
-        ps = np.array(self.ps)
         knl = _arrayofsize(self.knl, order + 1)
         ksl = _arrayofsize(self.ksl, order + 1)
-        pn = _arrayofsize(self.pn, order + 1) * deg2rad - ktau
-        ps = _arrayofsize(self.ps, order + 1) * deg2rad - ktau
+        pn = _arrayofsize(self.pn, order + 1) * deg2rad
+        ps = _arrayofsize(self.ps, order + 1) * deg2rad
         x = p.x
         y = p.y
-        fnr = knl[0]
-        fni = 0
-        fsr = ksl[0]
-        fsi = 0
         dpx = 0
         dpy = 0
         dptr = 0
         zre = 1
         zim = 0
         for ii in range(order + 1):
-            cn = cos(pn[ii])
-            sn = sin(pn[ii])
-            cs = cos(ps[ii])
-            ss = sin(ps[ii])
+            pn_ii = pn[ii] - ktau
+            ps_ii = ps[ii] - ktau
+            cn = cos(pn_ii)
+            sn = sin(pn_ii)
+            cs = cos(ps_ii)
+            ss = sin(ps_ii)
             # transverse kick order i!
             dpx += cn * knl[ii] * zre - cs * ksl[ii] * zim
             dpy += cs * ksl[ii] * zre + cn * knl[ii] * zim
@@ -194,8 +207,8 @@ class RFMultipole(Element):
             zim = (zim * y + zre * x) / (ii + 1)
             zre = zret
             fnr = knl[ii] * zre
-            fni = knl[ii] * zim
-            fsr = ksl[ii] * zre
+            # fni = knl[ii] * zim
+            # fsr = ksl[ii] * zre
             fsi = ksl[ii] * zim
             # energy kick order i+1
             dptr += sn * fnr - ss * fsi
@@ -203,8 +216,8 @@ class RFMultipole(Element):
         chi = p.chi
         p.px += -chi * dpx
         p.py += chi * dpy
-        phase = self.lag * deg2rad - ktau
-        p.add_to_energy(chi * (self.voltage * sin(phase) + dptr))
+        dv0 = self.voltage * sin(self.lag * deg2rad - ktau)
+        p.add_to_energy(chi * (dv0 - p.p0c * k * dptr))
 
 
 class Cavity(Element):
@@ -222,7 +235,25 @@ class Cavity(Element):
         k = 2 * pi * self.frequency / p.clight
         tau = p.zeta / p.rvv / p.beta0
         phase = self.lag * pi / 180 - k * tau
-        p.add_to_energy(p.chi * self.voltage * sin(phase))
+        p.add_to_energy(p.qratio * p.q0 * self.voltage * sin(phase))
+
+
+class SawtoothCavity(Element):
+    """Radio-frequency cavity"""
+
+    _description = [
+        ("voltage", "V", "Integrated energy change", 0),
+        ("frequency", "Hz", "Equivalent Frequency of the cavity", 0),
+        ("lag", "degree", "Delay in the cavity `lag - w tau`", 0),
+    ]
+
+    def track(self, p):
+        pi = p._m.pi
+        k = 2 * pi * self.frequency / p.clight
+        tau = p.zeta / p.rvv / p.beta0
+        phase = self.lag * pi / 180 - k * tau
+        phase = (phase + pi) % (2 * pi) - pi
+        p.add_to_energy(p.qratio * p.q0 * self.voltage * phase)
 
 
 class XYShift(Element):
@@ -267,8 +298,8 @@ class LimitRect(Element):
 
     def track(self, particle):
 
-        x=particle.x
-        y=particle.y
+        x = particle.x
+        y = particle.y
 
         if not hasattr(particle.state, "__iter__"):
             particle.state = int(
@@ -287,8 +318,9 @@ class LimitRect(Element):
                 & (y <= self.max_y)
             )
             particle.remove_lost_particles()
-            if len(particle.state == 0):
+            if len(particle.state) == 0:
                 return -1
+
 
 class LimitEllipse(Element):
     _description = [
@@ -298,20 +330,22 @@ class LimitEllipse(Element):
 
     def track(self, particle):
 
-        x=particle.x
-        y=particle.y
+        x = particle.x
+        y = particle.y
 
         if not hasattr(particle.state, "__iter__"):
             particle.state = int(
-                x*x/(self.a*self.a) + y*y/(self.b*self.b) <= 1.)
+                x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
+            )
             if particle.state != 1:
-                return particle.state
+                return "Particle lost"
         else:
             particle.state = np.int_(
-                x*x/(self.a*self.a) + y*y/(self.b*self.b) <= 1.)
+                x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
+            )
             particle.remove_lost_particles()
-            if len(particle.state == 0):
-                return -1
+            if len(particle.state) == 0:
+                return "All particle lost"
 
 
 class BeamMonitor(Element):
@@ -323,7 +357,7 @@ class BeamMonitor(Element):
         ("min_particle_id", "", "", 0),
         ("is_rolling", "", "", False),
         ("is_turn_ordered", "", "", True),
-        ("data", "", "...", []),
+        ("data", "", "...", lambda: []),
     ]
 
     def offset(self, particle):
@@ -373,6 +407,28 @@ class DipoleEdge(Element):
         cos = p._m.cos
         corr = 2 * self.h * self.hgap * self.fint
         r21 = self.h * tan(self.e1)
-        r43 = -self.h * tan(self.e1 - corr / cos(self.e1) * (1 + sin(self.e1) ** 2))
+        r43 = -self.h * tan(
+            self.e1 - corr / cos(self.e1) * (1 + sin(self.e1) ** 2)
+        )
         p.px += r21 * p.x
         p.py += r43 * p.y
+
+
+__all__ = [
+    "BeamBeam4D",
+    "BeamBeam6D",
+    "BeamMonitor",
+    "Cavity",
+    "DipoleEdge",
+    "Drift",
+    "DriftExact",
+    "Element",
+    "LimitEllipse",
+    "LimitRect",
+    "Multipole",
+    "RFMultipole",
+    "SRotation",
+    "SpaceChargeBunched",
+    "SpaceChargeCoasting",
+    "XYShift",
+]

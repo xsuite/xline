@@ -1,15 +1,16 @@
-# Read sixtrack input using sixtracktools
 import sixtracktools
+import pysixtrack
+import pysixtracklib
+
+# Read sixtrack input using sixtracktools
 
 sixinput = sixtracktools.SixInput("sixtrack_input")
 
 # Build a pysixtrack line from pyblep line
-import pysixtrack
 
-ps_line, other = pysixtrack.Line.from_sixinput(sixinput)
+ps_line = pysixtrack.Line.from_sixinput(sixinput)
 
 # Build a pysixtracklib line from pyblep line
-import pysixtracklib
 
 pslib_line = pysixtracklib.Elements()
 pslib_line.append_line(ps_line)
