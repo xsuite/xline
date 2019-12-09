@@ -6,16 +6,16 @@ class SpaceChargeCoasting(Element):
     """Space charge for a coasting beam"""
 
     _description = [
-        ("line_density", "1/m", "Desc...", 0.0),
-        ("sigma_x", "m", "Desc...", 1.0),
-        ("sigma_y", "m", "Desc...", 1.0),
-        ("length", "m", "Desc...", 0.0),
-        ("x_co", "m", "Desc...", 0.0),
-        ("y_co", "m", "Desc...", 0),
+        ("line_density", "1/m", "Number of particles per unit length", 0.0),
+        ("sigma_x", "m", "Horizontal size of the beam (r.m.s.)", 1.0),
+        ("sigma_y", "m", "Vertical size of the beam (r.m.s.)", 1.0),
+        ("length", "m", "Integration length of space charge kick", 0.0),
+        ("x_co", "m", "Horizontal closed orbit offset", 0.0),
+        ("y_co", "m", "Vertical closed orbit offset", 0),
     ]
     _extra = [
-        ("min_sigma_diff", "m", "Desc...", 1e-30),
-        ("enabled", "", "Desc...", True),
+        ("min_sigma_diff", "m", "Threshold to detect round beam", 1e-30),
+        ("enabled", "", "Switch to disable space charge effect", True),
     ]
 
     def track(self, p):
@@ -64,17 +64,17 @@ class SpaceChargeCoasting(Element):
 
 class SpaceChargeBunched(Element):
     _description = [
-        ("number_of_particles", "", "Desc...", 0.0),
-        ("bunchlength_rms", "m", "Desc...", 1.0),
-        ("sigma_x", "m", "Desc...", 1.0),
-        ("sigma_y", "m", "Desc...", 1.0),
-        ("length", "m", "Desc...", 0.0),
-        ("x_co", "m", "Desc...", 0.0),
-        ("y_co", "m", "Desc...", 0),
+        ("number_of_particles", "", "Number of particles in the bunch", 0.0),
+        ("bunchlength_rms", "m", "Length of the bunch (r.m.s.)", 1.0),
+        ("sigma_x", "m", "Horizontal size of the beam (r.m.s.)", 1.0),
+        ("sigma_y", "m", "Vertical size of the beam (r.m.s.)", 1.0),
+        ("length", "m", "Integration length of space charge kick", 0.0),
+        ("x_co", "m", "Horizontal closed orbit offset", 0.0),
+        ("y_co", "m", "Vertical closed orbit offset", 0),
     ]
     _extra = [
-        ("min_sigma_diff", "m", "Desc...", 1e-30),
-        ("enabled", "", "Desc...", True),
+        ("min_sigma_diff", "m", "Threshold to detect round beam", 1e-30),
+        ("enabled", "", "Switch to disable space charge effect", True),
     ]
 
     def track(self, p):

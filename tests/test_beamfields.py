@@ -38,8 +38,8 @@ def test_track_spacecharge():
     p2 = p1.copy()
     el1.track(p1)
     el2.track(p2)
-    assert np.isclose(p1.px, 1.33671170365656e-07, atol=1e-15) == True
-    assert np.isclose(p1.py, -6.228154616877465e-07, atol=1e-15) == True
+    assert np.isclose(p1.px, 1.33671170365656e-07, atol=1e-15)
+    assert np.isclose(p1.py, -6.228154616877465e-07, atol=1e-15)
     assert p1.compare(p2, abs_tol=1e-15)
 
     # test absolute kick for sigma_y > sigma_x
@@ -53,8 +53,8 @@ def test_track_spacecharge():
     p2 = p1.copy()
     el1.track(p1)
     el2.track(p2)
-    assert np.isclose(p1.px, -6.228154616877465e-07, atol=1e-15) == True
-    assert np.isclose(p1.py, 1.33671170365656e-07, atol=1e-15) == True
+    assert np.isclose(p1.px, -6.228154616877465e-07, atol=1e-15)
+    assert np.isclose(p1.py, 1.33671170365656e-07, atol=1e-15)
     assert p1.compare(p2, abs_tol=1e-15)
 
     # test no kick for particle on closed orbit
@@ -64,7 +64,6 @@ def test_track_spacecharge():
     p2 = p1.copy()
     el1.track(p1)
     el2.track(p2)
-    assert np.isclose(p1.px, 0.0, atol=1e-15) == True
-    assert np.isclose(p1.py, 0.0, atol=1e-15) == True
+    assert np.isclose(p1.px, 0.0, atol=1e-15)
+    assert np.isclose(p1.py, 0.0, atol=1e-15)
     assert p1.compare(p2, abs_tol=1e-15)
-
