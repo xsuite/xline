@@ -41,7 +41,9 @@ def iter_from_madx_sequence(
             "monitor",
             "hmonitor",
             "vmonitor",
+            "collimator",
             "rcollimator",
+            "elseparator",
             "instrument",
             "solenoid",
             "drift",
@@ -58,7 +60,7 @@ def iter_from_madx_sequence(
                 knl=list(knl), ksl=list(ksl), hxl=knl[0], hyl=0, length=ee.lrad
             )
 
-        elif mad_etype == "tkicker":
+        elif mad_etype == "tkicker" or mad_etype == "kicker":
             hkick = [-ee.hkick] if hasattr(ee, "hkick") else []
             vkick = [ee.vkick] if hasattr(ee, "vkick") else []
             newele = classes.Multipole(
