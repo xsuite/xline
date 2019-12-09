@@ -1,3 +1,4 @@
+import numpy as np
 from scipy.constants import e as qe
 from scipy.constants import c as clight
 
@@ -223,8 +224,8 @@ class BeamBeam6D(Element):
                 self.alpha,
                 self.x_bb_co,
                 self.y_bb_co,
-                self.charge_slices,
-                self.zeta_slices,
+                np.atleast_1d(self.charge_slices),
+                np.atleast_1d(self.zeta_slices),
                 self.sigma_11,
                 self.sigma_12,
                 self.sigma_13,
