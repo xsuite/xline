@@ -343,27 +343,43 @@ class Line(Element):
 
     # error handling (alignment, multipole orders, ...):
 
-    def add_offset_error_to(self, element, dx=0, dy=0):
+    def find_element_ids(self, element):
+        """Find element in this Line instance's self.elements.
+
+        Return index before and after the element, taking into account
+        attached _aperture instances (LimitRect, LimitEllipse, ...)
+        which would follow the element occurrence in the list.
+
+        Raises IndexError if element not in this Line.
+        """
         # will raise error if element not present:
         idx_el = self.elements.index(element)
+        idx_after_el = idx_el + 1
+        el_name = self.element_names[idx_el]
+        if self.element_names[idx_after_el] == el_name + '_aperture':
+            idx_after_el += 1
+        return idx_el, idx_after_el
+
+    def add_offset_error_to(self, element, dx=0, dy=0):
+        idx_el, idx_after_el = self.find_element_ids(element)
         el_name = self.element_names[idx_el]
         if not dx and not dy:
             return
         xyshift = elements.XYShift(dx=dx, dy=dy)
         inv_xyshift = elements.XYShift(dx=-dx, dy=-dy)
         self.insert_element(idx_el, xyshift, el_name + "_offset_in")
-        self.insert_element(idx_el + 2, inv_xyshift, el_name + "_offset_out")
+        self.insert_element(idx_after_el + 1, inv_xyshift,
+                            el_name + "_offset_out")
 
     def add_tilt_error_to(self, element, angle):
-        # will raise error if element not present:
-        idx_el = self.elements.index(element)
+        idx_el, idx_after_el = self.find_element_ids(element)
         el_name = self.element_names[idx_el]
         if not angle:
             return
         srot = elements.SRotation(angle=angle)
         inv_srot = elements.SRotation(angle=-angle)
         self.insert_element(idx_el, srot, el_name + "_tilt_in")
-        self.insert_element(idx_el + 2, inv_srot, el_name + "_tilt_out")
+        self.insert_element(idx_after_el + 1, inv_srot, el_name + "_tilt_out")
 
     def add_multipole_error_to(self, element, knl=[], ksl=[]):
         # will raise error if element not present:
