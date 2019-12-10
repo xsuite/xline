@@ -309,7 +309,7 @@ class LimitRect(Element):
                 and y <= self.max_y
             )
             if particle.state != 1:
-                return particle.state
+                return "Particle lost"
         else:
             particle.state = np.int_(
                 (x >= self.min_x)
@@ -319,13 +319,13 @@ class LimitRect(Element):
             )
             particle.remove_lost_particles()
             if len(particle.state) == 0:
-                return -1
+                return "All particles lost"
 
 
 class LimitEllipse(Element):
     _description = [
-        ("a", "m^2", "Horizontal semiaxis", 1.0),
-        ("b", "m^2", "Vertical semiaxis", 1.0),
+        ("a", "m", "Horizontal semiaxis", 1.0),
+        ("b", "m", "Vertical semiaxis", 1.0),
     ]
 
     def track(self, particle):
@@ -345,7 +345,7 @@ class LimitEllipse(Element):
             )
             particle.remove_lost_particles()
             if len(particle.state) == 0:
-                return "All particle lost"
+                return "All particles lost"
 
 
 class BeamMonitor(Element):
