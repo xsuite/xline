@@ -123,32 +123,36 @@ def _get_Ex_Ey_Gx_Gy_gauss(
         )
 
         if not skip_Gs:
-            Gx = (
-                1
-                / (2.0 * (x * x + y * y))
-                * (
-                    y * Ey
-                    - x * Ex
-                    + 1.0
-                    / (2 * pi * epsilon_0 * sigma * sigma)
-                    * x
-                    * x
-                    * exp(-(x * x + y * y) / (2.0 * sigma * sigma))
+            if abs(x) + abs(y) < min_sigma_diff:
+                Gx = 0.0
+                Gy = 0.0
+            else:
+                Gx = (
+                    1
+                    / (2.0 * (x * x + y * y))
+                    * (
+                        y * Ey
+                        - x * Ex
+                        + 1.0
+                        / (2 * pi * epsilon_0 * sigma * sigma)
+                        * x
+                        * x
+                        * exp(-(x * x + y * y) / (2.0 * sigma * sigma))
+                    )
                 )
-            )
-            Gy = (
-                1.0
-                / (2 * (x * x + y * y))
-                * (
-                    x * Ex
-                    - y * Ey
-                    + 1.0
-                    / (2 * pi * epsilon_0 * sigma * sigma)
-                    * y
-                    * y
-                    * exp(-(x * x + y * y) / (2.0 * sigma * sigma))
+                Gy = (
+                    1.0
+                    / (2 * (x * x + y * y))
+                    * (
+                        x * Ex
+                        - y * Ey
+                        + 1.0
+                        / (2 * pi * epsilon_0 * sigma * sigma)
+                        * y
+                        * y
+                        * exp(-(x * x + y * y) / (2.0 * sigma * sigma))
+                    )
                 )
-            )
     else:
 
         sigma_x = sigma_x
