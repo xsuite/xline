@@ -135,10 +135,10 @@ def get_bb_names_madpoints_sigmas(
     return element_names, points, sigmas
 
 
-def shift_strong_beam_based_on_close_ip(
+def compute_shift_strong_beam_based_on_close_ip(
     points_weak, points_strong, IPs_survey_weak, IPs_survey_strong
 ):
-
+    strong_shift = []
     for i_bb, _ in enumerate(points_weak):
 
         pbw = points_weak[i_bb]
@@ -155,10 +155,11 @@ def shift_strong_beam_based_on_close_ip(
 
         # Shift Bs
         shift_ws = IPs_survey_strong[use_ip].p - IPs_survey_weak[use_ip].p
-        pbs.p -= shift_ws
+        strong_shift.append(shift_ws)
+    return strong_shift
 
 
-def find_bb_separations(points_weak, points_strong, names=None):
+def find_bb_separations(points_weak, points_strong, strong_shift, names=None):
 
     if names is None:
         names = ["bb_%d" % ii for ii in range(len(points_weak))]
@@ -171,7 +172,9 @@ def find_bb_separations(points_weak, points_strong, names=None):
         pbs = points_strong[i_bb]
 
         # Find vws
-        vbb_ws = points_strong[i_bb].p - points_weak[i_bb].p
+        vbb_ws = (points_strong[i_bb].p - strong_shift[i_bb]) - points_weak[
+            i_bb
+        ].p
 
         # Check that the two reference system are parallel
         try:
@@ -211,6 +214,7 @@ def setup_beam_beam_in_line(
     bb_sigmas_strong,
     bb_points_weak,
     bb_points_strong,
+    bb_shift_strong,
     beta_r_strong,
     bunch_intensity_strong,
     n_slices_6D,
@@ -220,6 +224,7 @@ def setup_beam_beam_in_line(
     sep_x, sep_y = find_bb_separations(
         points_weak=bb_points_weak,
         points_strong=bb_points_strong,
+        strong_shift=bb_shift_strong,
         names=bb_names,
     )
 
