@@ -147,7 +147,9 @@ class BB6D_Data(object):
         buffer_list.append(self.parboost.tobuffer())
         buffer_list.append(self.Sigmas_0_star.tobuffer())
         buffer_list.append(np.array([self.min_sigma_diff], dtype=np.float64))
-        buffer_list.append(np.array([self.threshold_singular], dtype=np.float64))
+        buffer_list.append(
+            np.array([self.threshold_singular], dtype=np.float64)
+        )
         buffer_list.append(int_to_float64arr(self.N_slices))
 
         buffer_list.append(np.array([self.delta_x], dtype=np.float64))
@@ -164,7 +166,9 @@ class BB6D_Data(object):
         buffer_list.append(np.array([self.Dpy_sub], dtype=np.float64))
         buffer_list.append(np.array([self.Dsigma_sub], dtype=np.float64))
         buffer_list.append(np.array([self.Ddelta_sub], dtype=np.float64))
-        buffer_list.append(int_to_float64arr({True: 1, False: 0}[self.enabled]))
+        buffer_list.append(
+            int_to_float64arr({True: 1, False: 0}[self.enabled])
+        )
 
         buffer_list.append(int_to_float64arr(3))  # offset to N_part_per_slice
         # offset to x_slices_star
@@ -247,9 +251,17 @@ def BB6D_init(
     z_slices = np.take(z_slices, ind_sorted)
     N_part_per_slice = np.take(N_part_per_slice, ind_sorted)
 
-    # By boosting the strong z and all zeros, I get the transverse coordinates of the strong beam in the ref system of the weak
+    # By boosting the strong z and all zeros, I get the transverse coordinates
+    # of the strong beam in the ref system of the weak
     boost_vect = np.vectorize(boost.boost, excluded="parboost")
-    x_slices_star, px_slices_star, y_slices_star, py_slices_star, sigma_slices_star, delta_slices_star = boost_vect(
+    (
+        x_slices_star,
+        px_slices_star,
+        y_slices_star,
+        py_slices_star,
+        sigma_slices_star,
+        delta_slices_star,
+    ) = boost_vect(
         x=0 * z_slices,
         px=0 * z_slices,
         y=0 * z_slices,

@@ -1,3 +1,4 @@
+import numpy as np
 from scipy.constants import e as qe
 from scipy.constants import c as clight
 
@@ -11,10 +12,15 @@ class BeamBeam4D(Element):
     """Interaction with a transverse-Gaussian strong beam (4D modelling)."""
 
     _description = [
-        ("charge", "e", "Charge of the interacting distribution (strong beam)", 0),
-        ("sigma_x", "m", "Horizontal size of the strong beam (r.m.s.)", 0),
-        ("sigma_y", "m", "Vertical size of the strong beam (r.m.s.)", 0),
-        ("beta_r", "", "Relativistic beta of the stron beam", 0),
+        (
+            "charge",
+            "e",
+            "Charge of the interacting distribution (strong beam)",
+            0,
+        ),
+        ("sigma_x", "m", "Horizontal size of the strong beam (r.m.s.)", 1.0),
+        ("sigma_y", "m", "Vertical size of the strong beam (r.m.s.)", 1.0),
+        ("beta_r", "", "Relativistic beta of the stron beam", 1.0),
         (
             "x_bb",
             "m",
@@ -86,44 +92,96 @@ class BeamBeam6D(Element):
         (
             "phi",
             "rad",
-            "Crossing angle (>0 weak beam increases x in the direction motion)",
+            "Crossing angle (>0 weak beam increases"
+            "x in the direction motion)",
             0,
         ),
         ("alpha", "rad", "Crossing plane tilt angle (>0 x tends to y)", 0),
-        ("x_bb_co", "m", "H. position of the strong beam w.r.t. the closed orbit", 0),
-        ("y_bb_co", "m", "V. position of the strong beam w.r.t. the closed orbit", 0),
-        ("charge_slices", "qe", "Charge of the interacting slices (strong beam)", ()),
+        (
+            "x_bb_co",
+            "m",
+            "H. position of the strong beam w.r.t. the closed orbit",
+            0,
+        ),
+        (
+            "y_bb_co",
+            "m",
+            "V. position of the strong beam w.r.t. the closed orbit",
+            0,
+        ),
+        (
+            "charge_slices",
+            "qe",
+            "Charge of the interacting slices (strong beam)",
+            (0.0),
+        ),
         (
             "zeta_slices",
             "m",
-            "Longitudinal position of the interacting slices (>0 head of the strong).",
-            (),
+            "Longitudinal position of the interacting"
+            "slices (>0 head of the strong).",
+            (0.0),
         ),
         (
             "sigma_11",
             "m^2",
             "Sigma_11 element of the sigma matrix of the strong beam",
+            1.0,
+        ),
+        (
+            "sigma_12",
+            "m",
+            "Sigma_12 element of the sigma matrix of the strong beam",
             0,
         ),
-        ("sigma_12", "m", "Sigma_12 element of the sigma matrix of the strong beam", 0),
         (
             "sigma_13",
             "m^2",
             "Sigma_13 element of the sigma matrix of the strong beam",
             0,
         ),
-        ("sigma_14", "m", "Sigma_14 element of the sigma matrix of the strong beam", 0),
-        ("sigma_22", "", "Sigma_22 element of the sigma matrix of the strong beam", 0),
-        ("sigma_23", "m", "Sigma_23 element of the sigma matrix of the strong beam", 0),
-        ("sigma_24", "", "Sigma_24 element of the sigma matrix of the strong beam", 0),
+        (
+            "sigma_14",
+            "m",
+            "Sigma_14 element of the sigma matrix of the strong beam",
+            0,
+        ),
+        (
+            "sigma_22",
+            "",
+            "Sigma_22 element of the sigma matrix of the strong beam",
+            0,
+        ),
+        (
+            "sigma_23",
+            "m",
+            "Sigma_23 element of the sigma matrix of the strong beam",
+            0,
+        ),
+        (
+            "sigma_24",
+            "",
+            "Sigma_24 element of the sigma matrix of the strong beam",
+            0,
+        ),
         (
             "sigma_33",
             "m^2",
             "Sigma_33 element of the sigma matrix of the strong beam",
+            1.0,
+        ),
+        (
+            "sigma_34",
+            "m",
+            "Sigma_34 element of the sigma matrix of the strong beam",
             0,
         ),
-        ("sigma_34", "m", "Sigma_34 element of the sigma matrix of the strong beam", 0),
-        ("sigma_44", "", "Sigma_44 element of the sigma matrix of the strong beam", 0),
+        (
+            "sigma_44",
+            "",
+            "Sigma_44 element of the sigma matrix of the strong beam",
+            0,
+        ),
         ("x_co", "m", "x coordinate the closed orbit (weak beam).", 0),
         ("px_co", "", "px coordinate the closed orbit (weak beam).", 0),
         ("y_co", "m", "y coordinate the closed orbit (weaek beam).", 0),
@@ -134,12 +192,27 @@ class BeamBeam6D(Element):
         ("d_px", "", "Quantity subtracted from px after the interaction.", 0),
         ("d_y", "m", "Quantity subtracted from y after the interaction.", 0),
         ("d_py", "", "Quantity subtracted from py after the interaction.", 0),
-        ("d_zeta", "m", "Quantity subtracted from sigma after the interaction.", 0),
-        ("d_delta", "", "Quantity subtracted from delta after the interaction.", 0),
+        (
+            "d_zeta",
+            "m",
+            "Quantity subtracted from sigma after the interaction.",
+            0,
+        ),
+        (
+            "d_delta",
+            "",
+            "Quantity subtracted from delta after the interaction.",
+            0,
+        ),
     ]
     _extra = [
         ("min_sigma_diff", "m", "Threshold to detect round beam", 1e-28),
-        ("threshold_singular", "", "Threshold to detect small denominator", 1e-28),
+        (
+            "threshold_singular",
+            "",
+            "Threshold to detect small denominator",
+            1e-28,
+        ),
         ("enabled", "", "Switch for closed orbit search", True),
     ]
 
@@ -151,8 +224,8 @@ class BeamBeam6D(Element):
                 self.alpha,
                 self.x_bb_co,
                 self.y_bb_co,
-                self.charge_slices,
-                self.zeta_slices,
+                np.atleast_1d(self.charge_slices),
+                np.atleast_1d(self.zeta_slices),
                 self.sigma_11,
                 self.sigma_12,
                 self.sigma_13,
@@ -179,7 +252,14 @@ class BeamBeam6D(Element):
                 self.d_delta,
                 self.enabled,
             )
-            x_ret, px_ret, y_ret, py_ret, zeta_ret, delta_ret = BB6D.BB6D_track(
+            (
+                x_ret,
+                px_ret,
+                y_ret,
+                py_ret,
+                zeta_ret,
+                delta_ret,
+            ) = BB6D.BB6D_track(
                 p.x,
                 p.px,
                 p.y,

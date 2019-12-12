@@ -27,7 +27,9 @@ def initial_xy_cartesian(x_min, x_max, x_N, y_min, y_max, y_N):
     )
 
 
-def draw_footprint(A, axis_object=None, figure_object=None, axis=0, linewidth=4):
+def draw_footprint(
+    A, axis_object=None, figure_object=None, axis=0, linewidth=4
+):
     """
     Input A should be a 3-D numpy array with shape (Nx,Ny,2)
     representing a 2-D array of (x,y) points. This function

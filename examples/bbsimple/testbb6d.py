@@ -17,7 +17,7 @@ p0c_eV = sixinput.initialconditions[-3] * 1e6
 line, other_data = pysixtrack.Line.from_sixinput(sixinput)
 
 # Info on sixtrack->pyblep conversion
-iconv = other_data["iconv"]
+iconv = line.other_data["iconv"]
 
 ########################################################
 #                  Search closed orbit                 #
@@ -125,10 +125,15 @@ def compare(prun, pbench, pbench_prev):
         vbench = getattr(pbench, att)
         vbench_prev = getattr(pbench_prev, att)
         diff = vrun - vbench
-        diffrel = abs(1.0 - abs(vrun - vbench_prev) / abs(vbench - vbench_prev))
+        diffrel = abs(
+            1.0 - abs(vrun - vbench_prev) / abs(vbench - vbench_prev)
+        )
         out.append(abs(diff))
         out_rel.append(diffrel)
-        print(f"{att:<5} {vrun:22.13e} {vbench:22.13e} {diff:22.13g} {diffrel:22.13g}")
+        print(
+            f"{att:<5} {vrun:22.13e} {vbench:22.13e}"
+            "{diff:22.13g} {diffrel:22.13g}"
+        )
         if diffrel > 1e-5 or np.isnan(diffrel):
             if np.abs(diff) > 9e-10:
                 print("Too large discrepancy!")
