@@ -348,6 +348,46 @@ class LimitEllipse(Element):
                 return "All particles lost"
 
 
+class LimitRectEllipse(Element):
+    _description = [
+        ("max_x", "m", "Maximum horizontal aperture", 1.0),
+        ("max_y", "m", "Maximum vertical aperture", 1.0),
+        ("a", "m", "Horizontal semiaxis", 1.0),
+        ("b", "m", "Vertical semiaxis", 1.0),
+    ]
+
+    def track(self, particle):
+
+        x = particle.x
+        y = particle.y
+
+        if not hasattr(particle.state, "__iter__"):
+            particle.state = int(
+                x >= -self.max_x
+                and x <= self.max_x
+                and y >= -self.max_y
+                and y <= self.max_y
+                and x * x / (self.a * self.a) + y * y / (self.b * self.b)
+                <= 1.0
+            )
+            if particle.state != 1:
+                return "Particle lost"
+        else:
+            particle.state = np.int_(
+                (x >= -self.max_x)
+                & (x <= self.max_x)
+                & (y >= -self.max_y)
+                & (y <= self.max_y)
+                & (
+                    x * x / (self.a * self.a) + y * y / (self.b * self.b)
+                    <= 1.0
+                )
+            )
+            particle.remove_lost_particles()
+            if len(particle.state) == 0:
+                return "All particles lost"
+
+
 class BeamMonitor(Element):
     _description = [
         ("num_stores", "", "...", 0),

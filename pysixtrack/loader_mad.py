@@ -190,6 +190,17 @@ def iter_from_madx_sequence(
                 newaperture = pysixtrack_elements.LimitEllipse(
                     a=ee.aperture[0], b=ee.aperture[1]
                 )
+            elif ee.apertype == "circle":
+                newaperture = pysixtrack_elements.LimitEllipse(
+                    a=ee.aperture[0], b=ee.aperture[0]
+                )
+            elif ee.apertype == "rectellipse":
+                newaperture = pysixtrack_elements.LimitRectEllipse(
+                    max_x=ee.aperture[0],
+                    max_y=ee.aperture[1],
+                    a=ee.aperture[2],
+                    b=ee.aperture[3],
+                )
             else:
                 raise ValueError("Aperture type not recognized")
 
