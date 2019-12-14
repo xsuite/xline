@@ -217,7 +217,7 @@ class RFMultipole(Element):
         p.px += -chi * dpx
         p.py += chi * dpy
         dv0 = self.voltage * sin(self.lag * deg2rad - ktau)
-        p.add_to_energy(chi * (dv0 - p.p0c * k * dptr))
+        p.add_to_energy(p.qratio * p.q0 * (dv0 - p.p0c * k * dptr))
 
 
 class Cavity(Element):
