@@ -1,0 +1,71 @@
+ptc_twiss_macro(slice_flag): macro={
+  select, flag=ptc_twiss, column=name,keyword,l,s,x,px,y,py,beta11,alfa11,beta22,alfa22,disp1,mu1,mu2,angle,K0L,K1L,K2L,K3L,VKICK,HKICK;
+  !beta=sqrt(1-1/beam->gamma^2);
+  !dispx:=beta*table(ptc_twiss,disp1);
+  ptc_create_universe;
+  ptc_create_layout, model=2, method=2, nst=5, exact=true;
+  ptc_setswitch, debuglevel=0, nocavity=false, fringe=true, exact_mis=true, time=false, totalpath=true;
+  PTC_ALIGN;
+  
+  IF (slice_flag == 1){
+    select, flag=ptc_twiss, column=name,keyword,l,s,x,y,beta11,beta22,disp1;
+    ptc_twiss, closed_orbit, table=ptc_twiss, slice_magnets=true, icase=5, no=2, summary_table=ptc_twiss_summary;
+  }
+  ELSE{
+    ptc_twiss, closed_orbit, table=ptc_twiss, icase=5, no=2, summary_table=ptc_twiss_summary;
+  }
+
+  qx0=table(ptc_twiss_summary,Q1);
+  qy0=table(ptc_twiss_summary,Q2);
+  value, qx0, qy0;
+  ptc_end;
+  system,'rm internal_mag_pot.txt';
+};
+
+write_ptc_twiss(filename) : macro = {
+  write, table=ptc_twiss, file=filename;
+};
+
+assign_BSW_strength: macro = {
+     SELECT,FLAG=ERROR,CLEAR;
+     SELECT,FLAG=ERROR,PATTERN=BI1.BSW1L1.1;
+     SELECT,FLAG=ERROR,PATTERN=BI1.BSW1L1.4;
+     EFCOMP, DKN:={+BSW_K0L, 0, +BSW_K2L};   
+
+     SELECT,FLAG=ERROR,CLEAR;
+     SELECT,FLAG=ERROR,PATTERN=BI1.BSW1L1.2;
+     SELECT,FLAG=ERROR,PATTERN=BI1.BSW1L1.3;
+     EFCOMP, DKN:={-BSW_K0L, 0, -BSW_K2L}; 
+ };
+
+ assign_BSW_alignment: macro = {
+     SELECT,FLAG=ERROR,CLEAR;
+     SELECT,FLAG=ERROR,PATTERN=BI1.BSW1L1.1;
+     EALIGN, DX=-0.0057;
+
+     SELECT,FLAG=ERROR,CLEAR;
+     SELECT,FLAG=ERROR,PATTERN=BI1.BSW1L1.2;
+     SELECT,FLAG=ERROR,PATTERN=BI1.BSW1L1.3;
+     SELECT,FLAG=ERROR,PATTERN=BI1.BSW1L1.4;
+     EALIGN, DX=-0.0442;
+ };
+
+ assign_KSW_strength: macro = {
+     SELECT,FLAG=ERROR,CLEAR;
+     SELECT,FLAG=ERROR,PATTERN=BI1.KSW1L4;
+     EFCOMP, DKN:={kLBIKSW1L4};   
+
+     SELECT,FLAG=ERROR,CLEAR;
+     SELECT,FLAG=ERROR,PATTERN=BI1.KSW2L1;
+     EFCOMP, DKN:={kLBIKSW2L1};   
+
+     SELECT,FLAG=ERROR,CLEAR;
+     SELECT,FLAG=ERROR,PATTERN=BI1.KSW16L1;
+     EFCOMP, DKN:={kLBIKSW16L1};   
+
+     SELECT,FLAG=ERROR,CLEAR;
+     SELECT,FLAG=ERROR,PATTERN=BI1.KSW16L4;
+     EFCOMP, DKN:={kLBIKSW16L4};   
+ };
+
+

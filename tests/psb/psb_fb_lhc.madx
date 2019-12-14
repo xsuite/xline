@@ -1,0 +1,54 @@
+
+/******************************************************************************************
+ *
+ * MAD-X input script for the flat bottom optics of the LHC cycle.
+ *
+ * 03/12/2019 - Fanouria Antoniou, Hannes Bartosik, Chiara Bracco, 
+ * Alexander Huschauer, Elisabeth Renner
+ ******************************************************************************************/
+
+ /******************************************************************
+ * Energy and particle type definition
+ ******************************************************************/
+ 
+BEAM, PARTICLE=PROTON, PC = 0.571;
+BRHO      := BEAM->PC * 3.3356;
+
+set,  format="20.10f";
+
+/******************************************************************
+ * Call lattice files
+ ******************************************************************/
+
+call, file = 'psb.seq';
+call, file = 'psb_aperture.dbx';
+call, file = 'psb_fb_lhc.str';
+call, file = 'macros.ptc';
+
+/******************************************************************
+ * MakeThin & Tune matching 
+ ******************************************************************/
+
+QH = 4.22;
+QV = 4.45;
+kqf = 0.7041950169 ;
+kqd =-0.6740114090 ;
+
+use, sequence=psb1;
+seqedit, sequence=psb1;
+flatten;
+endedit;
+use, sequence=psb1;
+
+select,flag=makethin, slice=1;
+makethin,sequence=psb1, style=teapot, makedipedge=true;
+! save, sequence=psb1, file='psb_thin.seq';
+
+use, sequence=psb1;
+
+MATCH,sequence=psb1;
+ vary, NAME=kQF, step = 0.0001;
+ vary, NAME=kQD, step = 0.0001;
+ constraint, range=#E, MUX=QH, MUY=QV;
+ lmdif, calls = 10000, tolerance = 1.0E-21;
+ENDMATCH;
