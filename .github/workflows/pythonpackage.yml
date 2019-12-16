@@ -31,8 +31,8 @@ jobs:
     - name: Test with pytest
       run: |
         pip install pytest
-        pytest --rootdir=/home/runner/work/pysixtrack/
         pwd
         echo $HOME
         ls -l
+        #pytest --rootdir=/home/runner/work/pysixtrack/
 
