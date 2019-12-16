@@ -16,6 +16,7 @@ element_list = [
     pysixtrack.elements.Line,
     pysixtrack.elements.LimitRect,
     pysixtrack.elements.LimitEllipse,
+    pysixtrack.elements.LimitRectEllipse,
     pysixtrack.elements.BeamBeam4D,
     pysixtrack.elements.BeamBeam6D,
     pysixtrack.elements.SpaceChargeCoasting,
