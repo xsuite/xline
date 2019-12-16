@@ -17,8 +17,8 @@ assert rect_aperture.track(p) is None
 assert ellip_aperture.track(p) is None
 
 p.x = 100.0
-assert rect_aperture.track(p) == 0
-assert ellip_aperture.track(p) == 0
+assert rect_aperture.track(p) == "Particle lost"
+assert ellip_aperture.track(p) == "Particle lost"
 
 # Test vector
 
@@ -39,3 +39,24 @@ ax = fig1.add_subplot(111)
 ax.plot(p.x, p.y, ".b")
 ax.plot(p.lost_particles[0].x, p.lost_particles[0].y, "r.")
 ax.plot(p.lost_particles[1].x, p.lost_particles[1].y, "g.")
+
+
+# test rectellipse
+
+p = pysixtrack.Particles()
+
+p.x = uniform(low=-5e-2, high=5e-2, size=N_part)
+p.y = uniform(low=-5e-2, high=5e-2, size=N_part)
+
+p.state = np.ones_like(p.x, dtype=np.int)
+
+rectellip_aperture = pysixtrack.elements.LimitRectEllipse(
+    max_x=4e-2, max_y=2e-2, a=4e-2, b=2.5e-2
+)
+rectellip_aperture.track(p)
+
+fig2 = plt.figure(2)
+ax = fig2.add_subplot(111)
+
+ax.plot(p.x, p.y, ".b")
+ax.plot(p.lost_particles[0].x, p.lost_particles[0].y, "r.")
