@@ -23,7 +23,7 @@ set,  format="20.10f";
 call, file = 'psb.seq';
 call, file = 'psb_aperture.dbx';
 call, file = 'psb_fb_lhc.str';
-call, file = 'macros.ptc';
+! call, file = 'macros.ptc';
 
 /******************************************************************
  * MakeThin & Tune matching 
