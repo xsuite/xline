@@ -34,5 +34,5 @@ jobs:
         pwd
         echo $HOME
         ls -l
-        #pytest --rootdir=/home/runner/work/pysixtrack/
+        pytest
 
