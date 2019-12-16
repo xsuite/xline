@@ -31,4 +31,8 @@ jobs:
     - name: Test with pytest
       run: |
         pip install pytest
+        pwd
+        echo $HOME
+        ls -l
         pytest
+

@@ -57,7 +57,11 @@ def iter_from_madx_sequence(
             knl = ee.knl if hasattr(ee, "knl") else [0]
             ksl = ee.ksl if hasattr(ee, "ksl") else [0]
             newele = classes.Multipole(
-                knl=list(knl), ksl=list(ksl), hxl=knl[0], hyl=0, length=ee.lrad
+                knl=list(knl),
+                ksl=list(ksl),
+                hxl=knl[0],
+                hyl=ksl[0],
+                length=ee.lrad,
             )
 
         elif mad_etype == "tkicker" or mad_etype == "kicker":

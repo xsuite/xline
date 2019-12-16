@@ -204,7 +204,7 @@ class RFMultipole(Element):
             dpy += cs * ksl[ii] * zre + cn * knl[ii] * zim
             # compute z**(i+1)/(i+1)!
             zret = (zre * x - zim * y) / (ii + 1)
-            zim = (zim * y + zre * x) / (ii + 1)
+            zim = (zim * x + zre * y) / (ii + 1)
             zre = zret
             fnr = knl[ii] * zre
             # fni = knl[ii] * zim
