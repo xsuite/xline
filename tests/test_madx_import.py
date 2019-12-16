@@ -1,11 +1,19 @@
 import os
+import sys
+from importlib import util
 
-from cpymad.madx import Madx
 import pysixtrack
 import pysixtrack.be_beamfields.tools as bt
 
 
 def test_madx_import():
+    cpymad_spec = util.find_spec("cpymad")
+    if cpymad_spec is None:
+        print("cpymad is not available - abort test")
+        sys.exit(0)
+
+    from cpymad.madx import Madx
+
     seq_name = "psb1"
     use_aperture = True
 
@@ -45,9 +53,6 @@ def test_madx_import():
         bt.install_sc_placeholders(
             mad, seq_name, sc_names, sc_locations, mode=sc_mode
         )
-
-        # twiss
-        # twtable = mad.twiss()
 
         # Generate line with spacecharge
         line = pysixtrack.Line.from_madx_sequence(
