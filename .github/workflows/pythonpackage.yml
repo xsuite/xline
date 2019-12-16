@@ -34,5 +34,5 @@ jobs:
         pwd
         echo $HOME
         ls -l
-        pytest
+        python -m pytest
 
