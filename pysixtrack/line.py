@@ -356,7 +356,7 @@ class Line(Element):
         idx_el = self.elements.index(element)
         idx_after_el = idx_el + 1
         el_name = self.element_names[idx_el]
-        if self.element_names[idx_after_el] == el_name + '_aperture':
+        if self.element_names[idx_after_el] == el_name + "_aperture":
             idx_after_el += 1
         return idx_el, idx_after_el
 
@@ -368,8 +368,9 @@ class Line(Element):
         xyshift = elements.XYShift(dx=dx, dy=dy)
         inv_xyshift = elements.XYShift(dx=-dx, dy=-dy)
         self.insert_element(idx_el, xyshift, el_name + "_offset_in")
-        self.insert_element(idx_after_el + 1, inv_xyshift,
-                            el_name + "_offset_out")
+        self.insert_element(
+            idx_after_el + 1, inv_xyshift, el_name + "_offset_out"
+        )
 
     def add_tilt_error_to(self, element, angle):
         idx_el, idx_after_el = self.find_element_ids(element)
