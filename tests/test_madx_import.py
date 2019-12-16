@@ -60,7 +60,11 @@ def test_madx_import():
         )
 
         # Get sc info from optics
-        mad_sc_names, sc_points, sc_twdata = bt.get_spacecharge_names_madpoints_twdata(
+        (
+            mad_sc_names,
+            sc_points,
+            sc_twdata,
+        ) = bt.get_spacecharge_names_madpoints_twdata(
             mad, seq_name, mode=sc_mode
         )
 
