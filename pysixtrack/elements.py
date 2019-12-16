@@ -202,7 +202,6 @@ class RFMultipole(Element):
             # transverse kick order i!
             dpx += cn * knl[ii] * zre - cs * ksl[ii] * zim
             dpy += cs * ksl[ii] * zre + cn * knl[ii] * zim
-            print(dpy)
             # compute z**(i+1)/(i+1)!
             zret = (zre * x - zim * y) / (ii + 1)
             zim = (zim * x + zre * y) / (ii + 1)
