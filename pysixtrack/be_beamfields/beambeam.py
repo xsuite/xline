@@ -1,3 +1,4 @@
+import numpy as np
 from scipy.constants import e as qe
 from scipy.constants import c as clight
 
@@ -17,9 +18,9 @@ class BeamBeam4D(Element):
             "Charge of the interacting distribution (strong beam)",
             0,
         ),
-        ("sigma_x", "m", "Horizontal size of the strong beam (r.m.s.)", 0),
-        ("sigma_y", "m", "Vertical size of the strong beam (r.m.s.)", 0),
-        ("beta_r", "", "Relativistic beta of the stron beam", 0),
+        ("sigma_x", "m", "Horizontal size of the strong beam (r.m.s.)", 1.0),
+        ("sigma_y", "m", "Vertical size of the strong beam (r.m.s.)", 1.0),
+        ("beta_r", "", "Relativistic beta of the stron beam", 1.0),
         (
             "x_bb",
             "m",
@@ -112,20 +113,20 @@ class BeamBeam6D(Element):
             "charge_slices",
             "qe",
             "Charge of the interacting slices (strong beam)",
-            (),
+            (0.0),
         ),
         (
             "zeta_slices",
             "m",
             "Longitudinal position of the interacting"
             "slices (>0 head of the strong).",
-            (),
+            (0.0),
         ),
         (
             "sigma_11",
             "m^2",
             "Sigma_11 element of the sigma matrix of the strong beam",
-            0,
+            1.0,
         ),
         (
             "sigma_12",
@@ -167,7 +168,7 @@ class BeamBeam6D(Element):
             "sigma_33",
             "m^2",
             "Sigma_33 element of the sigma matrix of the strong beam",
-            0,
+            1.0,
         ),
         (
             "sigma_34",
@@ -223,8 +224,8 @@ class BeamBeam6D(Element):
                 self.alpha,
                 self.x_bb_co,
                 self.y_bb_co,
-                self.charge_slices,
-                self.zeta_slices,
+                np.atleast_1d(self.charge_slices),
+                np.atleast_1d(self.zeta_slices),
                 self.sigma_11,
                 self.sigma_12,
                 self.sigma_13,

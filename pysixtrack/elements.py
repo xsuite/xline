@@ -218,7 +218,7 @@ class RFMultipole(Element):
         p.px += -chi * dpx
         p.py += chi * dpy
         dv0 = self.voltage * sin(self.lag * deg2rad - ktau)
-        p.add_to_energy(chi * (dv0 - p.p0c * k * dptr))
+        p.add_to_energy(p.qratio * p.q0 * (dv0 - p.p0c * k * dptr))
 
 
 class Cavity(Element):
@@ -245,16 +245,15 @@ class SawtoothCavity(Element):
     _description = [
         ("voltage", "V", "Integrated energy change", 0),
         ("frequency", "Hz", "Equivalent Frequency of the cavity", 0),
-        ("lag", "degree", "Delay in the cavity sin(lag - w tau)", 0),
+        ("lag", "degree", "Delay in the cavity `lag - w tau`", 0),
     ]
 
     def track(self, p):
-        sin = p._m.sin
         pi = p._m.pi
         k = 2 * pi * self.frequency / p.clight
         tau = p.zeta / p.rvv / p.beta0
         phase = self.lag * pi / 180 - k * tau
-        phase = (phase + pi)%(2*pi) - pi
+        phase = (phase + pi) % (2 * pi) - pi
         p.add_to_energy(p.qratio * p.q0 * self.voltage * phase)
 
 
@@ -311,7 +310,7 @@ class LimitRect(Element):
                 and y <= self.max_y
             )
             if particle.state != 1:
-                return particle.state
+                return "Particle lost"
         else:
             particle.state = np.int_(
                 (x >= self.min_x)
@@ -320,14 +319,14 @@ class LimitRect(Element):
                 & (y <= self.max_y)
             )
             particle.remove_lost_particles()
-            if len(particle.state == 0):
-                return -1
+            if len(particle.state) == 0:
+                return "All particles lost"
 
 
 class LimitEllipse(Element):
     _description = [
-        ("a", "m^2", "Horizontal semiaxis", 1.0),
-        ("b", "m^2", "Vertical semiaxis", 1.0),
+        ("a", "m", "Horizontal semiaxis", 1.0),
+        ("b", "m", "Vertical semiaxis", 1.0),
     ]
 
     def track(self, particle):
@@ -340,14 +339,14 @@ class LimitEllipse(Element):
                 x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
             )
             if particle.state != 1:
-                return particle.state
+                return "Particle lost"
         else:
             particle.state = np.int_(
                 x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
             )
             particle.remove_lost_particles()
-            if len(particle.state == 0):
-                return -1
+            if len(particle.state) == 0:
+                return "All particles lost"
 
 
 class BeamMonitor(Element):
