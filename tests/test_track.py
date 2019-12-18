@@ -62,7 +62,11 @@ def test_track_LimitRect():
 
     arr = np.arange(0, 1, 0.001)
     p2 = pysixtrack.Particles(x=arr, y=arr)
+    survive = np.where(
+        (p2.x >= min_x) & (p2.x <= max_x) & (p2.y >= min_y) & (p2.y <= max_y)
+    )
     ret = el.track(p2)
+    assert len(p2.state) == len(survive[0])
 
     p2.x += max_x + 1e-6
     ret = el.track(p2)
@@ -82,11 +86,11 @@ def test_track_LimitEllipse():
 
     arr = np.arange(0, 1, 0.001)
     p2 = pysixtrack.Particles(x=arr, y=arr)
-    ret = el.track(p2)
-    survived = np.where(
+    survive = np.where(
         (p2.x ** 2 / limit_a ** 2 + p2.y ** 2 / limit_b ** 2 <= 1.0)
     )
-    assert len(p2.state) == len(survived[0])
+    ret = el.track(p2)
+    assert len(p2.state) == len(survive[0])
 
     p2.x += limit_a + 1e-6
     ret = el.track(p2)
