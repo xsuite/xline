@@ -55,7 +55,7 @@ twtable = mad.twiss()
 line = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)
 
 # Get sc info from optics
-mad_sc_names, sc_points, sc_twdata = bt.get_spacecharge_names_madpoints_twdata(
+mad_sc_names, sc_twdata = bt.get_spacecharge_names_twdata(
     mad, seq_name, mode=sc_mode
 )
 
@@ -80,7 +80,6 @@ if sc_mode == "Bunched":
         sc_elements,
         sc_lengths,
         sc_twdata,
-        sc_points,
         p0c,
         mass,
         number_of_particles,
@@ -94,7 +93,6 @@ elif sc_mode == "Coasting":
         sc_elements,
         sc_lengths,
         sc_twdata,
-        sc_points,
         p0c,
         mass,
         line_density,
