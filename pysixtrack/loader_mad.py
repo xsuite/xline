@@ -33,8 +33,8 @@ def iter_from_madx_sequence(
         eename = ee.name
         mad_etype = ee.base_type.name
 
-        if ee.length > 0:
-            raise ValueError(f"Sequence {seq} contains {eename} with length>0")
+        # if ee.length > 0:
+        #    raise ValueError(f"Sequence {seq} contains {eename} with length>0")
 
         if mad_etype in [
             "marker",
@@ -49,6 +49,7 @@ def iter_from_madx_sequence(
             "drift",
         ]:
             newele = myDrift(length=ee.l)
+            old_pp+=ee.l
 
         elif mad_etype in ignored_madtypes:
             pass
@@ -177,12 +178,17 @@ def iter_from_madx_sequence(
                 )
             else:
                 newele = myDrift(length=ee.l)
+                old_pp+=ee.l
         else:
             raise ValueError(f'MAD element "{mad_etype}" not recognized')
 
         yield eename, newele
 
-        if install_apertures & (min(ee.aperture) > 0):
+        if (
+            install_apertures
+            and hasattr(ee, "aperture")
+            and (min(ee.aperture) > 0)
+        ):
             if ee.apertype == "rectangle":
                 newaperture = pysixtrack_elements.LimitRect(
                     min_x=-ee.aperture[0],
@@ -333,5 +339,5 @@ def mad_benchmark(mtype, attrs, pc=0.2, x=0, px=0, y=0, py=0, t=0, pt=0):
         mad.sequence.bench, exact_drift=True
     )
     line.track(p_six)
-    p_mad.copy(1).compare(p_six, rel_tol=0)
+    p_mad.copy(-1).compare(p_six, rel_tol=0)
     return mad, line, p_mad, p_six
