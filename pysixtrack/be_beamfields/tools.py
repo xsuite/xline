@@ -312,8 +312,8 @@ def install_sc_placeholders(mad, seq_name, name, s, mode="Bunched"):
     )
 
 
-def get_spacecharge_names_madpoints_twdata(mad, seq_name, mode):
-    _, mad_sc_names, points, twdata = get_points_twissdata_for_element_type(
+def get_spacecharge_names_twdata(mad, seq_name, mode):
+    _, mad_sc_names, _, twdata = get_points_twissdata_for_element_type(
         mad,
         seq_name,
         ele_type="placeholder",
@@ -321,14 +321,13 @@ def get_spacecharge_names_madpoints_twdata(mad, seq_name, mode):
         use_survey=False,
         use_twiss=True,
     )
-    return mad_sc_names, points, twdata
+    return mad_sc_names, twdata
 
 
 def setup_spacecharge_bunched_in_line(
     sc_elements,
     sc_lengths,
     sc_twdata,
-    sc_points,
     p0c,
     mass,
     number_of_particles,
@@ -362,7 +361,6 @@ def setup_spacecharge_coasting_in_line(
     sc_elements,
     sc_lengths,
     sc_twdata,
-    sc_points,
     p0c,
     mass,
     line_density,
