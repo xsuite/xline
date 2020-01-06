@@ -12,22 +12,50 @@ import pysixtrack.be_beamfields.tools as bt
 # sc_mode = 'Coasting'
 sc_mode = "Bunched"
 
-# For bunched
-number_of_particles = 2e11
-bunchlength_rms = 0.22
+particle_type = 'protons'
+# particle_type = 'ions'
 
-# For coasting
-line_density = 2e11 / 0.5
+if particle_type == 'protons':
+    
+    # For bunched
+    number_of_particles = 2e11
+    bunchlength_rms = 0.22
 
-mass = physical_constants["proton mass energy equivalent in MeV"][0] * 1e6
-p0c = 25.92e9
-neps_x = 2e-6
-neps_y = 2e-6
-delta_rms = 1.5e-3
-V_RF_MV = 4.5
-lag_RF_deg = 180.0
-n_SCkicks = 108
-length_fuzzy = 1.5
+    # For coasting
+    line_density = 2e11 / 0.5
+
+    mass = pysixtrack.Particles.pmass 
+    p0c = 25.92e9
+    charge_state = 1.
+    neps_x = 2e-6
+    neps_y = 2e-6
+    delta_rms = 1.5e-3
+    V_RF_MV = 4.5
+    lag_RF_deg = 180.0
+    n_SCkicks = 108
+    length_fuzzy = 1.5
+
+if particle_type == 'ions':    
+    
+    # For bunched
+    number_of_particles = 3.5e8
+    bunchlength_rms = 0.22
+
+    # For coasting
+    line_density = 3.5e8 / 0.5
+
+    mass = 193.7e9 
+    p0c = 1402.406299e9
+    charge_state = 82.
+    neps_x = 1.63e-6
+    neps_y = 0.86e-6
+    delta_rms = 1.0e-3
+    V_RF_MV = 3
+    lag_RF_deg = 0.0
+    n_SCkicks = 1080
+    length_fuzzy = 1.5
+
+
 seq_name = "sps"
 
 mad = Madx()
@@ -123,6 +151,9 @@ part_on_CO = line.find_closed_orbit(
     p0c=p0c,
     method="get_guess",
 )
+
+part_on_CO.q0 = charge_state
+part_on_CO.mass0 = mass
 
 # Save particle on CO
 with open("particle_on_CO.pkl", "wb") as fid:

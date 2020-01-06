@@ -9,8 +9,8 @@ import NAFFlib
 import example_helpers as hp
 import footprint
 
-track_with = "PySixtrack"
-# track_with = 'Sixtracklib'
+# track_with = "PySixtrack"
+track_with = 'Sixtracklib'
 device = "0.0"
 device = None
 # device = 'opencl:0.0'
@@ -135,6 +135,6 @@ footprint.draw_footprint(Qxy_fp, axis_object=axFP, linewidth=1)
 # fig4.suptitle(info)
 axFP.set_xlabel("Qx")
 axFP.set_ylabel("Qy")
-axFP.set_xlim(0, 0.25)
-axFP.set_ylim(0, 0.25)
+axFP.set_xlim(0, 0.35)
+axFP.set_ylim(0, 0.35)
 plt.show()
