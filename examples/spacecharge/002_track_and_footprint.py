@@ -9,8 +9,8 @@ import NAFFlib
 import example_helpers as hp
 import footprint
 
-# track_with = "PySixtrack"
-track_with = "Sixtracklib"
+track_with = "PySixtrack"
+# track_with = "Sixtracklib"
 device = "0.0"
 device = None
 # device = 'opencl:0.0'
