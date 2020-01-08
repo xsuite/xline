@@ -1,19 +1,19 @@
 import pickle
-
 import numpy as np
 import matplotlib.pylab as plt
-from scipy.constants import physical_constants
 
 from cpymad.madx import Madx
 
 import pysixtrack
 import pysixtrack.be_beamfields.tools as bt
+import footprint
+
 
 # sc_mode = 'Coasting'
 sc_mode = "Bunched"
 
 particle_type = "protons"
-# particle_type = 'ions'
+# particle_type = "ions"
 
 if particle_type == "protons":
 
@@ -32,7 +32,7 @@ if particle_type == "protons":
     delta_rms = 1.5e-3
     V_RF_MV = 4.5
     lag_RF_deg = 180.0
-    n_SCkicks = 108
+    n_SCkicks = 250
     length_fuzzy = 1.5
 
 if particle_type == "ions":
@@ -47,12 +47,12 @@ if particle_type == "ions":
     mass = 193.7e9
     p0c = 1402.406299e9
     charge_state = 82.0
-    neps_x = 1.63e-6
-    neps_y = 0.86e-6
+    neps_x = 1.63e-6 
+    neps_y = 0.86e-6 
     delta_rms = 1.0e-3
-    V_RF_MV = 3
+    V_RF_MV = 3 
     lag_RF_deg = 0.0
-    n_SCkicks = 1080
+    n_SCkicks = 250
     length_fuzzy = 1.5
 
 
@@ -102,43 +102,12 @@ bt.check_spacecharge_consistency(
     sc_elements, sc_names, sc_lengths, mad_sc_names
 )
 
-# Setup spacecharge in the line
-if sc_mode == "Bunched":
-    bt.setup_spacecharge_bunched_in_line(
-        sc_elements,
-        sc_lengths,
-        sc_twdata,
-        p0c,
-        mass,
-        number_of_particles,
-        bunchlength_rms,
-        delta_rms,
-        neps_x,
-        neps_y,
-    )
-elif sc_mode == "Coasting":
-    bt.setup_spacecharge_coasting_in_line(
-        sc_elements,
-        sc_lengths,
-        sc_twdata,
-        p0c,
-        mass,
-        line_density,
-        delta_rms,
-        neps_x,
-        neps_y,
-    )
-else:
-    raise ValueError("mode not understood")
 # enable RF
 i_cavity = line.element_names.index("acta.31637")
 line.elements[i_cavity].voltage = V_RF_MV * 1e6
 line.elements[i_cavity].lag = lag_RF_deg
 
-
-with open("line.pkl", "wb") as fid:
-    pickle.dump(line.to_dict(keepextra=True), fid)
-
+# particle on closed orbit
 part_on_CO = line.find_closed_orbit(
     guess=[
         twtable["x"][0],
@@ -151,7 +120,6 @@ part_on_CO = line.find_closed_orbit(
     p0c=p0c,
     method="get_guess",
 )
-
 part_on_CO.q0 = charge_state
 part_on_CO.mass0 = mass
 
@@ -159,33 +127,88 @@ part_on_CO.mass0 = mass
 with open("particle_on_CO.pkl", "wb") as fid:
     pickle.dump(part_on_CO.to_dict(), fid)
 
+betagamma = part_on_CO.beta0 * part_on_CO.gamma0
+
+# Setup spacecharge in the line
+if sc_mode == "Bunched":
+    bt.setup_spacecharge_bunched_in_line(
+        sc_elements,
+        sc_lengths,
+        sc_twdata,
+        betagamma,
+        number_of_particles,
+        bunchlength_rms,
+        delta_rms,
+        neps_x,
+        neps_y,
+    )
+elif sc_mode == "Coasting":
+    bt.setup_spacecharge_coasting_in_line(
+        sc_elements,
+        sc_lengths,
+        sc_twdata,
+        betagamma,
+        line_density,
+        delta_rms,
+        neps_x,
+        neps_y,
+    )
+else:
+    raise ValueError("mode not understood")
+
+
+with open("line.pkl", "wb") as fid:
+    pickle.dump(line.to_dict(keepextra=True), fid)
+
+
 # Save twiss at start ring
 with open("twiss_at_start.pkl", "wb") as fid:
     pickle.dump({"betx": twtable.betx[0], "bety": twtable.bety[0]}, fid)
 
-""
 
-if 0:
-    plt.close("all")
+# prepare particles for tracking
+r_max_sigma = 10.0
+N_r_footp = 10.0
+N_theta_footp = 10.0
 
-    f, ax = plt.subplots()
-    ax.hist(sc_lengths, bins=np.linspace(0, max(sc_lengths) + 0.1, 100))
-    ax.set_xlabel("length of SC kick (m)")
-    ax.set_ylabel("counts")
-    ax.set_xlim(left=0)
-    plt.show()
+with open("line.pkl", "rb") as fid:
+    line = pysixtrack.Line.from_dict(pickle.load(fid), keepextra=True)
 
-    f, ax = plt.subplots(figsize=(14, 5))
-    ax.plot(twtable.s, twtable.betx, "b", label="x", lw=2)
-    ax.plot(twtable.s, twtable.bety, "g", label="x", lw=2)
-    for s in sc_locations:
-        ax.axvline(s, linewidth=1, color="r", linestyle="--")
-    ax.set_xlim(0, 1100)
-    ax.set_ylim(0, 120)
-    ax.set_xlabel("s (m)")
-    ax.set_ylabel("beta functions (m)")
-    ax.legend(loc=3)
-    plt.show()
+with open("particle_on_CO.pkl", "rb") as fid:
+    part_on_CO = pysixtrack.Particles.from_dict(pickle.load(fid))
 
+part = part_on_CO.copy()  
 
-""
+# get beta functions from twiss table
+with open("twiss_at_start.pkl", "rb") as fid:
+    twiss_at_start = pickle.load(fid)
+
+beta_x = twiss_at_start["betx"]
+beta_y = twiss_at_start["bety"]
+
+sigmax = np.sqrt(beta_x * neps_x / part.beta0 / part.gamma0)
+sigmay = np.sqrt(beta_y * neps_y / part.beta0 / part.gamma0)
+
+xy_norm = footprint.initial_xy_polar(
+    r_min=5e-2,
+    r_max=r_max_sigma,
+    r_N=N_r_footp + 1,
+    theta_min=np.pi / 100,
+    theta_max=np.pi / 2 - np.pi / 100,
+    theta_N=N_theta_footp,
+)
+
+DpxDpy_wrt_CO = np.zeros_like(xy_norm)
+
+for ii in range(xy_norm.shape[0]):
+    for jj in range(xy_norm.shape[1]):
+
+        DpxDpy_wrt_CO[ii, jj, 0] = xy_norm[ii, jj, 0] * np.sqrt(
+            neps_x / part.beta0 / part.gamma0 / beta_x
+        )
+        DpxDpy_wrt_CO[ii, jj, 1] = xy_norm[ii, jj, 1] * np.sqrt(
+            neps_y / part.beta0 / part.gamma0 / beta_y
+        )
+
+with open("DpxDpy_for_footprint.pkl", "wb") as fid:
+    pickle.dump({"DpxDpy_wrt_CO": DpxDpy_wrt_CO, "xy_norm": xy_norm}, fid)
