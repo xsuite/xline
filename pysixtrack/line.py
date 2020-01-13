@@ -357,9 +357,12 @@ class Line(Element):
         """
         # will raise error if element not present:
         idx_el = self.element_names.index(element_name)
-        idx_after_el = idx_el + 1
-        if self.element_names[idx_after_el] == element_name + "_aperture":
-            idx_after_el += 1
+        try:
+            # if aperture marker is present
+            idx_after_el = self.element_names.index(element_name + "_aperture") + 1
+        except ValueError:
+            # if aperture marker is not present
+            idx_after_el = idx_el + 1
         return idx_el, idx_after_el
 
     def add_offset_error_to(self, element_name, dx=0, dy=0):
@@ -375,7 +378,7 @@ class Line(Element):
     
     def add_aperture_offset_error_to(self, element_name, arex=0, arey=0):
         idx_el, idx_after_el = self.find_element_ids(element_name)
-        idx_el_aper = idx_el + 1
+        idx_el_aper = idx_after_el - 1
         if not arex and not arey:
             return
         if not self.element_names[idx_el_aper]  == element_name + "_aperture":
