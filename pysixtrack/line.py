@@ -372,6 +372,22 @@ class Line(Element):
         self.insert_element(
             idx_after_el + 1, inv_xyshift, element_name + "_offset_out"
         )
+    
+    def add_aperture_offset_error_to(self, element_name, arex=0, arey=0):
+        idx_el, idx_after_el = self.find_element_ids(element_name)
+        idx_el_aper = idx_el + 1
+        if not arex and not arey:
+            return
+        if not self.element_names[idx_el_aper]  == element_name + "_aperture":
+            # it is allowed to provide arex/arex without providing an aperture
+            print('Info: Element', element_name, ': arex/y provided without aperture -> arex/y ignored')
+            return  
+        xyshift = elements.XYShift(dx=arex, dy=arey)
+        inv_xyshift = elements.XYShift(dx=-arex, dy=-arey)
+        self.insert_element(idx_el_aper, xyshift, element_name + "_aperture_offset_in")
+        self.insert_element(
+            idx_after_el + 1, inv_xyshift, element_name + "_aperture_offset_out"
+        )
 
     def add_tilt_error_to(self, element_name, angle):
         '''Alignment error of transverse rotation around s-axis.
@@ -450,7 +466,7 @@ class Line(Element):
             if error_type == "name":
                 continue
             if any(error_table[error_type]):
-                if error_type in ["dx", "dy", "dpsi"]:
+                if error_type in ["dx", "dy", "dpsi", "arex", "arey"]:
                     # available alignment error
                     continue
                 elif error_type[:1] == "k" and error_type[-1:] == "l":
@@ -486,6 +502,17 @@ class Line(Element):
                 self.add_tilt_error_to(element_name, angle=dpsi / deg2rad)
             except KeyError:
                 pass
+            
+            # add aperture-only offset
+            try:
+                arex = error_table["arex"][i_line]
+            except KeyError:
+                arex = 0
+            try:
+                arey = error_table["arey"][i_line]
+            except KeyError:
+                arey = 0
+            self.add_aperture_offset_error_to(element_name, arex, arey)
 
             # add multipole error
             knl = [
