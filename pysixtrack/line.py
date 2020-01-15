@@ -7,6 +7,8 @@ from .particles import Particles
 from .loader_sixtrack import _expand_struct
 from .loader_mad import iter_from_madx_sequence
 
+# missing access to particles._m:
+deg2rad = np.pi / 180.
 
 class Line(Element):
     _description = [
@@ -373,10 +375,30 @@ class Line(Element):
         )
 
     def add_tilt_error_to(self, element, angle):
+        '''Alignment error of transverse rotation around s-axis.
+        The given `element` gets wrapped by SRotation elements
+        with rotation angle `angle`.
+
+        In the case of a thin dipole component, the corresponding
+        curvature terms in the Multipole (hxl and hyl) are rotated
+        by `angle` as well.
+        '''
         idx_el, idx_after_el = self.find_element_ids(element)
         el_name = self.element_names[idx_el]
         if not angle:
             return
+        if isinstance(element, elements.Multipole) and (
+                element.hxl or element.hyl):
+            dpsi = angle * deg2rad
+
+            hxl0 = element.hxl
+            hyl0 = element.hyl
+
+            hxl1 = hxl0 * np.cos(dpsi) - hyl0 * np.sin(dpsi)
+            hyl1 = hxl0 * np.sin(dpsi) + hyl0 * np.cos(dpsi)
+
+            element.hxl = hxl1
+            element.hyl = hyl1
         srot = elements.SRotation(angle=angle)
         inv_srot = elements.SRotation(angle=-angle)
         self.insert_element(idx_el, srot, el_name + "_tilt_in")
@@ -461,7 +483,7 @@ class Line(Element):
             # add tilt
             try:
                 dpsi = error_table["dpsi"][i_line]
-                self.add_tilt_error_to(element, angle=dpsi * 180 / np.pi)
+                self.add_tilt_error_to(element, angle=dpsi / deg2rad)
             except KeyError:
                 pass
 
