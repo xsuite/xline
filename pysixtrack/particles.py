@@ -224,7 +224,7 @@ class Particles(object):
         qratio=None,
         partid=None,
         turn=None,
-        state=None,  # ==1 particle lost
+        state=None,  # == 0 particle lost, == 1 particle active
         elemid=None,
         mathlib=MathlibDefault,
         **args,
