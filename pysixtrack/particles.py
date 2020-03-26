@@ -246,19 +246,21 @@ class Particles(object):
         self.__init__chi(chi, mratio, qratio)
         self._update_coordinates = True
         length = self._check_array_length()
+
         if partid is None:
-            if length is not None:
-                partid = np.arange(length)
+            partid = np.arange(length) if length is not None else 0
         self.partid = partid
 
         if turn is None:
-            if length is not None:
-                turn = np.zeros(length)
+            turn = np.zeros(length) if length is not None else 0
         self.turn = turn
 
+        if elemid is None:
+            elemid = np.zeros(length) if length is not None else 0
+        self.elemid = elemid
+
         if state is None:
-            if length is not None:
-                state = np.zeros(length)
+            state = np.ones(length) if length is not None else 1
         self.state = state
 
         self.lost_particles = []
