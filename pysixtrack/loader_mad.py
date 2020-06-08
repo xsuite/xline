@@ -33,8 +33,8 @@ def iter_from_madx_sequence(
         eename = ee.name
         mad_etype = ee.base_type.name
 
-        if ee.length > 0:
-            raise ValueError(f"Sequence {seq} contains {eename} with length>0")
+        # if ee.length > 0:
+        #    raise ValueError(f"Sequence {seq} contains {eename} with length>0")
 
         if mad_etype in [
             "marker",
@@ -49,6 +49,7 @@ def iter_from_madx_sequence(
             "drift",
         ]:
             newele = myDrift(length=ee.l)
+            old_pp+=ee.l
 
         elif mad_etype in ignored_madtypes:
             pass
@@ -57,7 +58,11 @@ def iter_from_madx_sequence(
             knl = ee.knl if hasattr(ee, "knl") else [0]
             ksl = ee.ksl if hasattr(ee, "ksl") else [0]
             newele = classes.Multipole(
-                knl=list(knl), ksl=list(ksl), hxl=knl[0], hyl=0, length=ee.lrad
+                knl=list(knl),
+                ksl=list(ksl),
+                hxl=knl[0],
+                hyl=ksl[0],
+                length=ee.lrad,
             )
 
         elif mad_etype == "tkicker" or mad_etype == "kicker":
@@ -173,12 +178,17 @@ def iter_from_madx_sequence(
                 )
             else:
                 newele = myDrift(length=ee.l)
+                old_pp+=ee.l
         else:
             raise ValueError(f'MAD element "{mad_etype}" not recognized')
 
         yield eename, newele
 
-        if install_apertures & (min(ee.aperture) > 0):
+        if (
+            install_apertures
+            and hasattr(ee, "aperture")
+            and (min(ee.aperture) > 0)
+        ):
             if ee.apertype == "rectangle":
                 newaperture = pysixtrack_elements.LimitRect(
                     min_x=-ee.aperture[0],
@@ -189,6 +199,17 @@ def iter_from_madx_sequence(
             elif ee.apertype == "ellipse":
                 newaperture = pysixtrack_elements.LimitEllipse(
                     a=ee.aperture[0], b=ee.aperture[1]
+                )
+            elif ee.apertype == "circle":
+                newaperture = pysixtrack_elements.LimitEllipse(
+                    a=ee.aperture[0], b=ee.aperture[0]
+                )
+            elif ee.apertype == "rectellipse":
+                newaperture = pysixtrack_elements.LimitRectEllipse(
+                    max_x=ee.aperture[0],
+                    max_y=ee.aperture[1],
+                    a=ee.aperture[2],
+                    b=ee.aperture[3],
                 )
             else:
                 raise ValueError("Aperture type not recognized")
@@ -318,5 +339,5 @@ def mad_benchmark(mtype, attrs, pc=0.2, x=0, px=0, y=0, py=0, t=0, pt=0):
         mad.sequence.bench, exact_drift=True
     )
     line.track(p_six)
-    p_mad.copy(1).compare(p_six, rel_tol=0)
+    p_mad.copy(-1).compare(p_six, rel_tol=0)
     return mad, line, p_mad, p_six

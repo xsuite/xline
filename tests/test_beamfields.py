@@ -1,6 +1,10 @@
 import numpy as np
 
+from pysixtrack.mathlibs import MathlibDefault
 import pysixtrack
+from pysixtrack.be_beamfields.gaussian_fields import (
+    _get_transv_field_gauss_ellip,
+)
 
 
 def test_track_spacecharge():
@@ -38,8 +42,8 @@ def test_track_spacecharge():
     p2 = p1.copy()
     el1.track(p1)
     el2.track(p2)
-    assert np.isclose(p1.px, 1.33671170365656e-07, atol=1e-15)
-    assert np.isclose(p1.py, -6.228154616877465e-07, atol=1e-15)
+    assert np.isclose(p1.px, 1.8329795395186613e-07, atol=1e-15)
+    assert np.isclose(p1.py, -8.540420459001383e-07, atol=1e-15)
     assert p1.compare(p2, abs_tol=1e-15)
 
     # test absolute kick for sigma_y > sigma_x
@@ -53,8 +57,8 @@ def test_track_spacecharge():
     p2 = p1.copy()
     el1.track(p1)
     el2.track(p2)
-    assert np.isclose(p1.px, -6.228154616877465e-07, atol=1e-15)
-    assert np.isclose(p1.py, 1.33671170365656e-07, atol=1e-15)
+    assert np.isclose(p1.px, -8.540420459001383e-07, atol=1e-15)
+    assert np.isclose(p1.py, 1.8329795395186613e-07, atol=1e-15)
     assert p1.compare(p2, abs_tol=1e-15)
 
     # test no kick for particle on closed orbit
@@ -67,3 +71,31 @@ def test_track_spacecharge():
     assert np.isclose(p1.px, 0.0, atol=1e-15)
     assert np.isclose(p1.py, 0.0, atol=1e-15)
     assert p1.compare(p2, abs_tol=1e-15)
+
+    # test round beam
+    p1 = pysixtrack.Particles()
+    p1.x = el1.x_co + 0.5
+    p1.y = el1.y_co + 0.1
+    p2 = p1.copy()
+    el1.sigma_y = el1.sigma_x
+    el2.sigma_y = el2.sigma_x
+    el1.track(p1)
+    el2.track(p2)
+    assert np.isclose(p1.px, 1.2895332740238447e-06, atol=1e-15)
+    assert np.isclose(p1.py, 2.579066548047689e-07, atol=1e-15)
+    assert p1.compare(p2, abs_tol=1e-15)
+
+
+def test_get_transv_field_gauss_ellip():
+    try:
+        _get_transv_field_gauss_ellip(
+            sigmax=1.0,
+            sigmay=1.0,
+            Delta_x=0.0,
+            Delta_y=1.0,
+            x=0.5,
+            y=0.1,
+            mathlib=MathlibDefault,
+        )
+    except ZeroDivisionError:
+        pass  # test passed

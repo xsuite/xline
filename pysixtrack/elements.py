@@ -103,7 +103,7 @@ class Multipole(Element):
             "Rotation angle of the reference trajectory in the vertical plane",
             0,
         ),
-        ("length", "m", "Length of the orginating thick multipole", 0),
+        ("length", "m", "Length of the originating thick multipole", 0),
     ]
 
     @property
@@ -204,7 +204,7 @@ class RFMultipole(Element):
             dpy += cs * ksl[ii] * zre + cn * knl[ii] * zim
             # compute z**(i+1)/(i+1)!
             zret = (zre * x - zim * y) / (ii + 1)
-            zim = (zim * y + zre * x) / (ii + 1)
+            zim = (zim * x + zre * y) / (ii + 1)
             zre = zret
             fnr = knl[ii] * zre
             # fni = knl[ii] * zim
@@ -217,7 +217,7 @@ class RFMultipole(Element):
         p.px += -chi * dpx
         p.py += chi * dpy
         dv0 = self.voltage * sin(self.lag * deg2rad - ktau)
-        p.add_to_energy(chi * (dv0 - p.p0c * k * dptr))
+        p.add_to_energy(p.qratio * p.q0 * (dv0 - p.p0c * k * dptr))
 
 
 class Cavity(Element):
@@ -342,6 +342,46 @@ class LimitEllipse(Element):
         else:
             particle.state = np.int_(
                 x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
+            )
+            particle.remove_lost_particles()
+            if len(particle.state) == 0:
+                return "All particles lost"
+
+
+class LimitRectEllipse(Element):
+    _description = [
+        ("max_x", "m", "Maximum horizontal aperture", 1.0),
+        ("max_y", "m", "Maximum vertical aperture", 1.0),
+        ("a", "m", "Horizontal semiaxis", 1.0),
+        ("b", "m", "Vertical semiaxis", 1.0),
+    ]
+
+    def track(self, particle):
+
+        x = particle.x
+        y = particle.y
+
+        if not hasattr(particle.state, "__iter__"):
+            particle.state = int(
+                x >= -self.max_x
+                and x <= self.max_x
+                and y >= -self.max_y
+                and y <= self.max_y
+                and x * x / (self.a * self.a) + y * y / (self.b * self.b)
+                <= 1.0
+            )
+            if particle.state != 1:
+                return "Particle lost"
+        else:
+            particle.state = np.int_(
+                (x >= -self.max_x)
+                & (x <= self.max_x)
+                & (y >= -self.max_y)
+                & (y <= self.max_y)
+                & (
+                    x * x / (self.a * self.a) + y * y / (self.b * self.b)
+                    <= 1.0
+                )
             )
             particle.remove_lost_particles()
             if len(particle.state) == 0:
