@@ -148,9 +148,9 @@ class SpaceChargeInterpolatedProfile(Element):
 
     _description = [
         ("number_of_particles", "", "Number of particles in the bunch", 0.0),
-        ("line_density_profile", "1/m", "Discretised list of density values with integral normalised to 1", [1.0]),
-        ("dz", "m", "Unit distance between profile points", 0.0),
-        ("z0", "m", "Start position of line density profile", 0.0),
+        ("line_density_profile", "1/m", "Discretised list of density values with integral normalised to 1", lambda : [1.0, 1.0]),
+        ("dz", "m", "Unit distance in zeta between profile points", 1.0),
+        ("z0", "m", "Start zeta position of line density profile", -0.5),
         ("sigma_x", "m", "Horizontal size of the beam (r.m.s.)", 1.0),
         ("sigma_y", "m", "Vertical size of the beam (r.m.s.)", 1.0),
         ("length", "m", "Integration length of space charge kick", 0.0),
@@ -167,10 +167,14 @@ class SpaceChargeInterpolatedProfile(Element):
             pi = p._m.pi
             exp = p._m.exp
             sqrt = p._m.sqrt
-            bunchlength_rms = self.bunchlength_rms
+            interp = p._m.interp
+            linspace = p._m.linspace
+
             length = self.length
             sigma_x = self.sigma_x
             sigma_y = self.sigma_y
+
+            n_prof_points = len(self.line_density_profile)
 
             charge = p.q0 * p.echarge
             x = p.x - self.x_co
@@ -205,11 +209,14 @@ class SpaceChargeInterpolatedProfile(Element):
 
             fact_kick *= (
                 self.number_of_particles
-                / (bunchlength_rms * sqrt(2 * pi))
-                * exp(
-                    -0.5
-                    * (sigma / bunchlength_rms)
-                    * (sigma / bunchlength_rms)
+                * interp(
+                    p.zeta,
+                    linspace(
+                        self.z0,
+                        self.z0 + self.dz * (n_prof_points - 1),
+                        n_prof_points,
+                    ),
+                    self.line_density_profile,
                 )
             )
 
