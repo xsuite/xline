@@ -167,7 +167,7 @@ def iter_from_madx_sequence(
                     y_co=0.0,
                 )
             elif ee.slot_id == 2:
-                newele = classes.SpaceChargeBunched(
+                newele = classes.SpaceChargeQGaussianProfile(
                     number_of_particles=0.0,
                     bunchlength_rms=0.0,
                     sigma_x=1.0,
