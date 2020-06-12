@@ -21,11 +21,9 @@ def test_track_spacecharge():
         x_co=x_co,
         y_co=y_co,
     )
-    line_density = el1.number_of_particles / (
-        el1.bunchlength_rms * np.sqrt(2 * np.pi)
-    )
     el2 = pysixtrack.elements.SpaceChargeCoasting(
-        line_density=line_density,
+        number_of_particles=el1.number_of_particles,
+        circumference=el1.bunchlength_rms * np.sqrt(2 * np.pi),
         sigma_x=el1.sigma_x,
         sigma_y=el1.sigma_y,
         length=el1.length,

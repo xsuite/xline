@@ -159,7 +159,8 @@ def iter_from_madx_sequence(
         elif mad_etype == "placeholder":
             if ee.slot_id == 1:
                 newele = classes.SpaceChargeCoasting(
-                    line_density=0.0,
+                    number_of_particles=0.0,
+                    circumference=0.0,
                     sigma_x=1.0,
                     sigma_y=1.0,
                     length=0.0,

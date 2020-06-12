@@ -359,7 +359,8 @@ def setup_spacecharge_coasting_in_line(
     sc_lengths,
     sc_twdata,
     betagamma,
-    line_density,
+    number_of_particles,
+    circumference,
     delta_rms,
     neps_x,
     neps_y,
@@ -367,7 +368,8 @@ def setup_spacecharge_coasting_in_line(
 
     for ii, ss in enumerate(sc_elements):
 
-        ss.line_density = line_density
+        ss.number_of_particles = number_of_particles
+        ss.circumference = circumference
         ss.sigma_x = np.sqrt(
             sc_twdata["betx"][ii] * neps_x / betagamma
             + (sc_twdata["dispersion_x"][ii] * delta_rms) ** 2

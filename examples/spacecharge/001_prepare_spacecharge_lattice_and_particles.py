@@ -17,12 +17,14 @@ particle_type = "protons"
 
 if particle_type == "protons":
 
-    # For bunched
+    # Space charge:
     number_of_particles = 2e11
+
+    # For bunched
     bunchlength_rms = 0.22
 
     # For coasting
-    line_density = 2e11 / 0.5
+    circumference = 0.5
 
     mass = pysixtrack.Particles.pmass
     p0c = 25.92e9
@@ -37,12 +39,14 @@ if particle_type == "protons":
 
 if particle_type == "ions":
 
-    # For bunched
+    # Space charge:
     number_of_particles = 3.5e8
+
+    # For bunched
     bunchlength_rms = 0.22
 
     # For coasting
-    line_density = 3.5e8 / 0.5
+    circumference = 0.5
 
     mass = 193.7e9
     p0c = 1402.406299e9
@@ -148,7 +152,8 @@ elif sc_mode == "Coasting":
         sc_lengths,
         sc_twdata,
         betagamma,
-        line_density,
+        number_of_particles,
+        circumference,
         delta_rms,
         neps_x,
         neps_y,

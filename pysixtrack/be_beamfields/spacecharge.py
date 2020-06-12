@@ -7,7 +7,7 @@ class SpaceChargeCoasting(Element):
 
     _description = [
         ("number_of_particles", "", "Number of particles in the beam", 0.0),
-        ("circumference", "m", "Machine circumference", 0.0),
+        ("circumference", "m", "Machine circumference", 1.0),
         ("sigma_x", "m", "Horizontal size of the beam (r.m.s.)", 1.0),
         ("sigma_y", "m", "Vertical size of the beam (r.m.s.)", 1.0),
         ("length", "m", "Integration length of space charge kick", 0.0),
