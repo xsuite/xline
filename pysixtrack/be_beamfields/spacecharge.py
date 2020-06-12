@@ -3,15 +3,16 @@ from .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
 
 
 class SpaceChargeCoasting(Element):
-    """Space charge for a coasting beam"""
+    """Space charge for a coasting beam."""
 
     _description = [
-        ("line_density", "1/m", "Number of particles per unit length", 0.0),
+        ("number_of_particles", "", "Number of particles in the beam", 0.0),
+        ("circumference", "m", "Machine circumference", 0.0),
         ("sigma_x", "m", "Horizontal size of the beam (r.m.s.)", 1.0),
         ("sigma_y", "m", "Vertical size of the beam (r.m.s.)", 1.0),
         ("length", "m", "Integration length of space charge kick", 0.0),
         ("x_co", "m", "Horizontal closed orbit offset", 0.0),
-        ("y_co", "m", "Vertical closed orbit offset", 0),
+        ("y_co", "m", "Vertical closed orbit offset", 0.0),
     ]
     _extra = [
         ("min_sigma_diff", "m", "Threshold to detect round beam", 1e-30),
@@ -47,7 +48,8 @@ class SpaceChargeCoasting(Element):
 
             fact_kick = (
                 chi
-                * self.line_density
+                * self.number_of_particles
+                / self.circumference
                 * (charge * p.qratio)
                 * charge
                 * (1 - p.beta0 * beta)
