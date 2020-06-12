@@ -20,7 +20,7 @@ element_list = [
     pysixtrack.elements.BeamBeam4D,
     pysixtrack.elements.BeamBeam6D,
     pysixtrack.elements.SpaceChargeCoasting,
-    pysixtrack.elements.SpaceChargeBunched,
+    pysixtrack.elements.SpaceChargeQGaussianProfile,
 ]
 
 

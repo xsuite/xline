@@ -12,7 +12,7 @@ def test_track_spacecharge():
     y_co = -0.5
     sigma_x = 0.5
     sigma_y = 0.1
-    el1 = pysixtrack.elements.SpaceChargeBunched(
+    el1 = pysixtrack.elements.SpaceChargeQGaussianProfile(
         number_of_particles=1e11,
         bunchlength_rms=0.22,
         sigma_x=sigma_x,
