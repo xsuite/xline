@@ -124,18 +124,19 @@ def _expand_struct(sixinput, convert=elements):
             elem = RFMultipole(
                 frequency = freq_Hz,
                 knl= [voltage_V / p0c_eV], # Sign to be checked!!!
-                pn=[p0c_eV],
+                pn=[90.],
                 )
         elif etype == -23:
-            print(nnn, sixinput.single[nnn])
             voltage_V = d1 *1e6
             freq_Hz = d2 * 1e6
             phase_rad = d3
             p0c_eV = sixinput.initialconditions[12]*1e6
+            print(nnn, sixinput.single[nnn])
+            print(f'p0c_eV: {p0c_eV}')
             elem = RFMultipole(
                 frequency = freq_Hz,
                 ksl= [-voltage_V / p0c_eV], # Sign to be checked!!!
-                pn=[p0c_eV],
+                ps=[90.],
                 )
         else:
             rest.append([nnn] + sixinput.single[nnn])
