@@ -346,13 +346,14 @@ class Line(Element):
     # error handling (alignment, multipole orders, ...):
 
     def find_element_ids(self, element_name):
-        """Find element in this Line instance's self.elements.
+        """Find element_name in this Line instance's
+        self.elements_name list. Assumes the names are unique.
 
         Return index before and after the element, taking into account
         attached _aperture instances (LimitRect, LimitEllipse, ...)
         which would follow the element occurrence in the list.
 
-        Raises IndexError if element not in this Line.
+        Raises IndexError if element_name not found in this Line.
         """
         # will raise error if element not present:
         idx_el = self.element_names.index(element_name)
@@ -375,7 +376,7 @@ class Line(Element):
     def add_tilt_error_to(self, element_name, angle):
         '''Alignment error of transverse rotation around s-axis.
         The element corresponding to the given `element_name`
-        gets wrapped by SRotation elements with rotation angle 
+        gets wrapped by SRotation elements with rotation angle
         `angle`.
 
         In the case of a thin dipole component, the corresponding
@@ -385,6 +386,7 @@ class Line(Element):
         idx_el, idx_after_el = self.find_element_ids(element_name)
         if not angle:
             return
+        element = self.elements[self.element_names.index(element_name)]
         if isinstance(element, elements.Multipole) and (
                 element.hxl or element.hyl):
             dpsi = angle * deg2rad
