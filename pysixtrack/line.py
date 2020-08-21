@@ -345,48 +345,48 @@ class Line(Element):
 
     # error handling (alignment, multipole orders, ...):
 
-    def find_element_ids(self, element):
-        """Find element in this Line instance's self.elements.
+    def find_element_ids(self, element_name):
+        """Find element_name in this Line instance's
+        self.elements_name list. Assumes the names are unique.
 
         Return index before and after the element, taking into account
         attached _aperture instances (LimitRect, LimitEllipse, ...)
         which would follow the element occurrence in the list.
 
-        Raises IndexError if element not in this Line.
+        Raises IndexError if element_name not found in this Line.
         """
         # will raise error if element not present:
-        idx_el = self.elements.index(element)
+        idx_el = self.element_names.index(element_name)
         idx_after_el = idx_el + 1
-        el_name = self.element_names[idx_el]
-        if self.element_names[idx_after_el] == el_name + "_aperture":
+        if self.element_names[idx_after_el] == element_name + "_aperture":
             idx_after_el += 1
         return idx_el, idx_after_el
 
-    def add_offset_error_to(self, element, dx=0, dy=0):
-        idx_el, idx_after_el = self.find_element_ids(element)
-        el_name = self.element_names[idx_el]
+    def add_offset_error_to(self, element_name, dx=0, dy=0):
+        idx_el, idx_after_el = self.find_element_ids(element_name)
         if not dx and not dy:
             return
         xyshift = elements.XYShift(dx=dx, dy=dy)
         inv_xyshift = elements.XYShift(dx=-dx, dy=-dy)
-        self.insert_element(idx_el, xyshift, el_name + "_offset_in")
+        self.insert_element(idx_el, xyshift, element_name + "_offset_in")
         self.insert_element(
-            idx_after_el + 1, inv_xyshift, el_name + "_offset_out"
+            idx_after_el + 1, inv_xyshift, element_name + "_offset_out"
         )
 
-    def add_tilt_error_to(self, element, angle):
+    def add_tilt_error_to(self, element_name, angle):
         '''Alignment error of transverse rotation around s-axis.
-        The given `element` gets wrapped by SRotation elements
-        with rotation angle `angle`.
+        The element corresponding to the given `element_name`
+        gets wrapped by SRotation elements with rotation angle
+        `angle`.
 
         In the case of a thin dipole component, the corresponding
         curvature terms in the Multipole (hxl and hyl) are rotated
         by `angle` as well.
         '''
-        idx_el, idx_after_el = self.find_element_ids(element)
-        el_name = self.element_names[idx_el]
+        idx_el, idx_after_el = self.find_element_ids(element_name)
         if not angle:
             return
+        element = self.elements[self.element_names.index(element_name)]
         if isinstance(element, elements.Multipole) and (
                 element.hxl or element.hyl):
             dpsi = angle * deg2rad
@@ -401,12 +401,13 @@ class Line(Element):
             element.hyl = hyl1
         srot = elements.SRotation(angle=angle)
         inv_srot = elements.SRotation(angle=-angle)
-        self.insert_element(idx_el, srot, el_name + "_tilt_in")
-        self.insert_element(idx_after_el + 1, inv_srot, el_name + "_tilt_out")
+        self.insert_element(idx_el, srot, element_name + "_tilt_in")
+        self.insert_element(idx_after_el + 1, inv_srot, element_name + "_tilt_out")
 
-    def add_multipole_error_to(self, element, knl=[], ksl=[]):
+    def add_multipole_error_to(self, element_name, knl=[], ksl=[]):
         # will raise error if element not present:
-        assert element in self.elements
+        assert element_name in self.element_names
+        element = self.elements[self.element_names.index(element_name)]
         # normal components
         knl = np.trim_zeros(knl, trim="b")
         if len(element.knl) < len(knl):
@@ -467,7 +468,6 @@ class Line(Element):
             if element_name not in self.element_names:
                 elements_not_found.append(element_name)
                 continue
-            element = self.elements[self.element_names.index(element_name)]
 
             # add offset
             try:
@@ -478,12 +478,12 @@ class Line(Element):
                 dy = error_table["dy"][i_line]
             except KeyError:
                 dy = 0
-            self.add_offset_error_to(element, dx, dy)
+            self.add_offset_error_to(element_name, dx, dy)
 
             # add tilt
             try:
                 dpsi = error_table["dpsi"][i_line]
-                self.add_tilt_error_to(element, angle=dpsi / deg2rad)
+                self.add_tilt_error_to(element_name, angle=dpsi / deg2rad)
             except KeyError:
                 pass
 
@@ -496,7 +496,8 @@ class Line(Element):
                 error_table[f"k{o}sl"][i_line]
                 for o in range(max_multipole_err + 1)
             ]
-            self.add_multipole_error_to(element, knl, ksl)
+            if any(knl) or any(ksl):
+                self.add_multipole_error_to(element_name, knl, ksl)
 
         return elements_not_found
 
