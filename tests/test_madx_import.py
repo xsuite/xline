@@ -27,12 +27,14 @@ def test_madx_import():
     neps_x = 1.5e-6
     neps_y = 1.5e-6
 
-    # for space charge bunched
+    # for space charge
     number_of_particles = 1e11
+
+    # for space charge bunched
     bunchlength_rms = 1.0
 
     # for space charge coasting
-    line_density = 1e11
+    circumference = 1.0
 
     for sc_mode in ["Bunched", "Coasting"]:
 
@@ -69,7 +71,7 @@ def test_madx_import():
         # Check consistency
         if sc_mode == "Bunched":
             sc_elements, sc_names = line.get_elements_of_type(
-                pysixtrack.elements.SpaceChargeBunched
+                pysixtrack.elements.SpaceChargeQGaussianProfile
             )
         elif sc_mode == "Coasting":
             sc_elements, sc_names = line.get_elements_of_type(
@@ -100,7 +102,8 @@ def test_madx_import():
                 sc_lengths,
                 sc_twdata,
                 betagamma,
-                line_density,
+                number_of_particles,
+                circumference,
                 delta_rms,
                 neps_x,
                 neps_y,
