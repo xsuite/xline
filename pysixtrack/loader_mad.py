@@ -177,6 +177,18 @@ def iter_from_madx_sequence(
                     x_co=0.0,
                     y_co=0.0,
                 )
+            elif ee.slot_id == 3:
+                newele = classes.SpaceChargeInterpolatedProfile(
+                    number_of_particles=0.0,
+                    line_density_profile=[1.0, 1.0],
+                    z0=0.0,
+                    dz=1.0,
+                    sigma_x=1.0,
+                    sigma_y=1.0,
+                    length=0.0,
+                    x_co=0.0,
+                    y_co=0.0,
+                )
             else:
                 newele = myDrift(length=ee.l)
                 old_pp+=ee.l
