@@ -15,7 +15,7 @@ class SpaceChargeCoasting(Element):
         ("y_co", "m", "Vertical closed orbit offset", 0.0),
     ]
     _extra = [
-        ("min_sigma_diff", "m", "Threshold to detect round beam", 1e-10),
+        ("min_sigma_diff", "m", "Threshold to detect round beam", 1e-8),
         ("enabled", "", "Switch to disable space charge effect", True),
     ]
 
@@ -79,7 +79,7 @@ class SpaceChargeQGaussianProfile(Element):
         ("y_co", "m", "Vertical closed orbit offset", 0.0),
     ]
     _extra = [
-        ("min_sigma_diff", "m", "Threshold to detect round beam", 1e-10),
+        ("min_sigma_diff", "m", "Threshold to detect round beam", 1e-8),
         ("enabled", "", "Switch to disable space charge effect", True),
         ("q_parameter", "", "q parameter of generalised Gaussian distribution (q=1 for standard Gaussian)", 1.0),
         ("b_parameter", "", "b parameter of generalised Gaussian distribution (b=1 for standard Gaussian)", 1.0),
@@ -158,7 +158,7 @@ class SpaceChargeInterpolatedProfile(Element):
         ("y_co", "m", "Vertical closed orbit offset", 0.0),
     ]
     _extra = [
-        ("min_sigma_diff", "m", "Threshold to detect round beam", 1e-10),
+        ("min_sigma_diff", "m", "Threshold to detect round beam", 1e-8),
         ("enabled", "", "Switch to disable space charge effect", True),
     ]
 
