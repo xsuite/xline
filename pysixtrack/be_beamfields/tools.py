@@ -11,8 +11,7 @@ def norm(v):
 
 
 def get_points_twissdata_for_elements(
-    ele_names, mad, seq_name, use_survey=True, use_twiss=True
-):
+        ele_names, mad, seq_name, use_survey=True, use_twiss=True):
 
     mad.use(sequence=seq_name)
 
@@ -77,8 +76,8 @@ def get_elements(seq, ele_type=None, slot_id=None):
 
 
 def get_points_twissdata_for_element_type(
-    mad, seq_name, ele_type=None, slot_id=None, use_survey=True, use_twiss=True
-):
+        mad, seq_name, ele_type=None, slot_id=None, 
+        use_survey=True, use_twiss=True):
 
     elements, element_names = get_elements(
         seq=mad.sequence[seq_name], ele_type=ele_type, slot_id=slot_id
@@ -116,8 +115,7 @@ def find_alpha_and_phi(dpx, dpy):
 
 
 def get_bb_names_madpoints_sigmas(
-    mad, seq_name, use_survey=True, use_twiss=True
-):
+        mad, seq_name, use_survey=True, use_twiss=True):
     (
         _,
         element_names,
@@ -136,8 +134,7 @@ def get_bb_names_madpoints_sigmas(
 
 
 def shift_strong_beam_based_on_close_ip(
-    points_weak, points_strong, IPs_survey_weak, IPs_survey_strong
-):
+        points_weak, points_strong, IPs_survey_weak, IPs_survey_strong):
 
     for i_bb, _ in enumerate(points_weak):
 
@@ -206,16 +203,15 @@ def find_bb_separations(points_weak, points_strong, names=None):
 
 
 def setup_beam_beam_in_line(
-    line,
-    bb_names,
-    bb_sigmas_strong,
-    bb_points_weak,
-    bb_points_strong,
-    beta_r_strong,
-    bunch_intensity_strong,
-    n_slices_6D,
-    bb_coupling,
-):
+        line,
+        bb_names,
+        bb_sigmas_strong,
+        bb_points_weak,
+        bb_points_strong,
+        beta_r_strong,
+        bunch_intensity_strong,
+        n_slices_6D,
+        bb_coupling):
 
     sep_x, sep_y = find_bb_separations(
         points_weak=bb_points_weak,
@@ -326,32 +322,18 @@ def get_spacecharge_names_twdata(mad, seq_name, mode):
     return mad_sc_names, twdata
 
 
-def setup_spacecharge_in_line(
-    sc_elements,
-    sc_lengths,
-    sc_twdata,
-    betagamma,
-    number_of_particles,
-    zeta_length,
-    delta_rms,
-    neps_x,
-    neps_y,
-):
+def _setup_spacecharge_in_line(
+        sc_elements,
+        sc_lengths,
+        sc_twdata,
+        betagamma,
+        number_of_particles,
+        delta_rms,
+        neps_x,
+        neps_y):
 
     for ii, ss in enumerate(sc_elements):
-
         ss.number_of_particles = number_of_particles
-        if isinstance(ss, pysixtrack.elements.SpaceChargeQGaussianProfile):
-            ss.bunchlength_rms = zeta_length
-        elif isinstance(ss, pysixtrack.elements.SpaceChargeCoasting):
-            ss.circumference = zeta_length
-        elif isinstance(ss, pysixtrack.elements.SpaceChargeInterpolatedProfile):
-            # InterpolatedProfile
-            if ii == 0:
-                print ('Warning: please add the profile data to '
-                       'SpaceChargeInterpolatedProfile nodes manually!')
-        else:
-            raise NotImplementedError('Unknown space charge node type.')
         ss.sigma_x = np.sqrt(
             sc_twdata["betx"][ii] * neps_x / betagamma
             + (sc_twdata["dispersion_x"][ii] * delta_rms) ** 2
@@ -365,10 +347,64 @@ def setup_spacecharge_in_line(
         ss.y_co = sc_twdata["y"][ii]
         ss.enabled = True
 
+def setup_spacecharge_bunched_in_line(
+        sc_elements,
+        sc_lengths,
+        sc_twdata,
+        betagamma,
+        number_of_particles,
+        delta_rms,
+        neps_x,
+        neps_y,
+        bunchlength_rms):
+
+    for ii, ss in enumerate(sc_elements):
+        ss.bunchlength_rms = bunchlength_rms
+    _setup_spacecharge_in_line(
+        sc_elements, sc_lengths, sc_twdata, betagamma, 
+        number_of_particles, delta_rms, neps_x, neps_y)
+
+def setup_spacecharge_coasting_in_line(
+        sc_elements,
+        sc_lengths,
+        sc_twdata,
+        betagamma,
+        number_of_particles,
+        delta_rms,
+        neps_x,
+        neps_y,
+        circumference):
+
+    for ii, ss in enumerate(sc_elements):
+        ss.circumference = circumference
+    _setup_spacecharge_in_line(
+        sc_elements, sc_lengths, sc_twdata, betagamma, 
+        number_of_particles, delta_rms, neps_x, neps_y)
+
+def setup_spacecharge_interpolated_in_line(
+        sc_elements,
+        sc_lengths,
+        sc_twdata,
+        betagamma,
+        number_of_particles,
+        delta_rms,
+        neps_x,
+        neps_y,
+        line_density_profile,
+        dz,
+        z0):
+
+    for ii, ss in enumerate(sc_elements):
+        ss.line_density_profile = line_density_profile
+        ss.dz = dz
+        ss.z0 = z0
+    _setup_spacecharge_in_line(
+        sc_elements, sc_lengths, sc_twdata, betagamma,
+        number_of_particles, delta_rms, neps_x, neps_y)
+
 
 def check_spacecharge_consistency(
-    sc_elements, sc_names, sc_lengths, mad_sc_names
-):
+        sc_elements, sc_names, sc_lengths, mad_sc_names):
     assert len(sc_elements) == len(mad_sc_names)
     assert len(sc_lengths) == len(mad_sc_names)
     for ii, (ss, nn) in enumerate(zip(sc_elements, sc_names)):

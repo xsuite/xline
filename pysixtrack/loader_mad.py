@@ -158,40 +158,14 @@ def iter_from_madx_sequence(
                 )
         elif mad_etype == "placeholder":
             if ee.slot_id == 1:
-                newele = classes.SpaceChargeCoasting(
-                    number_of_particles=0.0,
-                    circumference=0.0,
-                    sigma_x=1.0,
-                    sigma_y=1.0,
-                    length=0.0,
-                    x_co=0.0,
-                    y_co=0.0,
-                )
+                newele = classes.SpaceChargeCoasting()
             elif ee.slot_id == 2:
-                newele = classes.SpaceChargeQGaussianProfile(
-                    number_of_particles=0.0,
-                    bunchlength_rms=0.0,
-                    sigma_x=1.0,
-                    sigma_y=1.0,
-                    length=0.0,
-                    x_co=0.0,
-                    y_co=0.0,
-                )
+                newele = classes.SpaceChargeQGaussianProfile()
             elif ee.slot_id == 3:
-                newele = classes.SpaceChargeInterpolatedProfile(
-                    number_of_particles=0.0,
-                    line_density_profile=[1.0, 1.0],
-                    z0=0.0,
-                    dz=1.0,
-                    sigma_x=1.0,
-                    sigma_y=1.0,
-                    length=0.0,
-                    x_co=0.0,
-                    y_co=0.0,
-                )
+                newele = classes.SpaceChargeInterpolatedProfile()
             else:
                 newele = myDrift(length=ee.l)
-                old_pp+=ee.l
+                old_pp += ee.l
         else:
             raise ValueError(f'MAD element "{mad_etype}" not recognized')
 
