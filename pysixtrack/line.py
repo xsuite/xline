@@ -367,8 +367,6 @@ class Line(Element):
 
     def add_offset_error_to(self, element_name, dx=0, dy=0):
         idx_el, idx_after_el = self.find_element_ids(element_name)
-        if not dx and not dy:
-            return
         xyshift = elements.XYShift(dx=dx, dy=dy)
         inv_xyshift = elements.XYShift(dx=-dx, dy=-dy)
         self.insert_element(idx_el, xyshift, element_name + "_offset_in")
@@ -379,10 +377,8 @@ class Line(Element):
     def add_aperture_offset_error_to(self, element_name, arex=0, arey=0):
         idx_el, idx_after_el = self.find_element_ids(element_name)
         idx_el_aper = idx_after_el - 1
-        if not arex and not arey:
-            return
         if not self.element_names[idx_el_aper]  == element_name + "_aperture":
-            # it is allowed to provide arex/arex without providing an aperture
+            # it is allowed to provide arex/arey without providing an aperture
             print('Info: Element', element_name, ': arex/y provided without aperture -> arex/y ignored')
             return  
         xyshift = elements.XYShift(dx=arex, dy=arey)
@@ -403,8 +399,6 @@ class Line(Element):
         by `angle` as well.
         '''
         idx_el, idx_after_el = self.find_element_ids(element_name)
-        if not angle:
-            return
         element = self.elements[self.element_names.index(element_name)]
         if isinstance(element, elements.Multipole) and (
                 element.hxl or element.hyl):
@@ -497,15 +491,17 @@ class Line(Element):
                 dy = error_table["dy"][i_line]
             except KeyError:
                 dy = 0
-            self.add_offset_error_to(element_name, dx, dy)
+            if dx or dy:
+                self.add_offset_error_to(element_name, dx, dy)
 
             # add tilt
             try:
                 dpsi = error_table["dpsi"][i_line]
-                self.add_tilt_error_to(element_name, angle=dpsi / deg2rad)
             except KeyError:
-                pass
-            
+                dpsi = 0
+            if dpsi:
+                self.add_tilt_error_to(element_name, angle=dpsi / deg2rad)
+
             # add aperture-only offset
             try:
                 arex = error_table["arex"][i_line]
@@ -515,7 +511,8 @@ class Line(Element):
                 arey = error_table["arey"][i_line]
             except KeyError:
                 arey = 0
-            self.add_aperture_offset_error_to(element_name, arex, arey)
+            if arex or arey:
+                self.add_aperture_offset_error_to(element_name, arex, arey)
 
             # add multipole error
             knl = [

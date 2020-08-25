@@ -35,6 +35,7 @@ def test_line():
     assert len(line) == n_elements
 
     line.add_offset_error_to(multipole_name, dx=0, dy=0)
+    n_elements += 2
     assert len(line) == n_elements
 
     line.add_offset_error_to(multipole_name, dx=0.2, dy=-0.003)
@@ -42,6 +43,7 @@ def test_line():
     assert len(line) == n_elements
 
     line.add_tilt_error_to(multipole_name, angle=0)
+    n_elements += 2
     assert len(line) == n_elements
 
     line.add_tilt_error_to(multipole_name, angle=0.1)
