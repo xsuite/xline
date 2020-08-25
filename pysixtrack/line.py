@@ -10,6 +10,7 @@ from .loader_mad import iter_from_madx_sequence
 # missing access to particles._m:
 deg2rad = np.pi / 180.
 
+
 class Line(Element):
     _description = [
         ("elements", "", "List of elements", ()),
@@ -373,14 +374,14 @@ class Line(Element):
         self.insert_element(
             idx_after_el + 1, inv_xyshift, element_name + "_offset_out"
         )
-    
+
     def add_aperture_offset_error_to(self, element_name, arex=0, arey=0):
         idx_el, idx_after_el = self.find_element_ids(element_name)
         idx_el_aper = idx_after_el - 1
-        if not self.element_names[idx_el_aper]  == element_name + "_aperture":
+        if not self.element_names[idx_el_aper] == element_name + "_aperture":
             # it is allowed to provide arex/arey without providing an aperture
             print('Info: Element', element_name, ': arex/y provided without aperture -> arex/y ignored')
-            return  
+            return
         xyshift = elements.XYShift(dx=arex, dy=arey)
         inv_xyshift = elements.XYShift(dx=-arex, dy=-arey)
         self.insert_element(idx_el_aper, xyshift, element_name + "_aperture_offset_in")
