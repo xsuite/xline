@@ -5,6 +5,7 @@ from .be_beamfields.beambeam import BeamBeam4D
 from .be_beamfields.beambeam import BeamBeam6D
 from .be_beamfields.spacecharge import SpaceChargeCoasting
 from .be_beamfields.spacecharge import SpaceChargeQGaussianProfile
+from .be_beamfields.spacecharge import SpaceChargeInterpolatedProfile
 
 _factorial = np.array(
     [
@@ -468,7 +469,8 @@ __all__ = [
     "Multipole",
     "RFMultipole",
     "SRotation",
-    "SpaceChargeQGaussianProfile",
     "SpaceChargeCoasting",
+    "SpaceChargeInterpolatedProfile",
+    "SpaceChargeQGaussianProfile",
     "XYShift",
 ]
