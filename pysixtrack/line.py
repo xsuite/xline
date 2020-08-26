@@ -10,6 +10,7 @@ from .loader_mad import iter_from_madx_sequence
 # missing access to particles._m:
 deg2rad = np.pi / 180.
 
+
 class Line(Element):
     _description = [
         ("elements", "", "List of elements", ()),
@@ -357,20 +358,35 @@ class Line(Element):
         """
         # will raise error if element not present:
         idx_el = self.element_names.index(element_name)
-        idx_after_el = idx_el + 1
-        if self.element_names[idx_after_el] == element_name + "_aperture":
-            idx_after_el += 1
+        try:
+            # if aperture marker is present
+            idx_after_el = self.element_names.index(element_name + "_aperture") + 1
+        except ValueError:
+            # if aperture marker is not present
+            idx_after_el = idx_el + 1
         return idx_el, idx_after_el
 
     def add_offset_error_to(self, element_name, dx=0, dy=0):
         idx_el, idx_after_el = self.find_element_ids(element_name)
-        if not dx and not dy:
-            return
         xyshift = elements.XYShift(dx=dx, dy=dy)
         inv_xyshift = elements.XYShift(dx=-dx, dy=-dy)
         self.insert_element(idx_el, xyshift, element_name + "_offset_in")
         self.insert_element(
             idx_after_el + 1, inv_xyshift, element_name + "_offset_out"
+        )
+
+    def add_aperture_offset_error_to(self, element_name, arex=0, arey=0):
+        idx_el, idx_after_el = self.find_element_ids(element_name)
+        idx_el_aper = idx_after_el - 1
+        if not self.element_names[idx_el_aper] == element_name + "_aperture":
+            # it is allowed to provide arex/arey without providing an aperture
+            print('Info: Element', element_name, ': arex/y provided without aperture -> arex/y ignored')
+            return
+        xyshift = elements.XYShift(dx=arex, dy=arey)
+        inv_xyshift = elements.XYShift(dx=-arex, dy=-arey)
+        self.insert_element(idx_el_aper, xyshift, element_name + "_aperture_offset_in")
+        self.insert_element(
+            idx_after_el + 1, inv_xyshift, element_name + "_aperture_offset_out"
         )
 
     def add_tilt_error_to(self, element_name, angle):
@@ -384,8 +400,6 @@ class Line(Element):
         by `angle` as well.
         '''
         idx_el, idx_after_el = self.find_element_ids(element_name)
-        if not angle:
-            return
         element = self.elements[self.element_names.index(element_name)]
         if isinstance(element, elements.Multipole) and (
                 element.hxl or element.hyl):
@@ -450,7 +464,7 @@ class Line(Element):
             if error_type == "name":
                 continue
             if any(error_table[error_type]):
-                if error_type in ["dx", "dy", "dpsi"]:
+                if error_type in ["dx", "dy", "dpsi", "arex", "arey"]:
                     # available alignment error
                     continue
                 elif error_type[:1] == "k" and error_type[-1:] == "l":
@@ -478,14 +492,28 @@ class Line(Element):
                 dy = error_table["dy"][i_line]
             except KeyError:
                 dy = 0
-            self.add_offset_error_to(element_name, dx, dy)
+            if dx or dy:
+                self.add_offset_error_to(element_name, dx, dy)
 
             # add tilt
             try:
                 dpsi = error_table["dpsi"][i_line]
-                self.add_tilt_error_to(element_name, angle=dpsi / deg2rad)
             except KeyError:
-                pass
+                dpsi = 0
+            if dpsi:
+                self.add_tilt_error_to(element_name, angle=dpsi / deg2rad)
+
+            # add aperture-only offset
+            try:
+                arex = error_table["arex"][i_line]
+            except KeyError:
+                arex = 0
+            try:
+                arey = error_table["arey"][i_line]
+            except KeyError:
+                arey = 0
+            if arex or arey:
+                self.add_aperture_offset_error_to(element_name, arex, arey)
 
             # add multipole error
             knl = [
