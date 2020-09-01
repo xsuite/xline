@@ -402,21 +402,44 @@ def setup_spacecharge_coasting_in_line(
         delta_rms,
         neps_x,
         neps_y,
-        line_density_profile,
-        dz,
-        z0):
+    )
 
+
+def setup_spacecharge_interpolated_in_line(
+    sc_elements,
+    sc_lengths,
+    sc_twdata,
+    betagamma,
+    number_of_particles,
+    delta_rms,
+    neps_x,
+    neps_y,
+    line_density_profile,
+    dz,
+    z0,
+    method=0,
+):
+    assert method == 0 or method == 1
     for ii, ss in enumerate(sc_elements):
         ss.line_density_profile = line_density_profile
         ss.dz = dz
         ss.z0 = z0
+        ss.method = method
     _setup_spacecharge_in_line(
-        sc_elements, sc_lengths, sc_twdata, betagamma,
-        number_of_particles, delta_rms, neps_x, neps_y)
+        sc_elements,
+        sc_lengths,
+        sc_twdata,
+        betagamma,
+        number_of_particles,
+        delta_rms,
+        neps_x,
+        neps_y,
+    )
 
 
 def check_spacecharge_consistency(
-        sc_elements, sc_names, sc_lengths, mad_sc_names):
+    sc_elements, sc_names, sc_lengths, mad_sc_names
+):
     assert len(sc_elements) == len(mad_sc_names)
     assert len(sc_lengths) == len(mad_sc_names)
     for ii, (ss, nn) in enumerate(zip(sc_elements, sc_names)):
