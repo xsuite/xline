@@ -368,8 +368,7 @@ class LimitRectEllipse(Element):
                 and x <= self.max_x
                 and y >= -self.max_y
                 and y <= self.max_y
-                and x * x / (self.a * self.a) + y * y / (self.b * self.b)
-                <= 1.0
+                and x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
             )
             if particle.state != 1:
                 return "Particle lost"
@@ -379,10 +378,7 @@ class LimitRectEllipse(Element):
                 & (x <= self.max_x)
                 & (y >= -self.max_y)
                 & (y <= self.max_y)
-                & (
-                    x * x / (self.a * self.a) + y * y / (self.b * self.b)
-                    <= 1.0
-                )
+                & (x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0)
             )
             particle.remove_lost_particles()
             if len(particle.state) == 0:
