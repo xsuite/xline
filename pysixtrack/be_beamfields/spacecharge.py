@@ -161,11 +161,6 @@ class SpaceChargeInterpolatedProfile(Element):
 
     def track(self, p):
         if self.enabled:
-            pi = p._m.pi
-            exp = p._m.exp
-            sqrt = p._m.sqrt
-            linspace = p._m.linspace
-
             length = self.length
             sigma_x = self.sigma_x
             sigma_y = self.sigma_y
@@ -177,8 +172,6 @@ class SpaceChargeInterpolatedProfile(Element):
             px = p.px
             y = p.y - self.y_co
             py = p.py
-            sigma = p.sigma
-
             chi = p.chi
 
             beta = p.beta0 / p.rvv
