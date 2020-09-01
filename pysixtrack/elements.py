@@ -3,9 +3,9 @@ import numpy as np
 from .base_classes import Element
 from .be_beamfields.beambeam import BeamBeam4D
 from .be_beamfields.beambeam import BeamBeam6D
-from .be_beamfields.spacecharge import SpaceChargeCoasting
-from .be_beamfields.spacecharge import SpaceChargeQGaussianProfile
-from .be_beamfields.spacecharge import SpaceChargeInterpolatedProfile
+from .be_beamfields.spacecharge import ScCoasting
+from .be_beamfields.spacecharge import ScQGaussProfile
+from .be_beamfields.spacecharge import ScInterpolatedProfile
 
 _factorial = np.array(
     [
@@ -468,9 +468,9 @@ __all__ = [
     "LimitRect",
     "Multipole",
     "RFMultipole",
+    "ScCoasting",
+    "ScInterpolatedProfile",
+    "ScQGaussProfile",
     "SRotation",
-    "SpaceChargeCoasting",
-    "SpaceChargeInterpolatedProfile",
-    "SpaceChargeQGaussianProfile",
     "XYShift",
 ]
