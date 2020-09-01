@@ -134,12 +134,17 @@ class ScQGaussProfile(Element):
             p.py = py
 
 
-class SpaceChargeInterpolatedProfile(Element):
+class ScInterpolatedProfile(Element):
     """Space charge for a bunched beam with discretised profile."""
 
     _description = [
         ("number_of_particles", "", "Number of particles in the bunch", 0.0),
-        ("line_density_profile", "1/m", "Discretised list of density values with integral normalised to 1", lambda : [1.0, 1.0]),
+        (
+            "line_density_profile",
+            "1/m",
+            "Discretised list of density values with integral normalised to 1",
+            lambda: [1.0, 1.0],
+        ),
         ("dz", "m", "Unit distance in zeta between profile points", 1.0),
         ("z0", "m", "Start zeta position of line density profile", -0.5),
         ("sigma_x", "m", "Horizontal size of the beam (r.m.s.)", 1.0),
