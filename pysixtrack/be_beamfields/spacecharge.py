@@ -65,7 +65,7 @@ class ScCoasting(Element):
             p.py = py
 
 
-class SpaceChargeQGaussianProfile(Element):
+class ScQGaussProfile(Element):
     """Space charge for a bunched beam with generalised
     Gaussian profile.
     """
