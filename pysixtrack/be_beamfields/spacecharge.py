@@ -1,6 +1,7 @@
 from pysixtrack.base_classes import Element
 from .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
 from .qgauss import QGauss
+from scipy.interpolate import CubicSpline
 
 
 class ScCoasting(Element):
@@ -148,6 +149,12 @@ class SpaceChargeInterpolatedProfile(Element):
         ("y_co", "m", "Vertical closed orbit offset", 0.0),
     ]
     _extra = [
+        (
+            "method",
+            "",
+            "Interpolation method; 0 == linear (default), 1 == cubic spline",
+            0,
+        ),
         ("min_sigma_diff", "m", "Threshold to detect round beam", 1e-8),
         ("enabled", "", "Switch to disable space charge effect", True),
     ]
@@ -157,7 +164,6 @@ class SpaceChargeInterpolatedProfile(Element):
             pi = p._m.pi
             exp = p._m.exp
             sqrt = p._m.sqrt
-            interp = p._m.interp
             linspace = p._m.linspace
 
             length = self.length
@@ -197,19 +203,21 @@ class SpaceChargeInterpolatedProfile(Element):
                 * length
             )
 
-            fact_kick *= (
-                self.number_of_particles
-                * interp(
-                    p.zeta,
-                    linspace(
-                        self.z0,
-                        self.z0 + self.dz * (n_prof_points - 1),
-                        n_prof_points,
-                    ),
-                    self.line_density_profile,
-                )
+            absc_values = p._m.linspace(
+                self.z0, self.z0 + self.dz * (n_prof_points - 1), n_prof_points
             )
 
+            if self.method == 0:
+                ld_factor = p._m.interp(
+                    p.zeta, absc_values, self.line_density_profile
+                )
+            elif self.method == 1:
+                cs = CubicSpline(absc_values, self.line_density_profile)
+                ld_factor = cs(p.zeta)
+            else:
+                ld_factor = 1
+
+            fact_kick *= self.number_of_particles * ld_factor
             px += fact_kick * Ex
             py += fact_kick * Ey
 
