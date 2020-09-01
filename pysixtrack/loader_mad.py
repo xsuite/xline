@@ -49,7 +49,7 @@ def iter_from_madx_sequence(
             "drift",
         ]:
             newele = myDrift(length=ee.l)
-            old_pp+=ee.l
+            old_pp += ee.l
 
         elif mad_etype in ignored_madtypes:
             pass
