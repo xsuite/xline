@@ -19,8 +19,8 @@ element_list = [
     pysixtrack.elements.LimitRectEllipse,
     pysixtrack.elements.BeamBeam4D,
     pysixtrack.elements.BeamBeam6D,
-    pysixtrack.elements.SpaceChargeCoasting,
-    pysixtrack.elements.SpaceChargeQGaussianProfile,
+    pysixtrack.elements.ScCoasting,
+    pysixtrack.elements.ScQGaussProfile,
 ]
 
 
