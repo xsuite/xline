@@ -83,7 +83,12 @@ class ScQGaussProfile(Element):
     _extra = [
         ("min_sigma_diff", "m", "Threshold to detect round beam", 1e-8),
         ("enabled", "", "Switch to disable space charge effect", True),
-        ("q_parameter", "", "q parameter of generalised Gaussian distribution (q=1 for standard Gaussian)", 1.0),
+        (
+            "q_parameter",
+            "",
+            "q parameter of generalised Gaussian distribution (q=1 for standard Gaussian)",
+            1.0,
+        ),
     ]
 
     def track(self, p):
@@ -123,9 +128,9 @@ class ScQGaussProfile(Element):
                 * length
             )
 
-            distr = QGauss( self.q, mathlib=p._m )
-            sqrt_beta = QGauss.sqrt_beta( self.bunchlength_rms )
-            fact_kick *= self.number_of_particles * distr( sigma, sqrt_beta )
+            distr = QGauss(self.q, mathlib=p._m)
+            sqrt_beta = QGauss.sqrt_beta(self.bunchlength_rms)
+            fact_kick *= self.number_of_particles * distr(sigma, sqrt_beta)
 
             px += fact_kick * Ex
             py += fact_kick * Ey
