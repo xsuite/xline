@@ -1,5 +1,6 @@
 from pysixtrack.base_classes import Element
 from .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
+from .qgauss import QGauss
 
 
 class ScCoasting(Element):
@@ -82,15 +83,10 @@ class SpaceChargeQGaussianProfile(Element):
         ("min_sigma_diff", "m", "Threshold to detect round beam", 1e-8),
         ("enabled", "", "Switch to disable space charge effect", True),
         ("q_parameter", "", "q parameter of generalised Gaussian distribution (q=1 for standard Gaussian)", 1.0),
-        ("b_parameter", "", "b parameter of generalised Gaussian distribution (b=1 for standard Gaussian)", 1.0),
     ]
 
     def track(self, p):
         if self.enabled:
-            pi = p._m.pi
-            exp = p._m.exp
-            sqrt = p._m.sqrt
-            bunchlength_rms = self.bunchlength_rms
             length = self.length
             sigma_x = self.sigma_x
             sigma_y = self.sigma_y
@@ -126,15 +122,9 @@ class SpaceChargeQGaussianProfile(Element):
                 * length
             )
 
-            fact_kick *= (
-                self.number_of_particles
-                / (bunchlength_rms * sqrt(2 * pi))
-                * exp(
-                    -0.5
-                    * (sigma / bunchlength_rms)
-                    * (sigma / bunchlength_rms)
-                )
-            )
+            distr = QGauss( self.q, mathlib=p._m )
+            sqrt_beta = QGauss.sqrt_beta( self.bunchlength_rms )
+            fact_kick *= self.number_of_particles * distr( sigma, sqrt_beta )
 
             px += fact_kick * Ex
             py += fact_kick * Ey
