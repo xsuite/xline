@@ -62,7 +62,7 @@ class QGauss(object):
         return -(self.min_support(sqrt_beta))
 
     def eval(self, x, sqrt_beta, mu=0.0):
-        assert self._m.abs(self._m.cq) > 0
+        assert self._m.abs(self._cq) > 0
         assert self._q < 3
         assert sqrt_beta > 0
         factor = sqrt_beta / self._cq
