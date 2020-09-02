@@ -130,7 +130,7 @@ class ScQGaussProfile(Element):
 
             distr = QGauss(self.q_parameter, mathlib=p._m)
             sqrt_beta = QGauss.sqrt_beta(self.bunchlength_rms)
-            fact_kick *= self.number_of_particles * distr(sigma, sqrt_beta)
+            fact_kick *= self.number_of_particles * distr.eval(sigma, sqrt_beta)
 
             px += fact_kick * Ex
             py += fact_kick * Ey
