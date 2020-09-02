@@ -128,7 +128,7 @@ class ScQGaussProfile(Element):
                 * length
             )
 
-            distr = QGauss(self.q, mathlib=p._m)
+            distr = QGauss(self.q_parameter, mathlib=p._m)
             sqrt_beta = QGauss.sqrt_beta(self.bunchlength_rms)
             fact_kick *= self.number_of_particles * distr(sigma, sqrt_beta)
 
