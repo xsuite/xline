@@ -44,7 +44,7 @@ class QGauss(object):
     def q(self):
         return self._q
 
-    @property
+    @q.setter
     def q(self, q_value):
         assert q_value < 3
         self._q = q_value
