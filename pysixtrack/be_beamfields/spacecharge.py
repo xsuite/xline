@@ -78,50 +78,30 @@ class SCQGaussProfile(Element):
 
     def track(self, p):
         if self.enabled:
-            length = self.length
-            sigma_x = self.sigma_x
-            sigma_y = self.sigma_y
+            distr = QGauss(self.q_parameter, mathlib=p._m)
+            sigma = p.zeta / p.rvv
+            fact_kick = self.number_of_particles * distr.eval(
+                sigma, QGauss.sqrt_beta(self.bunchlength_rms)
+            )
 
             charge = p.q0 * p.echarge
-            x = p.x - self.x_co
-            px = p.px
-            y = p.y - self.y_co
-            py = p.py
-            sigma = p.sigma
-
-            chi = p.chi
-
             beta = p.beta0 / p.rvv
-            p0c = p.p0c * p.echarge
+            fact_kick *= p.chi * p.qratio * self.length * charge * charge
+            fact_kick *= 1 - p.beta0 * beta
+            fact_kick /= p.p0c * p.echarge * beta
 
             Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(
-                x,
-                y,
-                sigma_x,
-                sigma_y,
+                p.x - self.x_co,
+                p.y - self.y_co,
+                self.sigma_x,
+                self.sigma_y,
                 min_sigma_diff=self.min_sigma_diff,
                 skip_Gs=True,
                 mathlib=p._m,
             )
 
-            fact_kick = (
-                chi
-                * (charge * p.qratio)
-                * charge
-                * (1 - p.beta0 * beta)
-                / (p0c * beta)
-                * length
-            )
-
-            distr = QGauss(self.q_parameter, mathlib=p._m)
-            sqrt_beta = QGauss.sqrt_beta(self.bunchlength_rms)
-            fact_kick *= self.number_of_particles * distr.eval(sigma, sqrt_beta)
-
-            px += fact_kick * Ex
-            py += fact_kick * Ey
-
-            p.px = px
-            p.py = py
+            p.px += fact_kick * Ex
+            p.py += fact_kick * Ey
 
 
 class ScInterpolatedProfile(Element):
