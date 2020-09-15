@@ -4,7 +4,7 @@ from .qgauss import QGauss
 from scipy.interpolate import CubicSpline
 
 
-class ScCoasting(Element):
+class SCCoasting(Element):
     """Space charge for a coasting beam."""
 
     _description = [
