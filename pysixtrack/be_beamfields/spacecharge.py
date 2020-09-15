@@ -23,47 +23,33 @@ class SCCoasting(Element):
 
     def track(self, p):
         if self.enabled:
-            length = self.length
-            sigma_x = self.sigma_x
-            sigma_y = self.sigma_y
-
             charge = p.q0 * p.echarge
-            x = p.x - self.x_co
-            px = p.px
-            y = p.y - self.y_co
-            py = p.py
-
-            chi = p.chi
-
             beta = p.beta0 / p.rvv
-            p0c = p.p0c * p.echarge
 
             Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(
-                x,
-                y,
-                sigma_x,
-                sigma_y,
+                p.x - self.x_co,
+                p.y - self.y_co,
+                self.sigma_x,
+                self.sigma_y,
                 min_sigma_diff=self.min_sigma_diff,
                 skip_Gs=True,
                 mathlib=p._m,
             )
 
             fact_kick = (
-                chi
+                p.chi
                 * self.number_of_particles
                 / self.circumference
                 * (charge * p.qratio)
                 * charge
                 * (1 - p.beta0 * beta)
-                / (p0c * beta)
-                * length
+                / (p.p0c * p.echarge * beta)
+                * self.length
             )
 
-            px += fact_kick * Ex
-            py += fact_kick * Ey
+            p.px += fact_kick * Ex
+            p.py += fact_kick * Ey
 
-            p.px = px
-            p.py = py
 
 
 class ScQGaussProfile(Element):
