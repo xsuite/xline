@@ -50,6 +50,10 @@ class QGauss(object):
         self._q = q_value
         self._cq = QGauss.calc_cq(self._q, self._m)
 
+    @property
+    def cq(self):
+        return self._cq
+
     def min_support(self, sqrt_beta):
         assert self._q < 3
         assert sqrt_beta > 0
