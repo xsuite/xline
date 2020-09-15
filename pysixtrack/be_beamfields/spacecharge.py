@@ -51,8 +51,7 @@ class SCCoasting(Element):
             p.py += fact_kick * Ey
 
 
-
-class ScQGaussProfile(Element):
+class SCQGaussProfile(Element):
     """Space charge for a bunched beam with generalised
     Gaussian profile.
     """
