@@ -21,7 +21,7 @@ class QGauss(object):
     @staticmethod
     def sqrt_beta(sigma, mathlib=MathlibDefault):
         assert sigma > 0
-        return 1 / mathlib.sqrt(2 * sigma)
+        return 1 / (mathlib.sqrt(2) * sigma)
 
     @staticmethod
     def exp_q(x, q, mathlib=MathlibDefault, EPS=1e-6):
