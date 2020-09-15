@@ -1,7 +1,6 @@
 import numpy as np
-
-from pysixtrack.mathlibs import MathlibDefault
 import pysixtrack
+from pysixtrack.mathlibs import MathlibDefault
 from pysixtrack.be_beamfields.gaussian_fields import (
     _get_transv_field_gauss_ellip,
 )
@@ -97,3 +96,7 @@ def test_get_transv_field_gauss_ellip():
         )
     except ZeroDivisionError:
         pass  # test passed
+
+
+if __name__ == "__main__":
+    test_track_spacecharge()
