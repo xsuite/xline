@@ -71,11 +71,11 @@ def test_madx_import():
         # Check consistency
         if sc_mode == "Bunched":
             sc_elements, sc_names = line.get_elements_of_type(
-                pysixtrack.elements.ScQGaussProfile
+                pysixtrack.elements.SCQGaussProfile
             )
         elif sc_mode == "Coasting":
             sc_elements, sc_names = line.get_elements_of_type(
-                pysixtrack.elements.ScCoasting
+                pysixtrack.elements.SCCoasting
             )
         else:
             raise ValueError("mode not understood")
