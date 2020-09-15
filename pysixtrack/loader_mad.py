@@ -158,11 +158,11 @@ def iter_from_madx_sequence(
                 )
         elif mad_etype == "placeholder":
             if ee.slot_id == 1:
-                newele = classes.ScCoasting()
+                newele = classes.SCCoasting()
             elif ee.slot_id == 2:
-                newele = classes.ScQGaussProfile()
+                newele = classes.SCQGaussProfile()
             elif ee.slot_id == 3:
-                newele = classes.ScInterpolatedProfile()
+                newele = classes.SCInterpolatedProfile()
             else:
                 newele = myDrift(length=ee.l)
                 old_pp += ee.l
