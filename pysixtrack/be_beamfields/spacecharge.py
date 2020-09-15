@@ -104,7 +104,7 @@ class SCQGaussProfile(Element):
             p.py += fact_kick * Ey
 
 
-class ScInterpolatedProfile(Element):
+class SCInterpolatedProfile(Element):
     """Space charge for a bunched beam with discretised profile."""
 
     _description = [
