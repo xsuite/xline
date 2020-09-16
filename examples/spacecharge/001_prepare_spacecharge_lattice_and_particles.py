@@ -51,10 +51,10 @@ if particle_type == "ions":
     mass = 193.7e9
     p0c = 1402.406299e9
     charge_state = 82.0
-    neps_x = 1.63e-6 
-    neps_y = 0.86e-6 
+    neps_x = 1.63e-6
+    neps_y = 0.86e-6
     delta_rms = 1.0e-3
-    V_RF_MV = 3 
+    V_RF_MV = 3
     lag_RF_deg = 0.0
     n_SCkicks = 250
     length_fuzzy = 1.5
@@ -94,11 +94,11 @@ mad_sc_names, sc_twdata = bt.get_spacecharge_names_twdata(
 # Check consistency
 if sc_mode == "Bunched":
     sc_elements, sc_names = line.get_elements_of_type(
-        pysixtrack.elements.SpaceChargeQGaussianProfile
+        pysixtrack.elements.SCQGaussProfile
     )
 elif sc_mode == "Coasting":
     sc_elements, sc_names = line.get_elements_of_type(
-        pysixtrack.elements.SpaceChargeCoasting
+        pysixtrack.elements.SCCoasting
     )
 else:
     raise ValueError("mode not understood")
@@ -182,7 +182,7 @@ with open("line.pkl", "rb") as fid:
 with open("particle_on_CO.pkl", "rb") as fid:
     part_on_CO = pysixtrack.Particles.from_dict(pickle.load(fid))
 
-part = part_on_CO.copy()  
+part = part_on_CO.copy()
 
 # get beta functions from twiss table
 with open("twiss_at_start.pkl", "rb") as fid:
