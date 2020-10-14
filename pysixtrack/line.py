@@ -192,6 +192,20 @@ class Line(Element):
 
         return elements, names
 
+    def get_element_ids_of_type(self, types, start_idx_offset=0):
+        assert start_idx_offset >= 0
+        if not hasattr(types, "__iter__"):
+            type_list = [types]
+        else:
+            type_list = types
+        elem_idx = []
+        for idx, elem in enumerate(self.elements):
+            for tt in type_list:
+                if isinstance(elem, tt):
+                    elem_idx.append(idx+start_idx_offset)
+                    break
+        return elem_idx
+
     def find_closed_orbit(
         self, p0c, guess=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], method="Nelder-Mead"
     ):
