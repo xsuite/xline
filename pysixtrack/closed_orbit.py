@@ -4,6 +4,8 @@ from .particles import Particles
 
 def get_init_particles_for_linear_map(closed_orbit, p0c, d, longitudinal_coordinate, longitudinal_momentum):
     part = Particles(p0c=p0c)
+#    part = Particles()
+#    part.p0c = p0c
     part.x  = closed_orbit[0] + np.array([0.0, 1.0 * d, 0.0, 0.0, 0.0, 0.0, 0.0])
     part.px = closed_orbit[1] + np.array([0.0, 0.0, 1.0 * d, 0.0, 0.0, 0.0, 0.0])
     part.y  = closed_orbit[2] + np.array([0.0, 0.0, 0.0, 1.0 * d, 0.0, 0.0, 0.0])
@@ -14,7 +16,6 @@ def get_init_particles_for_linear_map(closed_orbit, p0c, d, longitudinal_coordin
 
     setattr(part, longitudinal_coordinate, longi)
     setattr(part, longitudinal_momentum, plongi)
-    print(part)
 
     return part
 

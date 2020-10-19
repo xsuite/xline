@@ -195,7 +195,9 @@ class Line(Element):
 
         return elements, names
 
-    def find_closed_orbit_and_linear_OTM(self, p0c, guess=None, d=1.e-7, tol=1.e-10, max_iterations=20, longitudinal_coordinate='tau'):
+    def find_closed_orbit_and_linear_OTM(
+        self, p0c, guess=None, d=1.e-7, tol=1.e-10, max_iterations=20, longitudinal_coordinate='zeta'
+    ):
         if guess is None:
             guess = [0., 0., 0., 0., 0., 0.]
         
@@ -216,7 +218,6 @@ class Line(Element):
             )
 
             error = np.linalg.norm( new_closed_orbit - closed_orbit )
-            error = np.sum( np.abs(new_closed_orbit - closed_orbit) )
     
             closed_orbit = new_closed_orbit
             if error < tol:
