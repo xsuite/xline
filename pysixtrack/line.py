@@ -8,6 +8,7 @@ from .loader_sixtrack import _expand_struct
 from .loader_mad import iter_from_madx_sequence
 from .closed_orbit import linearize_around_closed_orbit
 from .closed_orbit import healy_symplectify
+from .linear_normal_form import _linear_normal_form
 
 
 # missing access to particles._m:
@@ -194,6 +195,9 @@ class Line(Element):
                     elements.append(ee)
 
         return elements, names
+
+    def linear_normal_form(self, M):
+        return _linear_normal_form(M)
 
     def find_closed_orbit_and_linear_OTM(
         self, p0c, guess=None, d=1.e-7, tol=1.e-10, max_iterations=20, longitudinal_coordinate='zeta'
