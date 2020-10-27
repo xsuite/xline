@@ -287,3 +287,110 @@ def test_neutral_errors():
 
     assert abs(particle.x-initial_x) < 1e-14
     assert abs(particle.y-initial_y) < 1e-14
+
+
+def test_error_functionality():
+    # check if errors are actually working as intended
+    cpymad_spec = util.find_spec("cpymad")
+    if cpymad_spec is None:
+        print("cpymad is not available - abort test")
+        sys.exit(0)
+
+    from cpymad.madx import Madx
+    import numpy as np
+
+    madx = Madx()
+
+    madx.input('''
+        T1: Collimator, L=0.0, apertype=CIRCLE, aperture={0.5};
+        T2: Marker;
+        T3: Collimator, L=0.0, apertype=CIRCLE, aperture={0.5};
+
+        testseq: SEQUENCE, l = 20.0;
+            T1, at =  5;
+            T2, at = 10;
+            T3, at = 15;
+        ENDSEQUENCE;
+
+        !---the usual stuff
+        BEAM, PARTICLE=PROTON, ENERGY=7000.0, EXN=2.2e-6, EYN=2.2e-6;
+        USE, SEQUENCE=testseq;
+
+        !---assign misalignments and field errors
+        select, flag = error, clear;
+        select, flag = error, pattern = "T1";
+        ealign, dx = 0.01, dy = 0.02, arex = 0.03, arey = 0.04;
+        select, flag = error, clear;
+        select, flag = error, pattern = "T3";
+        ealign, dx = 0.07, dy = 0.08, dpsi = 0.7, arex = 0.08, arey = 0.09;
+        select, flag = error, full;
+    ''')
+    seq = madx.sequence.testseq
+
+    pysixtrack_line = pysixtrack.Line.from_madx_sequence(seq, install_apertures=True)
+    pysixtrack_line.apply_madx_errors(seq)
+    madx.input('stop;')
+
+    x_init = 0.1*np.random.rand(10)
+    y_init = 0.1*np.random.rand(10)
+    particles = pysixtrack.Particles(
+        x=x_init.copy(),
+        y=y_init.copy()
+    )
+
+    T1_checked = False
+    T1_aper_checked = False
+    T2_checked = False
+    T3_checked = False
+    T3_aper_checked = False
+    for element, element_name in zip(pysixtrack_line.elements,
+                                     pysixtrack_line.element_names):
+        ret = element.track(particles)
+
+        if element_name == 't1':
+            T1_checked = True
+            assert np.all(abs(particles.x - (x_init - 0.01)) < 1e-14)
+            assert np.all(abs(particles.y - (y_init - 0.02)) < 1e-14)
+        if element_name == 't1_aperture':
+            T1_aper_checked = True
+            assert np.all(abs(particles.x - (x_init - 0.01 - 0.03)) < 1e-14)
+            assert np.all(abs(particles.y - (y_init - 0.02 - 0.04)) < 1e-14)
+        if element_name == 't2':
+            T2_checked = True
+            assert np.all(abs(particles.x - x_init) < 1e-14)
+            assert np.all(abs(particles.y - y_init) < 1e-14)
+        cospsi = np.cos(0.7)
+        sinpsi = np.sin(0.7)
+        if element_name == 't3':
+            T3_checked = True
+            assert np.all(abs(
+                            particles.x
+                            - (x_init - 0.07)*cospsi
+                            - (y_init - 0.08)*sinpsi
+                          ) < 1e-14)
+            assert np.all(abs(
+                            particles.y
+                            + (x_init - 0.07)*sinpsi
+                            - (y_init - 0.08)*cospsi
+                           ) < 1e-14)
+        if element_name == 't3_aperture':
+            T3_aper_checked = True
+            assert np.all(abs(
+                            particles.x
+                            - (x_init - 0.07)*cospsi
+                            - (y_init - 0.08)*sinpsi
+                            - (-0.08)
+                          ) < 1e-14)
+            assert np.all(abs(
+                            particles.y
+                            + (x_init - 0.07)*sinpsi
+                            - (y_init - 0.08)*cospsi
+                            - (-0.09)
+                          ) < 1e-14)
+
+            if ret is not None:
+                break
+
+    assert not ret
+    assert np.all([T1_checked, T1_aper_checked,
+                   T2_checked, T3_checked, T3_aper_checked])
