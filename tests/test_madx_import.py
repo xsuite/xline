@@ -158,8 +158,11 @@ def test_error_import():
     ''')
     seq = madx.sequence.testseq
 
-    pysixtrack_line = pysixtrack.Line.from_madx_sequence(seq, install_apertures=True)
-    pysixtrack_line.apply_madx_errors(seq)
+    pysixtrack_line = pysixtrack.Line.from_madx_sequence(
+            seq,
+            install_apertures=True,
+            apply_madx_errors=True,
+    )
     madx.input('stop;')
 
     expected_element_num = (
@@ -271,8 +274,11 @@ def test_neutral_errors():
     ''')
     seq = madx.sequence.testseq
 
-    pysixtrack_line = pysixtrack.Line.from_madx_sequence(seq, install_apertures=True)
-    pysixtrack_line.apply_madx_errors(seq)
+    pysixtrack_line = pysixtrack.Line.from_madx_sequence(
+            seq,
+            install_apertures=True,
+            apply_madx_errors=True,
+    )
     madx.input('stop;')
 
     initial_x = 0.025
@@ -327,8 +333,11 @@ def test_error_functionality():
     ''')
     seq = madx.sequence.testseq
 
-    pysixtrack_line = pysixtrack.Line.from_madx_sequence(seq, install_apertures=True)
-    pysixtrack_line.apply_madx_errors(seq)
+    pysixtrack_line = pysixtrack.Line.from_madx_sequence(
+            seq,
+            install_apertures=True,
+            apply_madx_errors=True,
+    )
     madx.input('stop;')
 
     x_init = 0.1*np.random.rand(10)

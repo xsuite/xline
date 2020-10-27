@@ -327,6 +327,7 @@ class Line(Element):
         ignored_madtypes=[],
         exact_drift=False,
         drift_threshold=1e-6,
+        apply_madx_errors=False,
         install_apertures=False,
     ):
 
@@ -341,6 +342,9 @@ class Line(Element):
             install_apertures=install_apertures,
         ):
             line.append_element(el, el_name)
+
+        if apply_madx_errors:
+            line._apply_madx_errors(sequence)
 
         return line
 
@@ -366,7 +370,7 @@ class Line(Element):
             idx_after_el = idx_el + 1
         return idx_el, idx_after_el
 
-    def add_offset_error_to(self, element_name, dx=0, dy=0):
+    def _add_offset_error_to(self, element_name, dx=0, dy=0):
         idx_el, idx_after_el = self.find_element_ids(element_name)
         xyshift = elements.XYShift(dx=dx, dy=dy)
         inv_xyshift = elements.XYShift(dx=-dx, dy=-dy)
@@ -375,7 +379,7 @@ class Line(Element):
             idx_after_el + 1, inv_xyshift, element_name + "_offset_out"
         )
 
-    def add_aperture_offset_error_to(self, element_name, arex=0, arey=0):
+    def _add_aperture_offset_error_to(self, element_name, arex=0, arey=0):
         idx_el, idx_after_el = self.find_element_ids(element_name)
         idx_el_aper = idx_after_el - 1
         if not self.element_names[idx_el_aper] == element_name + "_aperture":
@@ -389,7 +393,7 @@ class Line(Element):
             idx_after_el + 1, inv_xyshift, element_name + "_aperture_offset_out"
         )
 
-    def add_tilt_error_to(self, element_name, angle):
+    def _add_tilt_error_to(self, element_name, angle):
         '''Alignment error of transverse rotation around s-axis.
         The element corresponding to the given `element_name`
         gets wrapped by SRotation elements with rotation angle
@@ -418,7 +422,7 @@ class Line(Element):
         self.insert_element(idx_el, srot, element_name + "_tilt_in")
         self.insert_element(idx_after_el + 1, inv_srot, element_name + "_tilt_out")
 
-    def add_multipole_error_to(self, element_name, knl=[], ksl=[]):
+    def _add_multipole_error_to(self, element_name, knl=[], ksl=[]):
         # will raise error if element not present:
         assert element_name in self.element_names
         element = self.elements[self.element_names.index(element_name)]
@@ -435,7 +439,7 @@ class Line(Element):
         for i, component in enumerate(ksl):
             element.ksl[i] += component
 
-    def apply_madx_errors(self, madx_sequence):
+    def _apply_madx_errors(self, madx_sequence):
         """Applies errors from MAD-X sequence to existing
         elements in this Line instance.
 
@@ -449,8 +453,10 @@ class Line(Element):
             # (...set up lattice and errors in cpymad...)
 
             seq = madx.sequence.some_lattice
-            pysixtrack_line = pysixtrack.Line.from_madx_sequence(seq)
-            pysixtrack_line.apply_madx_errors(seq)
+            pysixtrack_line = pysixtrack.Line.from_madx_sequence(
+                                    seq,
+                                    apply_madx_errors=True
+                              )
         """
         elements_not_found = []
         for element, element_name in zip(
@@ -467,18 +473,18 @@ class Line(Element):
                 dx = element.align_errors.dx
                 dy = element.align_errors.dy
                 if dx or dy:
-                    self.add_offset_error_to(element_name, dx, dy)
+                    self._add_offset_error_to(element_name, dx, dy)
 
                 # add tilt
                 dpsi = element.align_errors.dpsi
                 if dpsi:
-                    self.add_tilt_error_to(element_name, angle=dpsi / deg2rad)
+                    self._add_tilt_error_to(element_name, angle=dpsi / deg2rad)
 
                 # add aperture-only offset
                 arex = element.align_errors.arex
                 arey = element.align_errors.arey
                 if arex or arey:
-                    self.add_aperture_offset_error_to(element_name, arex, arey)
+                    self._add_aperture_offset_error_to(element_name, arex, arey)
 
                 # check for errors which cannot be treated yet:
                 for error_type in ['ds', 'dphi', 'dtheta', 'mrex', 'mrey',
@@ -496,7 +502,7 @@ class Line(Element):
                 knl = knl[:np.amax(np.where(knl)) + 1]  # delete trailing zeros
                 ksl = ksl[:np.amax(np.where(ksl)) + 1]  # to keep order low
                 if any(knl) or any(ksl):
-                    self.add_multipole_error_to(element_name, knl, ksl)
+                    self._add_multipole_error_to(element_name, knl, ksl)
 
         return elements_not_found
 

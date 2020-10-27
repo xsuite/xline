@@ -34,24 +34,24 @@ def test_line():
     n_elements += 1
     assert len(line) == n_elements
 
-    line.add_offset_error_to(multipole_name, dx=0, dy=0)
+    line._add_offset_error_to(multipole_name, dx=0, dy=0)
     n_elements += 2
     assert len(line) == n_elements
 
-    line.add_offset_error_to(multipole_name, dx=0.2, dy=-0.003)
+    line._add_offset_error_to(multipole_name, dx=0.2, dy=-0.003)
     n_elements += 2
     assert len(line) == n_elements
 
-    line.add_tilt_error_to(multipole_name, angle=0)
+    line._add_tilt_error_to(multipole_name, angle=0)
     n_elements += 2
     assert len(line) == n_elements
 
-    line.add_tilt_error_to(multipole_name, angle=0.1)
+    line._add_tilt_error_to(multipole_name, angle=0.1)
     n_elements += 2
     assert len(line) == n_elements
 
-    line.add_multipole_error_to(multipole_name, knl=[0, 0.1], ksl=[-0.03, 0.01])
-    # line.add_multipole_error_to(drift_exact,knl=[0,0.1],ksl=[-0.03,0.01])
+    line._add_multipole_error_to(multipole_name, knl=[0, 0.1], ksl=[-0.03, 0.01])
+    # line._add_multipole_error_to(drift_exact,knl=[0,0.1],ksl=[-0.03,0.01])
 
     line_dict = line.to_dict()
     line = pysixtrack.Line.from_dict(line_dict)
