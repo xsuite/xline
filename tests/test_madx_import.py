@@ -153,18 +153,13 @@ def test_error_import():
         select, flag = error, clear;
         select, flag = error, pattern = "MQ3";
         ealign, dx = 0.00, dy = 0.00, arex = 0.00, arey = 0.00, dpsi = 0.00;
-        efcomp, DKN = {0.0, 0.0, 0.001, 0.002}, DKS = {0.0, 0.0, 0.003, 0.004};
+        efcomp, DKN = {0.0, 0.0, 0.001, 0.002}, DKS = {0.0, 0.0, 0.003, 0.004, 0.005};
         select, flag = error, full;
     ''')
     seq = madx.sequence.testseq
-    # store already applied errors:
-    madx.command.esave(file='lattice_errors.err')
-    madx.command.readtable(file='lattice_errors.err', table="errors")
-    os.remove('lattice_errors.err')
-    errors = madx.table.errors
 
     pysixtrack_line = pysixtrack.Line.from_madx_sequence(seq, install_apertures=True)
-    pysixtrack_line.apply_madx_errors(errors)
+    pysixtrack_line.apply_madx_errors(seq)
     madx.input('stop;')
 
     expected_element_num = (
@@ -224,6 +219,7 @@ def test_error_import():
     assert abs(MQ3.knl[3] - 0.002) < 1e-14
     assert abs(MQ3.ksl[2] - 0.003) < 1e-14
     assert abs(MQ3.ksl[3] - 0.004) < 1e-14
+    assert abs(MQ3.ksl[4] - 0.005) < 1e-14
 
 
 def test_neutral_errors():
@@ -274,14 +270,9 @@ def test_neutral_errors():
         select, flag = error, full;
     ''')
     seq = madx.sequence.testseq
-    # store already applied errors:
-    madx.command.esave(file='lattice_errors.err')
-    madx.command.readtable(file='lattice_errors.err', table="errors")
-    os.remove('lattice_errors.err')
-    errors = madx.table.errors
 
     pysixtrack_line = pysixtrack.Line.from_madx_sequence(seq, install_apertures=True)
-    pysixtrack_line.apply_madx_errors(errors)
+    pysixtrack_line.apply_madx_errors(seq)
     madx.input('stop;')
 
     initial_x = 0.025

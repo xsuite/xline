@@ -435,13 +435,13 @@ class Line(Element):
         for i, component in enumerate(ksl):
             element.ksl[i] += component
 
-    def apply_madx_errors(self, error_table):
-        """Applies MAD-X error_table (with multipole errors,
-        dx and dy offset errors and dpsi tilt errors)
-        to existing elements in this Line instance.
+    def apply_madx_errors(self, madx_sequence):
+        """Applies errors from MAD-X sequence to existing
+        elements in this Line instance.
 
-        Return error_table names which were not found in the
-        elements of this Line instance (and thus not treated).
+        Return names of MAD-X elements with existing align_errors
+        or field_errors which were not found in the elements of
+        this Line instance (and thus not treated).
 
         Example via cpymad:
             madx = cpymad.madx.Madx()
@@ -449,83 +449,54 @@ class Line(Element):
             # (...set up lattice and errors in cpymad...)
 
             seq = madx.sequence.some_lattice
-            # store already applied errors:
-            madx.command.esave(file='lattice_errors.err')
-            madx.command.readtable(
-                file='lattice_errors.err', table="errors")
-            errors = madx.table.errors
-
-            pysixtrack_line = Line.from_madx_sequence(seq)
-            pysixtrack_line.apply_madx_errors(errors)
+            pysixtrack_line = pysixtrack.Line.from_madx_sequence(seq)
+            pysixtrack_line.apply_madx_errors(seq)
         """
-        max_multipole_err = 0
-        # check for errors in table which cannot be treated yet:
-        for error_type in error_table.keys():
-            if error_type == "name":
-                continue
-            if any(error_table[error_type]):
-                if error_type in ["dx", "dy", "dpsi", "arex", "arey"]:
-                    # available alignment error
-                    continue
-                elif error_type[:1] == "k" and error_type[-1:] == "l":
-                    # available multipole error
-                    order = int("".join(c for c in error_type if c.isdigit()))
-                    max_multipole_err = max(max_multipole_err, order)
-                else:
-                    print(
-                        f'Warning: MAD-X error type "{error_type}"'
-                        " not implemented yet."
-                    )
-
         elements_not_found = []
-        for i_line, element_name in enumerate(error_table["name"]):
+        for element, element_name in zip(
+                madx_sequence.expanded_elements,
+                madx_sequence.expanded_element_names()
+        ):
             if element_name not in self.element_names:
-                elements_not_found.append(element_name)
-                continue
+                if element.align_errors or element.field_errors:
+                    elements_not_found.append(element_name)
+                    continue
 
-            # add offset
-            try:
-                dx = error_table["dx"][i_line]
-            except KeyError:
-                dx = 0
-            try:
-                dy = error_table["dy"][i_line]
-            except KeyError:
-                dy = 0
-            if dx or dy:
-                self.add_offset_error_to(element_name, dx, dy)
+            if element.align_errors:
+                # add offset
+                dx = element.align_errors.dx
+                dy = element.align_errors.dy
+                if dx or dy:
+                    self.add_offset_error_to(element_name, dx, dy)
 
-            # add tilt
-            try:
-                dpsi = error_table["dpsi"][i_line]
-            except KeyError:
-                dpsi = 0
-            if dpsi:
-                self.add_tilt_error_to(element_name, angle=dpsi / deg2rad)
+                # add tilt
+                dpsi = element.align_errors.dpsi
+                if dpsi:
+                    self.add_tilt_error_to(element_name, angle=dpsi / deg2rad)
 
-            # add aperture-only offset
-            try:
-                arex = error_table["arex"][i_line]
-            except KeyError:
-                arex = 0
-            try:
-                arey = error_table["arey"][i_line]
-            except KeyError:
-                arey = 0
-            if arex or arey:
-                self.add_aperture_offset_error_to(element_name, arex, arey)
+                # add aperture-only offset
+                arex = element.align_errors.arex
+                arey = element.align_errors.arey
+                if arex or arey:
+                    self.add_aperture_offset_error_to(element_name, arex, arey)
 
-            # add multipole error
-            knl = [
-                error_table[f"k{o}l"][i_line]
-                for o in range(max_multipole_err + 1)
-            ]
-            ksl = [
-                error_table[f"k{o}sl"][i_line]
-                for o in range(max_multipole_err + 1)
-            ]
-            if any(knl) or any(ksl):
-                self.add_multipole_error_to(element_name, knl, ksl)
+                # check for errors which cannot be treated yet:
+                for error_type in ['ds', 'dphi', 'dtheta', 'mrex', 'mrey',
+                                   'mredx', 'mredy', 'mscalx', 'mscaly']:
+                    if getattr(element.align_errors, error_type):
+                        print(
+                            f'Warning: MAD-X error type "{error_type}"'
+                            " not implemented yet."
+                        )
+
+            if element.field_errors:
+                # add multipole error
+                knl = element.field_errors.dkn
+                ksl = element.field_errors.dks
+                knl = knl[:np.amax(np.where(knl)) + 1]  # delete trailing zeros
+                ksl = ksl[:np.amax(np.where(ksl)) + 1]  # to keep order low
+                if any(knl) or any(ksl):
+                    self.add_multipole_error_to(element_name, knl, ksl)
 
         return elements_not_found
 
