@@ -498,11 +498,12 @@ class Line(Element):
 
             if element.field_errors:
                 # add multipole error
-                knl = element.field_errors.dkn
-                ksl = element.field_errors.dks
-                knl = knl[:np.amax(np.where(knl)) + 1]  # delete trailing zeros
-                ksl = ksl[:np.amax(np.where(ksl)) + 1]  # to keep order low
-                if any(knl) or any(ksl):
+                if any(element.field_errors.dkn) or \
+                            any(element.field_errors.dks):
+                    knl = element.field_errors.dkn
+                    ksl = element.field_errors.dks
+                    knl = knl[:np.amax(np.where(knl)) + 1]  # delete trailing zeros
+                    ksl = ksl[:np.amax(np.where(ksl)) + 1]  # to keep order low
                     self._add_multipole_error_to(element_name, knl, ksl)
 
         return elements_not_found
