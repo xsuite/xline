@@ -403,3 +403,42 @@ def test_error_functionality():
     assert not ret
     assert np.all([T1_checked, T1_aper_checked,
                    T2_checked, T3_checked, T3_aper_checked])
+
+
+def test_zero_errors():
+    # check that zero-errors are loaded without erro
+    cpymad_spec = util.find_spec("cpymad")
+    if cpymad_spec is None:
+        print("cpymad is not available - abort test")
+        sys.exit(0)
+
+    from cpymad.madx import Madx
+
+    madx = Madx()
+    madx.input('''
+        qd: multipole, knl={0,-0.3};
+        qf: multipole, knl={0, 0.3};
+        testseq: sequence, l = 1;
+            qd, at = 0.3;
+            qf, at = 0.6;
+        endsequence;
+    ''')
+    madx.select(flag='error', pattern='qf')
+    madx.command.efcomp(
+        dkn=[0, 0, 0, 0, 0.0, 0.0, 0.0],
+        dks=[0.0, 0.0, 0, 0]
+    )
+    madx.command.ealign(
+        dx=0.0,
+        dy=0.0,
+        ds=0.0,
+        DPHI=0.0,
+        DTHETA=0.0,
+        DPSI=0.0,
+        MREX=0.0,
+        MREY=0.0,
+        MSCALX=0.0,
+        MSCALY=0.0,
+        AREX=0.0,
+        AREY=0.0
+    )
