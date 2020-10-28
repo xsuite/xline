@@ -487,9 +487,10 @@ class Line(Element):
                     self._add_aperture_offset_error_to(element_name, arex, arey)
 
                 # check for errors which cannot be treated yet:
-                for error_type in ['ds', 'dphi', 'dtheta', 'mrex', 'mrey',
-                                   'mredx', 'mredy', 'mscalx', 'mscaly']:
-                    if getattr(element.align_errors, error_type):
+                for error_type in dir(element.align_errors):
+                    if not error_type[0] == '_' and \
+                            error_type not in ['dx', 'dy', 'dpsi', 'arex',
+                                               'arey', 'count', 'index']:
                         print(
                             f'Warning: MAD-X error type "{error_type}"'
                             " not implemented yet."
