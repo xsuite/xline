@@ -255,7 +255,7 @@ def test_neutral_errors():
         USE, SEQUENCE=testseq;
 
 
-        Select, flag=makethin, pattern="MQ1", slice=2;
+        Select, flag=makethin, pattern="T1", slice=2;
         makethin, sequence=testseq;
 
         use, sequence=testseq;
