@@ -207,10 +207,11 @@ class Line(Element):
         return elem_idx
 
     def find_closed_orbit(
-        self, p0c, guess=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], method="Nelder-Mead"
-    ):
+            self, p0c, guess=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            method="Nelder-Mead", **kwargs
+            ):
         def _one_turn_map(coord):
-            pcl = Particles(p0c=p0c)
+            pcl = Particles(p0c=p0c, **kwargs)
             pcl.x = coord[0]
             pcl.px = coord[1]
             pcl.y = coord[2]
@@ -238,7 +239,7 @@ class Line(Element):
                 _CO_error, np.array(guess), tol=1e-20, method=method
             )
 
-        pcl = Particles(p0c=p0c)
+        pcl = Particles(p0c=p0c, **kwargs)
 
         pcl.x = res.x[0]
         pcl.px = res.x[1]
