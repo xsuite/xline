@@ -412,7 +412,7 @@ def test_error_functionality():
 
 
 def test_zero_errors():
-    # check that zero-errors are loaded without erro
+    # check that zero-errors are loaded without error
     cpymad_spec = util.find_spec("cpymad")
     if cpymad_spec is None:
         print("cpymad is not available - abort test")
@@ -429,6 +429,8 @@ def test_zero_errors():
             qf, at = 0.6;
         endsequence;
     ''')
+    madx.beam()
+    madx.use('testseq')
     madx.select(flag='error', pattern='qf')
     madx.command.efcomp(
         dkn=[0, 0, 0, 0, 0.0, 0.0, 0.0],
