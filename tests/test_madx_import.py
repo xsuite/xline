@@ -91,10 +91,10 @@ def test_madx_import():
                 sc_twdata,
                 betagamma,
                 number_of_particles,
-                bunchlength_rms,
                 delta_rms,
                 neps_x,
                 neps_y,
+                bunchlength_rms,
             )
         elif sc_mode == "Coasting":
             bt.setup_spacecharge_coasting_in_line(
@@ -103,10 +103,10 @@ def test_madx_import():
                 sc_twdata,
                 betagamma,
                 number_of_particles,
-                circumference,
                 delta_rms,
                 neps_x,
                 neps_y,
+                circumference,
             )
         else:
             raise ValueError("mode not understood")
