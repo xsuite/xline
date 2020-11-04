@@ -122,8 +122,7 @@ def test_error_import():
 
     madx = Madx()
 
-    madx.input(
-        """
+    madx.input('''
         MQ1: Quadrupole, K1:=KQ1, L=1.0, apertype=CIRCLE, aperture={0.04};
         MQ2: Quadrupole, K1:=KQ2, L=1.0, apertype=CIRCLE, aperture={0.04};
         MQ3: Quadrupole, K1:=0.0, L=1.0, apertype=CIRCLE, aperture={0.04};
@@ -157,22 +156,17 @@ def test_error_import():
         select, flag = error, clear;
         select, flag = error, pattern = "MQ3";
         ealign, dx = 0.00, dy = 0.00, arex = 0.00, arey = 0.00, dpsi = 0.00;
-        efcomp, DKN = {0.0, 0.0, 0.001, 0.002}, DKS = {0.0, 0.0, 0.003, 0.004};
+        efcomp, DKN = {0.0, 0.0, 0.001, 0.002}, DKS = {0.0, 0.0, 0.003, 0.004, 0.005};
         select, flag = error, full;
-    """
-    )
+    ''')
     seq = madx.sequence.testseq
-    # store already applied errors:
-    madx.command.esave(file="lattice_errors.err")
-    madx.command.readtable(file="lattice_errors.err", table="errors")
-    os.remove("lattice_errors.err")
-    errors = madx.table.errors
 
     pysixtrack_line = pysixtrack.Line.from_madx_sequence(
-        seq, install_apertures=True
+            seq,
+            install_apertures=True,
+            apply_madx_errors=True,
     )
-    pysixtrack_line.apply_madx_errors(errors)
-    madx.input("stop;")
+    madx.input('stop;')
 
     expected_element_num = (
         2  # start and end marker
@@ -228,12 +222,13 @@ def test_error_import():
     ):
         assert isinstance(element, expected_element)
 
-    idx_MQ3 = pysixtrack_line.element_names.index("mq3")
+    idx_MQ3 = pysixtrack_line.element_names.index('mq3')
     MQ3 = pysixtrack_line.elements[idx_MQ3]
     assert abs(MQ3.knl[2] - 0.001) < 1e-14
     assert abs(MQ3.knl[3] - 0.002) < 1e-14
     assert abs(MQ3.ksl[2] - 0.003) < 1e-14
     assert abs(MQ3.ksl[3] - 0.004) < 1e-14
+    assert abs(MQ3.ksl[4] - 0.005) < 1e-14
 
 
 def test_neutral_errors():
@@ -247,8 +242,7 @@ def test_neutral_errors():
 
     madx = Madx()
 
-    madx.input(
-        """
+    madx.input('''
         T1: Collimator, L=1.0, apertype=CIRCLE, aperture={0.5};
         T2: Collimator, L=1.0, apertype=CIRCLE, aperture={0.5};
         T3: Collimator, L=1.0, apertype=CIRCLE, aperture={0.5};
@@ -267,7 +261,7 @@ def test_neutral_errors():
         USE, SEQUENCE=testseq;
 
 
-        Select, flag=makethin, pattern="MQ1", slice=2;
+        Select, flag=makethin, pattern="T1", slice=2;
         makethin, sequence=testseq;
 
         use, sequence=testseq;
@@ -283,20 +277,15 @@ def test_neutral_errors():
         select, flag = error, pattern = "T3";
         ealign, dx = 0.02, dy = 0.01, arex = 0.03, arey = 0.02, dpsi = 0.1;
         select, flag = error, full;
-    """
-    )
+    ''')
     seq = madx.sequence.testseq
-    # store already applied errors:
-    madx.command.esave(file="lattice_errors.err")
-    madx.command.readtable(file="lattice_errors.err", table="errors")
-    os.remove("lattice_errors.err")
-    errors = madx.table.errors
 
     pysixtrack_line = pysixtrack.Line.from_madx_sequence(
-        seq, install_apertures=True
+            seq,
+            install_apertures=True,
+            apply_madx_errors=True,
     )
-    pysixtrack_line.apply_madx_errors(errors)
-    madx.input("stop;")
+    madx.input('stop;')
 
     initial_x = 0.025
     initial_y = -0.015
@@ -310,3 +299,152 @@ def test_neutral_errors():
 
     assert abs(particle.x - initial_x) < 1e-14
     assert abs(particle.y - initial_y) < 1e-14
+
+
+def test_error_functionality():
+    # check if errors are actually working as intended
+    cpymad_spec = util.find_spec("cpymad")
+    if cpymad_spec is None:
+        print("cpymad is not available - abort test")
+        sys.exit(0)
+
+    from cpymad.madx import Madx
+    import numpy as np
+
+    madx = Madx()
+
+    madx.input('''
+        T1: Collimator, L=0.0, apertype=CIRCLE, aperture={0.5};
+        T2: Marker;
+        T3: Collimator, L=0.0, apertype=CIRCLE, aperture={0.5};
+
+        testseq: SEQUENCE, l = 20.0;
+            T1, at =  5;
+            T2, at = 10;
+            T3, at = 15;
+        ENDSEQUENCE;
+
+        !---the usual stuff
+        BEAM, PARTICLE=PROTON, ENERGY=7000.0, EXN=2.2e-6, EYN=2.2e-6;
+        USE, SEQUENCE=testseq;
+
+        !---assign misalignments and field errors
+        select, flag = error, clear;
+        select, flag = error, pattern = "T1";
+        ealign, dx = 0.01, dy = 0.02, arex = 0.03, arey = 0.04;
+        select, flag = error, clear;
+        select, flag = error, pattern = "T3";
+        ealign, dx = 0.07, dy = 0.08, dpsi = 0.7, arex = 0.08, arey = 0.09;
+        select, flag = error, full;
+    ''')
+    seq = madx.sequence.testseq
+
+    pysixtrack_line = pysixtrack.Line.from_madx_sequence(
+            seq,
+            install_apertures=True,
+            apply_madx_errors=True,
+    )
+    madx.input('stop;')
+
+    x_init = 0.1*np.random.rand(10)
+    y_init = 0.1*np.random.rand(10)
+    particles = pysixtrack.Particles(
+        x=x_init.copy(),
+        y=y_init.copy()
+    )
+
+    T1_checked = False
+    T1_aper_checked = False
+    T2_checked = False
+    T3_checked = False
+    T3_aper_checked = False
+    for element, element_name in zip(pysixtrack_line.elements,
+                                     pysixtrack_line.element_names):
+        ret = element.track(particles)
+
+        if element_name == 't1':
+            T1_checked = True
+            assert np.all(abs(particles.x - (x_init - 0.01)) < 1e-14)
+            assert np.all(abs(particles.y - (y_init - 0.02)) < 1e-14)
+        if element_name == 't1_aperture':
+            T1_aper_checked = True
+            assert np.all(abs(particles.x - (x_init - 0.01 - 0.03)) < 1e-14)
+            assert np.all(abs(particles.y - (y_init - 0.02 - 0.04)) < 1e-14)
+        if element_name == 't2':
+            T2_checked = True
+            assert np.all(abs(particles.x - x_init) < 1e-14)
+            assert np.all(abs(particles.y - y_init) < 1e-14)
+        cospsi = np.cos(0.7)
+        sinpsi = np.sin(0.7)
+        if element_name == 't3':
+            T3_checked = True
+            assert np.all(abs(
+                            particles.x
+                            - (x_init - 0.07)*cospsi
+                            - (y_init - 0.08)*sinpsi
+                          ) < 1e-14)
+            assert np.all(abs(
+                            particles.y
+                            + (x_init - 0.07)*sinpsi
+                            - (y_init - 0.08)*cospsi
+                           ) < 1e-14)
+        if element_name == 't3_aperture':
+            T3_aper_checked = True
+            assert np.all(abs(
+                            particles.x
+                            - (x_init - 0.07)*cospsi
+                            - (y_init - 0.08)*sinpsi
+                            - (-0.08)
+                          ) < 1e-14)
+            assert np.all(abs(
+                            particles.y
+                            + (x_init - 0.07)*sinpsi
+                            - (y_init - 0.08)*cospsi
+                            - (-0.09)
+                          ) < 1e-14)
+
+            if ret is not None:
+                break
+
+    assert not ret
+    assert np.all([T1_checked, T1_aper_checked,
+                   T2_checked, T3_checked, T3_aper_checked])
+
+
+def test_zero_errors():
+    # check that zero-errors are loaded without erro
+    cpymad_spec = util.find_spec("cpymad")
+    if cpymad_spec is None:
+        print("cpymad is not available - abort test")
+        sys.exit(0)
+
+    from cpymad.madx import Madx
+
+    madx = Madx()
+    madx.input('''
+        qd: multipole, knl={0,-0.3};
+        qf: multipole, knl={0, 0.3};
+        testseq: sequence, l = 1;
+            qd, at = 0.3;
+            qf, at = 0.6;
+        endsequence;
+    ''')
+    madx.select(flag='error', pattern='qf')
+    madx.command.efcomp(
+        dkn=[0, 0, 0, 0, 0.0, 0.0, 0.0],
+        dks=[0.0, 0.0, 0, 0]
+    )
+    madx.command.ealign(
+        dx=0.0,
+        dy=0.0,
+        ds=0.0,
+        DPHI=0.0,
+        DTHETA=0.0,
+        DPSI=0.0,
+        MREX=0.0,
+        MREY=0.0,
+        MSCALX=0.0,
+        MSCALY=0.0,
+        AREX=0.0,
+        AREY=0.0
+    )
