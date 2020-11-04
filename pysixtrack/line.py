@@ -221,7 +221,7 @@ class Line(Element):
 
             self.track(pcl)
             coord_out = np.array(
-                [pcl.x, pcl.px, pcl.y, pcl.py, pcl.sigma, pcl.delta]
+                [pcl.x, pcl.px, pcl.y, pcl.py, pcl.zeta, pcl.delta]
             )
 
             return coord_out
