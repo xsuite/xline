@@ -196,6 +196,20 @@ class Line(Element):
 
         return elements, names
 
+    def get_element_ids_of_type(self, types, start_idx_offset=0):
+        assert start_idx_offset >= 0
+        if not hasattr(types, "__iter__"):
+            type_list = [types]
+        else:
+            type_list = types
+        elem_idx = []
+        for idx, elem in enumerate(self.elements):
+            for tt in type_list:
+                if isinstance(elem, tt):
+                    elem_idx.append(idx+start_idx_offset)
+                    break
+        return elem_idx
+
     def linear_normal_form(self, M):
         return _linear_normal_form(M)
 
@@ -237,10 +251,11 @@ class Line(Element):
         return closed_orbit, healy_symplectify(M)
 
     def find_closed_orbit(
-        self, p0c, guess=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], method="Nelder-Mead"
-    ):
+            self, p0c, guess=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            method="Nelder-Mead", **kwargs
+            ):
         def _one_turn_map(coord):
-            pcl = Particles(p0c=p0c)
+            pcl = Particles(p0c=p0c, **kwargs)
             pcl.x = coord[0]
             pcl.px = coord[1]
             pcl.y = coord[2]
@@ -250,7 +265,7 @@ class Line(Element):
 
             self.track(pcl)
             coord_out = np.array(
-                [pcl.x, pcl.px, pcl.y, pcl.py, pcl.sigma, pcl.delta]
+                [pcl.x, pcl.px, pcl.y, pcl.py, pcl.zeta, pcl.delta]
             )
 
             return coord_out
@@ -268,7 +283,7 @@ class Line(Element):
                 _CO_error, np.array(guess), tol=1e-20, method=method
             )
 
-        pcl = Particles(p0c=p0c)
+        pcl = Particles(p0c=p0c, **kwargs)
 
         pcl.x = res.x[0]
         pcl.px = res.x[1]

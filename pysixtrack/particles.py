@@ -17,7 +17,7 @@ class Particles(object):
     s       [m]  Reference accumulated pathlength
     x       [m]  Horizontal offset
     px      [1]  Px / (m/m0 * p0c) = beta_x gamma /(beta0 gamma0)
-    y       [m   Vertical offset]
+    y       [m]  Vertical offset
     py      [1]  Py / (m/m0 * p0c)
     delta   [1]  Pc / (m/m0 * p0c) - 1
     ptau    [1]  Energy / (m/m0 * p0c) - 1

@@ -15,7 +15,6 @@ def get_points_twissdata_for_elements(
 ):
 
     mad.use(sequence=seq_name)
-
     mad.twiss()
 
     if use_survey:
@@ -135,10 +134,10 @@ def get_bb_names_madpoints_sigmas(
     return element_names, points, sigmas
 
 
-def compute_shift_strong_beam_based_on_close_ip(
+def shift_strong_beam_based_on_close_ip(
     points_weak, points_strong, IPs_survey_weak, IPs_survey_strong
 ):
-    strong_shift = []
+
     for i_bb, _ in enumerate(points_weak):
 
         pbw = points_weak[i_bb]
@@ -155,11 +154,10 @@ def compute_shift_strong_beam_based_on_close_ip(
 
         # Shift Bs
         shift_ws = IPs_survey_strong[use_ip].p - IPs_survey_weak[use_ip].p
-        strong_shift.append(shift_ws)
-    return strong_shift
+        pbs.p -= shift_ws
 
 
-def find_bb_separations(points_weak, points_strong, strong_shift, names=None):
+def find_bb_separations(points_weak, points_strong, names=None):
 
     if names is None:
         names = ["bb_%d" % ii for ii in range(len(points_weak))]
@@ -172,9 +170,7 @@ def find_bb_separations(points_weak, points_strong, strong_shift, names=None):
         pbs = points_strong[i_bb]
 
         # Find vws
-        vbb_ws = (points_strong[i_bb].p - strong_shift[i_bb]) - points_weak[
-            i_bb
-        ].p
+        vbb_ws = points_strong[i_bb].p - points_weak[i_bb].p
 
         # Check that the two reference system are parallel
         try:
@@ -214,7 +210,6 @@ def setup_beam_beam_in_line(
     bb_sigmas_strong,
     bb_points_weak,
     bb_points_strong,
-    bb_shift_strong,
     beta_r_strong,
     bunch_intensity_strong,
     n_slices_6D,
@@ -224,7 +219,6 @@ def setup_beam_beam_in_line(
     sep_x, sep_y = find_bb_separations(
         points_weak=bb_points_weak,
         points_strong=bb_points_strong,
-        strong_shift=bb_shift_strong,
         names=bb_names,
     )
 
@@ -279,6 +273,9 @@ def setup_beam_beam_in_line(
 ##################################
 # space charge related functions #
 ##################################
+sc_mode_to_slotid = {"Coasting": "1", "Bunched": "2", "Interpolated": "3"}
+
+
 def determine_sc_locations(line, n_SCkicks, length_fuzzy):
     s_elements = np.array(line.get_s_elements())
     length_target = s_elements[-1] / float(n_SCkicks)
@@ -298,7 +295,7 @@ def determine_sc_locations(line, n_SCkicks, length_fuzzy):
 
 
 def install_sc_placeholders(mad, seq_name, name, s, mode="Bunched"):
-    sid = {"Coasting": "1", "Bunched": "2"}[mode]
+    sid = sc_mode_to_slotid[mode]
     mad.input(
         f"""
             seqedit, sequence={seq_name};"""
@@ -322,11 +319,38 @@ def get_spacecharge_names_twdata(mad, seq_name, mode):
         mad,
         seq_name,
         ele_type="placeholder",
-        slot_id={"Coasting": 1, "Bunched": 2}[mode],
+        slot_id=int(sc_mode_to_slotid[mode]),
         use_survey=False,
         use_twiss=True,
     )
     return mad_sc_names, twdata
+
+
+def _setup_spacecharge_in_line(
+    sc_elements,
+    sc_lengths,
+    sc_twdata,
+    betagamma,
+    number_of_particles,
+    delta_rms,
+    neps_x,
+    neps_y,
+):
+
+    for ii, ss in enumerate(sc_elements):
+        ss.number_of_particles = number_of_particles
+        ss.sigma_x = np.sqrt(
+            sc_twdata["betx"][ii] * neps_x / betagamma
+            + (sc_twdata["dispersion_x"][ii] * delta_rms) ** 2
+        )
+        ss.sigma_y = np.sqrt(
+            sc_twdata["bety"][ii] * neps_y / betagamma
+            + (sc_twdata["dispersion_y"][ii] * delta_rms) ** 2
+        )
+        ss.length = sc_lengths[ii]
+        ss.x_co = sc_twdata["x"][ii]
+        ss.y_co = sc_twdata["y"][ii]
+        ss.enabled = True
 
 
 def setup_spacecharge_bunched_in_line(
@@ -335,28 +359,24 @@ def setup_spacecharge_bunched_in_line(
     sc_twdata,
     betagamma,
     number_of_particles,
-    bunchlength_rms,
     delta_rms,
     neps_x,
     neps_y,
+    bunchlength_rms,
 ):
 
     for ii, ss in enumerate(sc_elements):
-
-        ss.number_of_particles = number_of_particles
         ss.bunchlength_rms = bunchlength_rms
-        ss.sigma_x = np.sqrt(
-            sc_twdata["betx"][ii] * neps_x / betagamma
-            + (sc_twdata["dispersion_x"][ii] * delta_rms) ** 2
-        )
-        ss.sigma_y = np.sqrt(
-            sc_twdata["bety"][ii] * neps_y / betagamma
-            + (sc_twdata["dispersion_y"][ii] * delta_rms) ** 2
-        )
-        ss.length = sc_lengths[ii]
-        ss.x_co = sc_twdata["x"][ii]
-        ss.y_co = sc_twdata["y"][ii]
-        ss.enabled = True
+    _setup_spacecharge_in_line(
+        sc_elements,
+        sc_lengths,
+        sc_twdata,
+        betagamma,
+        number_of_particles,
+        delta_rms,
+        neps_x,
+        neps_y,
+    )
 
 
 def setup_spacecharge_coasting_in_line(
@@ -364,27 +384,57 @@ def setup_spacecharge_coasting_in_line(
     sc_lengths,
     sc_twdata,
     betagamma,
-    line_density,
+    number_of_particles,
     delta_rms,
     neps_x,
     neps_y,
+    circumference,
 ):
 
     for ii, ss in enumerate(sc_elements):
+        ss.circumference = circumference
+    _setup_spacecharge_in_line(
+        sc_elements,
+        sc_lengths,
+        sc_twdata,
+        betagamma,
+        number_of_particles,
+        delta_rms,
+        neps_x,
+        neps_y,
+    )
 
-        ss.line_density = line_density
-        ss.sigma_x = np.sqrt(
-            sc_twdata["betx"][ii] * neps_x / betagamma
-            + (sc_twdata["dispersion_x"][ii] * delta_rms) ** 2
-        )
-        ss.sigma_y = np.sqrt(
-            sc_twdata["bety"][ii] * neps_y / betagamma
-            + (sc_twdata["dispersion_y"][ii] * delta_rms) ** 2
-        )
-        ss.length = sc_lengths[ii]
-        ss.x_co = sc_twdata["x"][ii]
-        ss.y_co = sc_twdata["y"][ii]
-        ss.enabled = True
+
+def setup_spacecharge_interpolated_in_line(
+    sc_elements,
+    sc_lengths,
+    sc_twdata,
+    betagamma,
+    number_of_particles,
+    delta_rms,
+    neps_x,
+    neps_y,
+    line_density_profile,
+    dz,
+    z0,
+    method=0,
+):
+    assert method == 0 or method == 1
+    for ii, ss in enumerate(sc_elements):
+        ss.line_density_profile = line_density_profile
+        ss.dz = dz
+        ss.z0 = z0
+        ss.method = method
+    _setup_spacecharge_in_line(
+        sc_elements,
+        sc_lengths,
+        sc_twdata,
+        betagamma,
+        number_of_particles,
+        delta_rms,
+        neps_x,
+        neps_y,
+    )
 
 
 def check_spacecharge_consistency(
