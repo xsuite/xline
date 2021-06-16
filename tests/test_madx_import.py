@@ -2,8 +2,8 @@ import os
 import sys
 from importlib import util
 
-import pysixtrack
-import pysixtrack.be_beamfields.tools as bt
+import xline
+import xline.be_beamfields.tools as bt
 
 
 def test_madx_import():
@@ -20,9 +20,9 @@ def test_madx_import():
     n_SCkicks = 120
     length_fuzzy = 0.0
     p0c = 0.571e6
-    particle = pysixtrack.Particles(p0c=p0c)
+    particle = xline.Particles(p0c=p0c)
     betagamma = particle.beta0 * particle.gamma0
-    # mass = pysixtrack.Particles.pmass
+    # mass = xline.Particles.pmass
     delta_rms = 1e-3
     neps_x = 1.5e-6
     neps_y = 1.5e-6
@@ -47,7 +47,7 @@ def test_madx_import():
         mad.call(path + "psb_fb_lhc.madx", chdir=True)
 
         # Determine space charge locations
-        temp_line = pysixtrack.Line.from_madx_sequence(mad.sequence[seq_name])
+        temp_line = xline.Line.from_madx_sequence(mad.sequence[seq_name])
         sc_locations, sc_lengths = bt.determine_sc_locations(
             temp_line, n_SCkicks, length_fuzzy
         )
@@ -59,7 +59,7 @@ def test_madx_import():
         )
 
         # Generate line with spacecharge
-        line = pysixtrack.Line.from_madx_sequence(
+        line = xline.Line.from_madx_sequence(
             mad.sequence[seq_name], install_apertures=use_aperture
         )
 
@@ -71,11 +71,11 @@ def test_madx_import():
         # Check consistency
         if sc_mode == "Bunched":
             sc_elements, sc_names = line.get_elements_of_type(
-                pysixtrack.elements.SCQGaussProfile
+                xline.elements.SCQGaussProfile
             )
         elif sc_mode == "Coasting":
             sc_elements, sc_names = line.get_elements_of_type(
-                pysixtrack.elements.SCCoasting
+                xline.elements.SCCoasting
             )
         else:
             raise ValueError("mode not understood")
@@ -161,7 +161,7 @@ def test_error_import():
     ''')
     seq = madx.sequence.testseq
 
-    pysixtrack_line = pysixtrack.Line.from_madx_sequence(
+    xline_line = xline.Line.from_madx_sequence(
             seq,
             install_apertures=True,
             apply_madx_errors=True,
@@ -179,51 +179,51 @@ def test_error_import():
         + 2  # tilt in/out for MQ2
         + 2 * 3  # arex/y in/out for MQ1 slices
     )
-    assert len(pysixtrack_line) == expected_element_num
+    assert len(xline_line) == expected_element_num
 
     expected_element_order = [
-        pysixtrack.elements.Drift,  # start marker
-        pysixtrack.elements.Drift,
-        pysixtrack.elements.XYShift,  # dx/y in of MQ1 1st slice
-        pysixtrack.elements.Multipole,  # MQ1 1st slice
-        pysixtrack.elements.XYShift,  # arex/y in for MQ1 1st slice
-        pysixtrack.elements.LimitEllipse,  # MQ1 1st slice aperture
-        pysixtrack.elements.XYShift,  # arex/y out for MQ1 1st slice
-        pysixtrack.elements.XYShift,  # dx/y out for MQ1 1st slice
-        pysixtrack.elements.Drift,
-        pysixtrack.elements.XYShift,  # dx/y in for MQ1 marker
-        pysixtrack.elements.Drift,  # MQ1 marker
-        pysixtrack.elements.XYShift,  # arex/y in for MQ1 marker
-        pysixtrack.elements.LimitEllipse,  # MQ1 marker aperture
-        pysixtrack.elements.XYShift,  # arex/y out for MQ1 marker
-        pysixtrack.elements.XYShift,  # dx/y out for MQ1 marker
-        pysixtrack.elements.Drift,
-        pysixtrack.elements.XYShift,  # dx/y in for MQ1 2nd slice
-        pysixtrack.elements.Multipole,  # MQ1 2nd slice
-        pysixtrack.elements.XYShift,  # arex/y in for MQ1 2nd slice
-        pysixtrack.elements.LimitEllipse,  # MQ1 2nd slice aperture
-        pysixtrack.elements.XYShift,  # arex/y out for MQ1 2nd slice
-        pysixtrack.elements.XYShift,  # dx/y out for MQ1 2nd slice
-        pysixtrack.elements.Drift,
-        pysixtrack.elements.XYShift,  # dx/y in for MQ2
-        pysixtrack.elements.SRotation,  # tilt in for MQ2
-        pysixtrack.elements.Multipole,  # MQ2
-        pysixtrack.elements.LimitEllipse,  # MQ2 aperture
-        pysixtrack.elements.SRotation,  # tilt out for MQ2
-        pysixtrack.elements.XYShift,  # dx/y out for MQ2
-        pysixtrack.elements.Drift,
-        pysixtrack.elements.Multipole,  # MQ3
-        pysixtrack.elements.LimitEllipse,  # MQ3 aperture
-        pysixtrack.elements.Drift,
-        pysixtrack.elements.Drift,  # end marker
+        xline.elements.Drift,  # start marker
+        xline.elements.Drift,
+        xline.elements.XYShift,  # dx/y in of MQ1 1st slice
+        xline.elements.Multipole,  # MQ1 1st slice
+        xline.elements.XYShift,  # arex/y in for MQ1 1st slice
+        xline.elements.LimitEllipse,  # MQ1 1st slice aperture
+        xline.elements.XYShift,  # arex/y out for MQ1 1st slice
+        xline.elements.XYShift,  # dx/y out for MQ1 1st slice
+        xline.elements.Drift,
+        xline.elements.XYShift,  # dx/y in for MQ1 marker
+        xline.elements.Drift,  # MQ1 marker
+        xline.elements.XYShift,  # arex/y in for MQ1 marker
+        xline.elements.LimitEllipse,  # MQ1 marker aperture
+        xline.elements.XYShift,  # arex/y out for MQ1 marker
+        xline.elements.XYShift,  # dx/y out for MQ1 marker
+        xline.elements.Drift,
+        xline.elements.XYShift,  # dx/y in for MQ1 2nd slice
+        xline.elements.Multipole,  # MQ1 2nd slice
+        xline.elements.XYShift,  # arex/y in for MQ1 2nd slice
+        xline.elements.LimitEllipse,  # MQ1 2nd slice aperture
+        xline.elements.XYShift,  # arex/y out for MQ1 2nd slice
+        xline.elements.XYShift,  # dx/y out for MQ1 2nd slice
+        xline.elements.Drift,
+        xline.elements.XYShift,  # dx/y in for MQ2
+        xline.elements.SRotation,  # tilt in for MQ2
+        xline.elements.Multipole,  # MQ2
+        xline.elements.LimitEllipse,  # MQ2 aperture
+        xline.elements.SRotation,  # tilt out for MQ2
+        xline.elements.XYShift,  # dx/y out for MQ2
+        xline.elements.Drift,
+        xline.elements.Multipole,  # MQ3
+        xline.elements.LimitEllipse,  # MQ3 aperture
+        xline.elements.Drift,
+        xline.elements.Drift,  # end marker
     ]
     for element, expected_element in zip(
-        pysixtrack_line.elements, expected_element_order
+        xline_line.elements, expected_element_order
     ):
         assert isinstance(element, expected_element)
 
-    idx_MQ3 = pysixtrack_line.element_names.index('mq3')
-    MQ3 = pysixtrack_line.elements[idx_MQ3]
+    idx_MQ3 = xline_line.element_names.index('mq3')
+    MQ3 = xline_line.elements[idx_MQ3]
     assert abs(MQ3.knl[2] - 0.001) < 1e-14
     assert abs(MQ3.knl[3] - 0.002) < 1e-14
     assert abs(MQ3.ksl[2] - 0.003) < 1e-14
@@ -280,7 +280,7 @@ def test_neutral_errors():
     ''')
     seq = madx.sequence.testseq
 
-    pysixtrack_line = pysixtrack.Line.from_madx_sequence(
+    xline_line = xline.Line.from_madx_sequence(
             seq,
             install_apertures=True,
             apply_madx_errors=True,
@@ -290,12 +290,12 @@ def test_neutral_errors():
     initial_x = 0.025
     initial_y = -0.015
 
-    particle = pysixtrack.Particles()
+    particle = xline.Particles()
     particle.x = initial_x
     particle.y = initial_y
     particle.state = 1
 
-    pysixtrack_line.track(particle)
+    xline_line.track(particle)
 
     assert abs(particle.x - initial_x) < 1e-14
     assert abs(particle.y - initial_y) < 1e-14
@@ -339,7 +339,7 @@ def test_error_functionality():
     ''')
     seq = madx.sequence.testseq
 
-    pysixtrack_line = pysixtrack.Line.from_madx_sequence(
+    xline_line = xline.Line.from_madx_sequence(
             seq,
             install_apertures=True,
             apply_madx_errors=True,
@@ -348,7 +348,7 @@ def test_error_functionality():
 
     x_init = 0.1*np.random.rand(10)
     y_init = 0.1*np.random.rand(10)
-    particles = pysixtrack.Particles(
+    particles = xline.Particles(
         x=x_init.copy(),
         y=y_init.copy()
     )
@@ -358,8 +358,8 @@ def test_error_functionality():
     T2_checked = False
     T3_checked = False
     T3_aper_checked = False
-    for element, element_name in zip(pysixtrack_line.elements,
-                                     pysixtrack_line.element_names):
+    for element, element_name in zip(xline_line.elements,
+                                     xline_line.element_names):
         ret = element.track(particles)
 
         if element_name == 't1':

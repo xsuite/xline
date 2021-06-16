@@ -2,7 +2,7 @@ import numpy as np
 from scipy.constants import e as qe
 from scipy.constants import c as clight
 
-from pysixtrack.base_classes import Element
+from xline.base_classes import Element
 from .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
 from . import BB6D
 from . import BB6Ddata

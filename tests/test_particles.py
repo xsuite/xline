@@ -1,4 +1,4 @@
-from pysixtrack import Particles
+from xline import Particles
 
 
 def test_particle_init():

@@ -1,5 +1,5 @@
 import numpy as np
-from pysixtrack.particles import Particles
+from xline.particles import Particles
 
 
 def test_particle_loss():

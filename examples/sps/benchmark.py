@@ -4,7 +4,7 @@ import time
 import numpy as np
 
 from pyoptics import madlang, optics
-import pysixtrack
+import xline
 
 # see sps/madx/a001_track_thin.madx
 mad = madlang.open("madx/SPS_Q20_thin.seq")
@@ -13,9 +13,9 @@ mad.acta_31637.lag = 0.5
 out, rest = mad.sps.expand_struct()
 
 
-out, rest = mad.sps.expand_struct(pysixtrack.convert)
+out, rest = mad.sps.expand_struct(xline.convert)
 elems = list(zip(*out))[1]
-sps = pysixtrack.Block(elems)
+sps = xline.Block(elems)
 
 
 pickle.dump(sps, open("sps.pickle", "w"))
@@ -36,7 +36,7 @@ def check_el(p):
 
 
 def trackn(n):
-    p = pysixtrack.Particles(
+    p = xline.Particles(
         x=1e-3,
         px=0.0,
         y=-0.5e-3,
@@ -64,7 +64,7 @@ check_el(p)
 
 
 def track_turn(n):
-    p = pysixtrack.Particles(
+    p = xline.Particles(
         x=1e-3,
         px=np.zeros(5000),
         y=-0.5e-3,

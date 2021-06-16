@@ -4,7 +4,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-import pysixtrack
+import xline
 import NAFFlib
 import example_helpers as hp
 import footprint
@@ -18,10 +18,10 @@ device = None
 n_turns = 100
 
 with open("line.pkl", "rb") as fid:
-    line = pysixtrack.Line.from_dict(pickle.load(fid), keepextra=True)
+    line = xline.Line.from_dict(pickle.load(fid), keepextra=True)
 
 with open("particle_on_CO.pkl", "rb") as fid:
-    partCO = pysixtrack.Particles.from_dict(pickle.load(fid))
+    partCO = xline.Particles.from_dict(pickle.load(fid))
 
 with open("DpxDpy_for_footprint.pkl", "rb") as fid:
     temp_data = pickle.load(fid)
@@ -42,7 +42,7 @@ if track_with == "PySixtrack":
         py_tbt,
         sigma_tbt,
         delta_tbt,
-    ) = hp.track_particle_pysixtrack(
+    ) = hp.track_particle_xline(
         line,
         part=part,
         Dx_wrt_CO_m=0.0,

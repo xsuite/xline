@@ -3,7 +3,7 @@ import gzip
 
 import numpy as np
 
-from pysixtrack import Particles
+from xline import Particles
 
 
 def savedata(out, fname):

@@ -1,15 +1,15 @@
 import pickle
 import numpy as np
 
-import pysixtrack
+import xline
 import sixtracktools
 
 # Load the two machines
 with open("line_from_mad.pkl", "rb") as fid:
-    lmad = pysixtrack.Line.from_dict(pickle.load(fid))
+    lmad = xline.Line.from_dict(pickle.load(fid))
 
 sixinput = sixtracktools.sixinput.SixInput("sixtrack/")
-lsix = pysixtrack.Line.from_sixinput(sixinput)
+lsix = xline.Line.from_sixinput(sixinput)
 
 original_length = lmad.get_length()
 assert (lsix.get_length() - original_length) < 1e-6
@@ -64,20 +64,20 @@ for ii, (ee_mad, ee_six, nn_mad, nn_six) in enumerate(
 
         # Exception: drift length (100 um tolerance)
         if isinstance(
-            ee_mad, (pysixtrack.elements.Drift, pysixtrack.elements.DriftExact)
+            ee_mad, (xline.elements.Drift, xline.elements.DriftExact)
         ):
             if kk == "length":
                 if diff_abs < 1e-4:
                     continue
 
         # Exception: multipole lrad is not passed to sixtraxk
-        if isinstance(ee_mad, pysixtrack.elements.Multipole):
+        if isinstance(ee_mad, xline.elements.Multipole):
             if kk == "length":
                 if np.abs(ee_mad.hxl) + np.abs(ee_mad.hyl) == 0.0:
                     continue
 
         # Exceptions BB4D (separations are recalculated)
-        if isinstance(ee_mad, pysixtrack.elements.BeamBeam4D):
+        if isinstance(ee_mad, xline.elements.BeamBeam4D):
             if kk == "x_bb":
                 if diff_abs / dmad["sigma_x"] < 0.0001:
                     continue
@@ -86,7 +86,7 @@ for ii, (ee_mad, ee_six, nn_mad, nn_six) in enumerate(
                     continue
 
         # Exceptions BB4D (angles and separations are recalculated)
-        if isinstance(ee_mad, pysixtrack.elements.BeamBeam6D):
+        if isinstance(ee_mad, xline.elements.BeamBeam6D):
             if kk == "alpha":
                 if diff_abs < 10e-6:
                     continue

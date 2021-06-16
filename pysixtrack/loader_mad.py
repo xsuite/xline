@@ -1,11 +1,11 @@
 import numpy as np
 
-from . import elements as pysixtrack_elements
+from . import elements as xline_elements
 
 
 def iter_from_madx_sequence(
     sequence,
-    classes=pysixtrack_elements,
+    classes=xline_elements,
     ignored_madtypes=[],
     exact_drift=False,
     drift_threshold=1e-6,
@@ -177,22 +177,22 @@ def iter_from_madx_sequence(
             and (min(ee.aperture) > 0)
         ):
             if ee.apertype == "rectangle":
-                newaperture = pysixtrack_elements.LimitRect(
+                newaperture = xline_elements.LimitRect(
                     min_x=-ee.aperture[0],
                     max_x=ee.aperture[0],
                     min_y=-ee.aperture[1],
                     max_y=ee.aperture[1],
                 )
             elif ee.apertype == "ellipse":
-                newaperture = pysixtrack_elements.LimitEllipse(
+                newaperture = xline_elements.LimitEllipse(
                     a=ee.aperture[0], b=ee.aperture[1]
                 )
             elif ee.apertype == "circle":
-                newaperture = pysixtrack_elements.LimitEllipse(
+                newaperture = xline_elements.LimitEllipse(
                     a=ee.aperture[0], b=ee.aperture[0]
                 )
             elif ee.apertype == "rectellipse":
-                newaperture = pysixtrack_elements.LimitRectEllipse(
+                newaperture = xline_elements.LimitRectEllipse(
                     max_x=ee.aperture[0],
                     max_y=ee.aperture[1],
                     a=ee.aperture[2],
@@ -307,7 +307,7 @@ class MadPoint(object):
 
 
 def mad_benchmark(mtype, attrs, pc=0.2, x=0, px=0, y=0, py=0, t=0, pt=0):
-    import pysixtrack
+    import xline
     from cpymad.madx import Madx
 
     mad = Madx(stdout=False)
@@ -320,9 +320,9 @@ def mad_benchmark(mtype, attrs, pc=0.2, x=0, px=0, y=0, py=0, t=0, pt=0):
     mad.start(x=x, px=px, y=y, py=py, t=t, pt=pt)
     mad.run()
     mad.endtrack()
-    p_mad = pysixtrack.Particles.from_madx_track(mad)
+    p_mad = xline.Particles.from_madx_track(mad)
     p_six = p_mad.copy(0)
-    line = pysixtrack.Line.from_madx_sequence(
+    line = xline.Line.from_madx_sequence(
         mad.sequence.bench, exact_drift=True
     )
     line.track(p_six)

@@ -1,4 +1,4 @@
-from pysixtrack import elements
+from xline import elements
 
 
 def test_other():

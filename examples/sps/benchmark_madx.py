@@ -1,21 +1,21 @@
 from pyoptics import madlang, optics
-import pysixtrack
+import xline
 
 # see sps/madx/a001_track_thin.madx
 mad = madlang.open("madx/SPS_Q20_thin.seq")
 mad.acta_31637.volt = 4.5
 mad.acta_31637.lag = 0.5
 
-elems, rest, iconv = mad.sps.expand_struct(pysixtrack.element_types)
+elems, rest, iconv = mad.sps.expand_struct(xline.element_types)
 
 pbench = optics.open("madx/track.obs0001.p0001")
-sps = pysixtrack.Line(elements=[e[2] for e in elems])
+sps = xline.Line(elements=[e[2] for e in elems])
 
 
 def get_part(pbench, ii):
     pstart = [pbench[n][ii] for n in "x px y py t pt".split()]
     pstart = dict(zip("x px y py tau ptau".split(), pstart))
-    prun = pysixtrack.Particles(energy0=pbench.e[ii] * 1e9, **pstart)
+    prun = xline.Particles(energy0=pbench.e[ii] * 1e9, **pstart)
     return prun
 
 

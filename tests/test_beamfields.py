@@ -1,7 +1,7 @@
 import numpy as np
-import pysixtrack
-from pysixtrack.mathlibs import MathlibDefault
-from pysixtrack.be_beamfields.gaussian_fields import (
+import xline
+from xline.mathlibs import MathlibDefault
+from xline.be_beamfields.gaussian_fields import (
     _get_transv_field_gauss_ellip,
 )
 
@@ -11,7 +11,7 @@ def test_track_spacecharge():
     y_co = -0.5
     sigma_x = 0.5
     sigma_y = 0.1
-    el1 = pysixtrack.elements.SCQGaussProfile(
+    el1 = xline.elements.SCQGaussProfile(
         number_of_particles=1e11,
         bunchlength_rms=0.22,
         sigma_x=sigma_x,
@@ -20,7 +20,7 @@ def test_track_spacecharge():
         x_co=x_co,
         y_co=y_co,
     )
-    el2 = pysixtrack.elements.SCCoasting(
+    el2 = xline.elements.SCCoasting(
         number_of_particles=el1.number_of_particles,
         circumference=el1.bunchlength_rms * np.sqrt(2 * np.pi),
         sigma_x=el1.sigma_x,
@@ -33,7 +33,7 @@ def test_track_spacecharge():
     # test absolute kick for sigma_x > sigma_y
     x_offset = 0.2
     y_offset = -0.5
-    p1 = pysixtrack.Particles()
+    p1 = xline.Particles()
     p1.x = x_co + x_offset
     p1.y = y_co + y_offset
     p2 = p1.copy()
@@ -48,7 +48,7 @@ def test_track_spacecharge():
     el1.sigma_y = sigma_x
     el2.sigma_x = sigma_y
     el2.sigma_y = sigma_x
-    p1 = pysixtrack.Particles()
+    p1 = xline.Particles()
     p1.x = x_co + y_offset
     p1.y = y_co + x_offset
     p2 = p1.copy()
@@ -59,7 +59,7 @@ def test_track_spacecharge():
     assert p1.compare(p2, abs_tol=1e-15)
 
     # test no kick for particle on closed orbit
-    p1 = pysixtrack.Particles()
+    p1 = xline.Particles()
     p1.x = el1.x_co
     p1.y = el1.y_co
     p2 = p1.copy()
@@ -70,7 +70,7 @@ def test_track_spacecharge():
     assert p1.compare(p2, abs_tol=1e-15)
 
     # test round beam
-    p1 = pysixtrack.Particles()
+    p1 = xline.Particles()
     p1.x = el1.x_co + 0.5
     p1.y = el1.y_co + 0.1
     p2 = p1.copy()

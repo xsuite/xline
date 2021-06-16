@@ -2,7 +2,7 @@ import time
 import gzip
 import math
 
-from pysixtrack import Particles
+from xline import Particles
 
 
 def savedata(out, fname):

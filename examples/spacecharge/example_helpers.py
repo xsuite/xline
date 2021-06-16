@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import sixtracktools
-import pysixtrack
+import xline
 
 
 def vectorize_all_coords(
@@ -109,7 +109,7 @@ def track_particle_sixtrack(
     prev_part = None
 
     for i_part in range(n_part):
-        temp_part = pysixtrack.Particles(**partCO)
+        temp_part = xline.Particles(**partCO)
         temp_part.x += Dx_wrt_CO_m[i_part]
         temp_part.px += Dpx_wrt_CO_rad[i_part]
         temp_part.y += Dy_wrt_CO_m[i_part]
@@ -186,7 +186,7 @@ def track_particle_sixtrack(
     return x_tbt, px_tbt, y_tbt, py_tbt, sigma_tbt, delta_tbt
 
 
-def track_particle_pysixtrack(
+def track_particle_xline(
     line,
     part,
     Dx_wrt_CO_m,
@@ -309,7 +309,7 @@ def track_particle_sixtracklib(
         part.elemid = 0
         part.turn = 0
 
-        p.from_pysixtrack(part, i_part)
+        p.from_xline(part, i_part)
 
     if device is None:
         job = sixtracklib.TrackJob(elements, ps)

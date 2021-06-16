@@ -1,7 +1,7 @@
 import numpy as np
 
-import pysixtrack
-from pysixtrack import elements
+import xline
+from xline import elements
 
 
 def test_line():
@@ -9,7 +9,7 @@ def test_line():
         frequency=100, knl=[0.1, 0.2], ksl=[0.3, 0.4]
     )
     zero_drift = elements.Drift(0)
-    line = pysixtrack.Line(
+    line = xline.Line(
         elements=[zero_drift, rfmultipole, zero_drift],
         element_names=["zero_drift", "rfmultipole", "zero_drift"],
     )
@@ -54,10 +54,10 @@ def test_line():
     # line._add_multipole_error_to(drift_exact,knl=[0,0.1],ksl=[-0.03,0.01])
 
     line_dict = line.to_dict()
-    line = pysixtrack.Line.from_dict(line_dict)
+    line = xline.Line.from_dict(line_dict)
     assert len(line) == n_elements
 
-    line.append_line(pysixtrack.Line.from_dict(line_dict))
+    line.append_line(xline.Line.from_dict(line_dict))
     n_elements *= 2
     assert len(line) == n_elements
     assert line.get_length() == 2 * length

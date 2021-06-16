@@ -1,4 +1,4 @@
-from pysixtrack.mathlibs import MathlibDefault
+from xline.mathlibs import MathlibDefault
 
 
 class QGauss(object):

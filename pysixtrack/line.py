@@ -45,7 +45,7 @@ class Line(Element):
     def append_line(self, line):
         # Append the elements
         if type(line) is Line:
-            # got a pysixtrack line
+            # got a xline line
             self.elements += line.elements
         else:
             # got a different type of line (e.g. pybplep)
@@ -512,7 +512,7 @@ class Line(Element):
             # (...set up lattice and errors in cpymad...)
 
             seq = madx.sequence.some_lattice
-            pysixtrack_line = pysixtrack.Line.from_madx_sequence(
+            xline_line = xline.Line.from_madx_sequence(
                                     seq,
                                     apply_madx_errors=True
                               )

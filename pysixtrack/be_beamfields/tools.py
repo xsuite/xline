@@ -1,6 +1,6 @@
 import numpy as np
-import pysixtrack
-from pysixtrack import MadPoint
+import xline
+from xline import MadPoint
 
 _sigma_names = [11, 12, 13, 14, 22, 23, 24, 33, 34, 44]
 _beta_names = ["betx", "bety"]
@@ -225,7 +225,7 @@ def setup_beam_beam_in_line(
     i_bb = 0
     assert bb_coupling is False  # Not implemented
     for ee, eename in zip(line.elements, line.element_names):
-        if isinstance(ee, pysixtrack.elements.BeamBeam4D):
+        if isinstance(ee, xline.elements.BeamBeam4D):
             assert eename == bb_names[i_bb]
 
             ee.charge = bunch_intensity_strong
@@ -236,7 +236,7 @@ def setup_beam_beam_in_line(
             ee.y_bb = sep_y[i_bb]
 
             i_bb += 1
-        if isinstance(ee, pysixtrack.elements.BeamBeam6D):
+        if isinstance(ee, xline.elements.BeamBeam6D):
             assert eename == bb_names[i_bb]
 
             dpx = bb_points_weak[i_bb].tpx - bb_points_strong[i_bb].tpx

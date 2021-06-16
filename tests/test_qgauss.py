@@ -1,6 +1,6 @@
 import numpy as np
-from pysixtrack.mathlibs import MathlibDefault
-from pysixtrack.be_beamfields.qgauss import QGauss
+from xline.mathlibs import MathlibDefault
+from xline.be_beamfields.qgauss import QGauss
 
 
 def test_qgauss_gauss_compare():

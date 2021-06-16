@@ -1,6 +1,6 @@
 from cpymad.madx import Madx
 
-import pysixtrack
+import xline
 
 
 class Madout:
@@ -34,14 +34,14 @@ twiss = mad.twiss()
 print(mad.table.summ.q1, mad.table.summ.q2)
 
 
-twissout = pysixtrack.Particles.from_madx_twiss(
+twissout = xline.Particles.from_madx_twiss(
     mad.twiss(betx=1, bety=1, x=0.001)
 )
 
-line = pysixtrack.Line.from_madx_sequence(mad.sequence.ring)
-part = pysixtrack.Particles()
+line = xline.Line.from_madx_sequence(mad.sequence.ring)
+part = xline.Particles()
 part.x = 0.001
-pysixout = pysixtrack.Particles.from_list(
+pysixout = xline.Particles.from_list(
     line.track_elem_by_elem(part, start=False, end=True)
 )
 

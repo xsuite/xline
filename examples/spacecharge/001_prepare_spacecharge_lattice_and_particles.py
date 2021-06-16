@@ -4,8 +4,8 @@ import matplotlib.pylab as plt
 
 from cpymad.madx import Madx
 
-import pysixtrack
-import pysixtrack.be_beamfields.tools as bt
+import xline
+import xline.be_beamfields.tools as bt
 import footprint
 
 
@@ -26,7 +26,7 @@ if particle_type == "protons":
     # For coasting
     circumference = 0.5
 
-    mass = pysixtrack.Particles.pmass
+    mass = xline.Particles.pmass
     p0c = 25.92e9
     charge_state = 1.0
     neps_x = 2e-6
@@ -71,7 +71,7 @@ mad.call("sps_thin.madx")
 mad.use(seq_name)
 
 # Determine space charge locations
-temp_line = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)
+temp_line = xline.Line.from_madx_sequence(mad.sequence.sps)
 sc_locations, sc_lengths = bt.determine_sc_locations(
     temp_line, n_SCkicks, length_fuzzy
 )
@@ -84,7 +84,7 @@ bt.install_sc_placeholders(mad, seq_name, sc_names, sc_locations, mode=sc_mode)
 twtable = mad.twiss()
 
 # Generate line with spacecharge
-line = pysixtrack.Line.from_madx_sequence(mad.sequence.sps)
+line = xline.Line.from_madx_sequence(mad.sequence.sps)
 
 # Get sc info from optics
 mad_sc_names, sc_twdata = bt.get_spacecharge_names_twdata(
@@ -94,11 +94,11 @@ mad_sc_names, sc_twdata = bt.get_spacecharge_names_twdata(
 # Check consistency
 if sc_mode == "Bunched":
     sc_elements, sc_names = line.get_elements_of_type(
-        pysixtrack.elements.SCQGaussProfile
+        xline.elements.SCQGaussProfile
     )
 elif sc_mode == "Coasting":
     sc_elements, sc_names = line.get_elements_of_type(
-        pysixtrack.elements.SCCoasting
+        xline.elements.SCCoasting
     )
 else:
     raise ValueError("mode not understood")
@@ -177,10 +177,10 @@ N_r_footp = 10.0
 N_theta_footp = 10.0
 
 with open("line.pkl", "rb") as fid:
-    line = pysixtrack.Line.from_dict(pickle.load(fid), keepextra=True)
+    line = xline.Line.from_dict(pickle.load(fid), keepextra=True)
 
 with open("particle_on_CO.pkl", "rb") as fid:
-    part_on_CO = pysixtrack.Particles.from_dict(pickle.load(fid))
+    part_on_CO = xline.Particles.from_dict(pickle.load(fid))
 
 part = part_on_CO.copy()
 

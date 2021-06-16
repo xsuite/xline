@@ -3,14 +3,14 @@ import numpy as np
 import pickle
 
 from cpymad.madx import Madx
-import pysixtrack
+import xline
 
-from pysixtrack.be_beamfields.tools import get_bb_names_madpoints_sigmas
-from pysixtrack.be_beamfields.tools import (
+from xline.be_beamfields.tools import get_bb_names_madpoints_sigmas
+from xline.be_beamfields.tools import (
     compute_shift_strong_beam_based_on_close_ip,
 )
-from pysixtrack.be_beamfields.tools import setup_beam_beam_in_line
-from pysixtrack import MadPoint
+from xline.be_beamfields.tools import setup_beam_beam_in_line
+from xline import MadPoint
 
 ip_names = [1, 2, 5, 8]
 
@@ -86,8 +86,8 @@ mad_ft.options.info = False
 mad_ft.call("mad/lhcwbb_fortracking.seq")
 mad_ft.use("lhcb1")  # without this the sequence does not work properly
 
-# Build pysixtrack line
-line_for_tracking = pysixtrack.Line.from_madx_sequence(
+# Build xline line
+line_for_tracking = xline.Line.from_madx_sequence(
     mad_ft.sequence["lhcb1"]
 )
 
@@ -114,9 +114,9 @@ assert (
 # There is a problem in the mask
 # (the RF frequancy is wrong in the machine for tracking
 # I patch it here -> to be fixed properly!!!!
-line_temp = pysixtrack.Line.from_madx_sequence(mad.sequence.lhcb1)
+line_temp = xline.Line.from_madx_sequence(mad.sequence.lhcb1)
 dct_correct_cavities = dict(
-    zip(*line_temp.get_elements_of_type(pysixtrack.elements.Cavity)[::-1])
+    zip(*line_temp.get_elements_of_type(xline.elements.Cavity)[::-1])
 )
 for ii, nn in enumerate(line_for_tracking.element_names):
     if nn in dct_correct_cavities.keys():
