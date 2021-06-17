@@ -250,7 +250,7 @@ class Particles(object):
         self.__init__ref(p0c, energy0, gamma0, beta0)
         self.__init__delta(delta, ptau, psigma)
         self.__init__zeta(zeta, tau, sigma)
-        self.__init__chi(chi, mratio, qratio)
+        self.__init__chi(chi=chi, mratio=mratio, qratio=qratio)
         self._update_coordinates = True
         length = self._check_array_length()
 
