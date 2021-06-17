@@ -197,7 +197,7 @@ class Particles(object):
             self._chi = chi
             self._mratio = mratio
             self._qratio = chi * mratio
-            if allclose(self._chi, qratio / mratio):
+            if np.allclose(self._chi, qratio / mratio):
                 raise ValueError(
                     f"""
             Particles defined with multiple mass/charge information:
