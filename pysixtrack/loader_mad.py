@@ -106,17 +106,18 @@ def iter_from_madx_sequence(
             )
 
         elif mad_etype == "crabcavity":
+            #ee.volt in MV, sequence.beam.pc in GeV
             if abs(ee.tilt-np.pi/2)<1e-9:
                 newele = classes.RFMultipole(
                     frequency=ee.freq * 1e6,
-                    ksl=[ee.volt / sequence.beam.pc],
+                    ksl=[ee.volt / sequence.beam.pc*1e-3],
                     pn=[ee.lag * 360 - 90],
                 )
                 skiptilt=True
             else:
                 newele = classes.RFMultipole(
                     frequency=ee.freq * 1e6,
-                    knl=[ee.volt / sequence.beam.pc],
+                    knl=[ee.volt / sequence.beam.pc*1e-3],
                     pn=[ee.lag * 360 - 90],
                 )
 
@@ -181,7 +182,7 @@ def iter_from_madx_sequence(
 
 
         if hasattr(ee,'tilt') and abs(ee.tilt)>0 and not skiptilt:
-            tilt=ee.tilt
+            tilt=np.rad2deg(ee.tilt)
         else:
             tilt=0
 
