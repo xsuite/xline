@@ -111,7 +111,7 @@ def iter_from_madx_sequence(
                 newele = classes.RFMultipole(
                     frequency=ee.freq * 1e6,
                     ksl=[ee.volt / sequence.beam.pc*1e-3],
-                    pn=[ee.lag * 360 - 90],
+                    ps=[ee.lag * 360 - 90],
                 )
                 skiptilt=True
             else:
