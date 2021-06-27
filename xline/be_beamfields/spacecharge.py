@@ -24,7 +24,6 @@ class SCCoasting(Element):
     def track(self, p):
         if self.enabled:
             charge = p.q0 * p.echarge
-            beta = p.beta0 / p.rvv
 
             Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(
                 p.x - self.x_co,
@@ -42,8 +41,8 @@ class SCCoasting(Element):
                 / self.circumference
                 * (charge * p.qratio)
                 * charge
-                * (1 - p.beta0 * beta)
-                / (p.p0c * p.echarge * beta)
+                * (1 - p.beta0 * - p.beta0)
+                / (p.p0c * p.echarge * p.beta0)
                 * self.length
             )
 
@@ -85,10 +84,9 @@ class SCQGaussProfile(Element):
             )
 
             charge = p.q0 * p.echarge
-            beta = p.beta0 / p.rvv
             fact_kick *= p.chi * p.qratio * self.length * charge * charge
-            fact_kick *= 1 - p.beta0 * beta
-            fact_kick /= p.p0c * p.echarge * beta
+            fact_kick *= 1 - p.beta0 * p.beta0
+            fact_kick /= p.p0c * p.echarge * p.beta0
 
             Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(
                 p.x - self.x_co,
@@ -138,7 +136,6 @@ class SCInterpolatedProfile(Element):
         if self.enabled:
             n_prof_points = len(self.line_density_profile)
             charge = p.q0 * p.echarge
-            beta = p.beta0 / p.rvv
 
             Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(
                 p.x - self.x_co,
@@ -154,8 +151,8 @@ class SCInterpolatedProfile(Element):
                 p.chi
                 * (charge * p.qratio)
                 * charge
-                * (1 - p.beta0 * beta)
-                / (p.p0c * p.echarge * beta)
+                * (1 - p.beta0 * p.beta0)
+                / (p.p0c * p.echarge * p.beta0)
                 * self.length
             )
 
