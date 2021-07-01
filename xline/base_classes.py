@@ -50,6 +50,9 @@ class _MetaElement(type):
 
 
 class Base(metaclass=_MetaElement):
+
+    iscollective = False
+
     def get_fields(self, keepextra=False):
         if keepextra:
             return self.__class__._fields
