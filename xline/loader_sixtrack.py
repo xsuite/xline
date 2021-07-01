@@ -100,12 +100,12 @@ def _expand_struct(sixinput, convert=elements):
                 ksl[0] = hyl
             elem = Multipole(knl=knl, ksl=ksl, hxl=hxl, hyl=hyl, length=length)
         elif etype == 12:
-            # e0=sixinput.initialconditions[-1]
-            # p0c=np.sqrt(e0**2-sixinput.pma**2)
-            # beta0=p0c/e0
+            e0=sixinput.initialconditions[-1]
+            p0c=np.sqrt(e0**2-sixinput.pma**2)
+            beta0=p0c/e0
             v = d1 * 1e6
-            freq = d2 * clight / sixinput.tlen
-            # print(v,freq)
+            freq = d2 * clight * beta0 / sixinput.tlen
+            #print(v,freq)
             elem = Cavity(voltage=v, frequency=freq, lag=180 - d3)
         elif etype == 20:
             thisbb = sixinput.bbelements[nnn]
@@ -116,7 +116,7 @@ def _expand_struct(sixinput, convert=elements):
             else:
                 raise ValueError("What?!")
         elif etype == 23:
-            print(nnn, sixinput.single[nnn])
+            #print(nnn, sixinput.single[nnn])
             voltage_V = d1 *1e6
             freq_Hz = d2 * 1e6
             phase_rad = d3

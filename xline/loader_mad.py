@@ -24,6 +24,7 @@ def iter_from_madx_sequence(
     old_pp = 0.0
     i_drift = 0
     for ee, pp in zip(elements, ele_pos):
+        skiptilt=False
 
         if pp > old_pp + drift_threshold:
             yield "drift_%d" % i_drift, myDrift(length=(pp - old_pp))
@@ -105,11 +106,21 @@ def iter_from_madx_sequence(
             )
 
         elif mad_etype == "crabcavity":
-            newele = classes.RFMultipole(
-                frequency=ee.freq * 1e6,
-                knl=[ee.volt / sequence.beam.pc],
-                pn=[ee.lag * 360 - 90],
-            )
+            #ee.volt in MV, sequence.beam.pc in GeV
+            if abs(ee.tilt-np.pi/2)<1e-9:
+                newele = classes.RFMultipole(
+                    frequency=ee.freq * 1e6,
+                    ksl=[ee.volt / sequence.beam.pc*1e-3],
+                    ps=[ee.lag * 360 - 90],
+                )
+                skiptilt=True
+            else:
+                newele = classes.RFMultipole(
+                    frequency=ee.freq * 1e6,
+                    knl=[ee.volt / sequence.beam.pc*1e-3],
+                    pn=[ee.lag * 360 - 90],
+                )
+
 
         elif mad_etype == "beambeam":
             if ee.slot_id == 6 or ee.slot_id == 60:
@@ -169,7 +180,19 @@ def iter_from_madx_sequence(
         else:
             raise ValueError(f'MAD element "{mad_etype}" not recognized')
 
+
+        if hasattr(ee,'tilt') and abs(ee.tilt)>0 and not skiptilt:
+            tilt=np.rad2deg(ee.tilt)
+        else:
+            tilt=0
+
+        if abs(tilt)>0:
+            yield eename+"_pretilt", classes.SRotation(angle=tilt)
+
         yield eename, newele
+
+        if abs(tilt)>0:
+            yield eename+"_posttilt", classes.SRotation(angle=-tilt)
 
         if (
             install_apertures
@@ -177,22 +200,22 @@ def iter_from_madx_sequence(
             and (min(ee.aperture) > 0)
         ):
             if ee.apertype == "rectangle":
-                newaperture = xline_elements.LimitRect(
+                newaperture = classes.LimitRect(
                     min_x=-ee.aperture[0],
                     max_x=ee.aperture[0],
                     min_y=-ee.aperture[1],
                     max_y=ee.aperture[1],
                 )
             elif ee.apertype == "ellipse":
-                newaperture = xline_elements.LimitEllipse(
+                newaperture = classes.LimitEllipse(
                     a=ee.aperture[0], b=ee.aperture[1]
                 )
             elif ee.apertype == "circle":
-                newaperture = xline_elements.LimitEllipse(
+                newaperture = classes.LimitEllipse(
                     a=ee.aperture[0], b=ee.aperture[0]
                 )
             elif ee.apertype == "rectellipse":
-                newaperture = xline_elements.LimitRectEllipse(
+                newaperture = classes.LimitRectEllipse(
                     max_x=ee.aperture[0],
                     max_y=ee.aperture[1],
                     a=ee.aperture[2],

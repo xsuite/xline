@@ -183,21 +183,28 @@ class Particles(object):
         elif not_none == 2:
             if chi is None:
                 self._mratio = mratio
-                self.qratio = qratio
+                self._qratio = qratio
+                self._chi = qratio / mratio
             elif mratio is None:
                 self._chi = chi
-                self.qratio = qratio
+                self._qratio = qratio
+                self._mratio = qratio / chi
             elif qratio is None:
                 self._chi = chi
-                self.mratio = mratio
+                self._mratio = mratio
+                self._qratio = chi * mratio
         else:
-            raise ValueError(
-                f"""
+            self._chi = chi
+            self._mratio = mratio
+            self._qratio = chi * mratio
+            if np.allclose(self._chi, qratio / mratio):
+                raise ValueError(
+                    f"""
             Particles defined with multiple mass/charge information:
             chi    = {chi},
             mratio = {mratio},
             qratio = {qratio}"""
-            )
+                )
 
     def __init__(
         self,
@@ -243,7 +250,7 @@ class Particles(object):
         self.__init__ref(p0c, energy0, gamma0, beta0)
         self.__init__delta(delta, ptau, psigma)
         self.__init__zeta(zeta, tau, sigma)
-        self.__init__chi(chi, mratio, qratio)
+        self.__init__chi(chi=chi, mratio=mratio, qratio=qratio)
         self._update_coordinates = True
         length = self._check_array_length()
 
@@ -479,9 +486,7 @@ class Particles(object):
                     to_trash = self.copy()  # Not exactly efficient (but robust)
                     for ff in self._dict_vars:
                         if hasattr(getattr(self, ff), "__iter__"):
-                            setattr(
-                                to_trash, ff, getattr(self, ff)[~mask_valid]
-                            )
+                            setattr(to_trash, ff, getattr(self, ff)[~mask_valid])
                     self.lost_particles.append(to_trash)
 
             for ff in self._dict_vars:
@@ -510,9 +515,7 @@ class Particles(object):
                             print(f"{kk}[{nn}] {vv1} {vv2}  diff:{diff[nn]}")
                             res = False
                         if abs(vv1) > 0 and abs(diff[nn]) / vv1 > rel_tol:
-                            print(
-                                f"{kk}[{nn}] {vv1} {vv2} rdiff:{diff[nn]/vv1}"
-                            )
+                            print(f"{kk}[{nn}] {vv1} {vv2} rdiff:{diff[nn]/vv1}")
                             res = False
                 else:
                     if abs(diff) > abs_tol:

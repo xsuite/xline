@@ -123,7 +123,7 @@ class Line(Element):
 
         for ee, nn in zip(self.elements, self.element_names):
             if isinstance(ee, (elements.Multipole)):
-                aux = [ee.hxl, ee.hyl] + ee.knl + ee.ksl
+                aux = [ee.hxl, ee.hyl] + list(ee.knl) + list(ee.ksl)
                 if np.sum(np.abs(np.array(aux))) == 0.0:
                     continue
             newline.append_element(ee, nn)
@@ -180,6 +180,44 @@ class Line(Element):
         else:
             return newline
 
+    def merge_consecutive_multipoles(self, inplace=False):
+        newline = Line(elements=[], element_names=[])
+
+        for ee, nn in zip(self.elements, self.element_names):
+            if len(newline.elements) == 0:
+                newline.append_element(ee, nn)
+                continue
+
+            if isinstance(ee, elements.Multipole):
+                prev_ee = newline.elements[-1]
+                prev_nn = newline.element_names[-1]
+                if isinstance(prev_ee, elements.Multipole) and prev_ee.hxl==ee.hxl and prev_ee.hyl==ee.hyl:
+                    oo=max(len(prev_ee.knl),len(prev_ee.ksl),len(ee.knl),len(ee.ksl))
+                    knl=np.zeros(oo,dtype=float)
+                    ksl=np.zeros(oo,dtype=float)
+                    for ii,kk in enumerate(prev_ee.knl):
+                        knl[ii]+=kk
+                    for ii,kk in enumerate(ee.knl):
+                        knl[ii]+=kk
+                    for ii,kk in enumerate(prev_ee.ksl):
+                        ksl[ii]+=kk
+                    for ii,kk in enumerate(ee.ksl):
+                        ksl[ii]+=kk
+                    prev_ee.knl=knl
+                    prev_ee.ksl=ksl
+                    prev_nn += nn
+                else:
+                    newline.append_element(ee, nn)
+            else:
+                newline.append_element(ee, nn)
+
+        if inplace:
+            self.elements.clear()
+            self.element_names.clear()
+            self.append_line(newline)
+            return self
+        else:
+            return newline
     def get_elements_of_type(self, types):
         if not hasattr(types, "__iter__"):
             type_list = [types]
@@ -546,14 +584,14 @@ class Line(Element):
                     self._add_aperture_offset_error_to(element_name, arex, arey)
 
                 # check for errors which cannot be treated yet:
-                for error_type in dir(element.align_errors):
-                    if not error_type[0] == '_' and \
-                            error_type not in ['dx', 'dy', 'dpsi', 'arex',
-                                               'arey', 'count', 'index']:
-                        print(
-                            f'Warning: MAD-X error type "{error_type}"'
-                            " not implemented yet."
-                        )
+                #for error_type in dir(element.align_errors):
+                 #   if not error_type[0] == '_' and \
+                  #          error_type not in ['dx', 'dy', 'dpsi', 'arex',
+                   #                            'arey', 'count', 'index']:
+                        #print(
+                        #    f'Warning: MAD-X error type "{error_type}"'
+                        #    " not implemented yet."
+                        #)
 
             if element.field_errors:
                 # add multipole error
@@ -561,8 +599,13 @@ class Line(Element):
                             any(element.field_errors.dks):
                     knl = element.field_errors.dkn
                     ksl = element.field_errors.dks
-                    knl = knl[:np.amax(np.where(knl)) + 1]  # delete trailing zeros
-                    ksl = ksl[:np.amax(np.where(ksl)) + 1]  # to keep order low
+                    on=np.where(knl)[0]
+                    os=np.where(ksl)[0]
+                    on = on[-1] if len(on)>0 else 0
+                    os = os[-1] if len(os)>0 else 0
+                    oo = max(os,on)+1
+                    knl = knl[:oo]  # delete trailing zeros
+                    ksl = ksl[:oo]  # to keep order low
                     self._add_multipole_error_to(element_name, knl, ksl)
 
         return elements_not_found
