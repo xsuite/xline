@@ -1,6 +1,7 @@
+import json
 import numpy as np
 
-from .base_classes import Element
+from .base_classes import Element, JEncoder
 from . import elements
 from .particles import Particles
 
@@ -26,7 +27,7 @@ class Line(Element):
         assert len(self.elements) == len(self.element_names)
         return len(self.elements)
 
-    def to_dict(self, keepextra=False):
+    def to_dict(self, keepextra=True):
         out = {}
         out["elements"] = [el.to_dict(keepextra) for el in self.elements]
         out["element_names"] = self.element_names[:]
@@ -42,6 +43,15 @@ class Line(Element):
         self.element_names = dct["element_names"]
         return self
 
+    def to_json(self, filename,  keepextra=True):
+        with open(filename, 'w') as fid:
+            json.dump(self.to_dict(keepextra=keepextra), fid, cls=JEncoder)    
+    
+    @classmethod
+    def from_json(cls, filename,  keepextra=True):
+        with open(filename, 'r') as fid:
+            return cls.from_dict(json.load(fid), keepextra=keepextra)
+    
     def append_line(self, line):
         # Append the elements
         if type(line) is Line:
@@ -612,3 +622,4 @@ class Line(Element):
 
 
 elements.Line = Line
+

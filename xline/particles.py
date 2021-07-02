@@ -1,12 +1,13 @@
+import json
 import numpy as np
 from .mathlibs import MathlibDefault
-
+from .base_classes import JEncoder
 
 def count_not_none(*lst):
     return len(lst) - sum(p is None for p in lst)
 
 
-class Particles(object):
+class Particles:
     """
     Coordinates:
 
@@ -500,6 +501,15 @@ class Particles(object):
     def from_dict(cls, dct):
         return cls(**dct)
 
+    def to_json(self, filename):
+        with open(filename, 'w') as fid:
+            json.dump(self.to_dict(), fid, cls=JEncoder)    
+    
+    @classmethod
+    def from_json(cls, filename):
+        with open(filename, 'r') as fid:
+            return cls.from_dict(json.load(fid))
+    
     def compare(self, particle, rel_tol=1e-6, abs_tol=1e-15):
         res = True
         for kk in self._dict_vars:
