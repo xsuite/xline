@@ -23,7 +23,7 @@ def iter_from_madx_sequence(
 
     old_pp = 0.0
     i_drift = 0
-    for ee, pp in zip(elements, ele_pos):
+    for pp, ee in sorted(zip(ele_pos,elements),key=lambda x:x[0]):
         skiptilt=False
 
         if pp > old_pp + drift_threshold:
