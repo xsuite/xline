@@ -110,15 +110,17 @@ def iter_from_madx_sequence(
             if abs(ee.tilt-np.pi/2)<1e-9:
                 newele = classes.RFMultipole(
                     frequency=ee.freq * 1e6,
-                    ksl=[ee.volt / sequence.beam.pc*1e-3],
-                    ps=[ee.lag * 360 - 90],
+                    ksl=[-ee.volt / sequence.beam.pc*1e-3],
+                    ps=[ee.lag * 360 + 90],
                 )
                 skiptilt=True
             else:
                 newele = classes.RFMultipole(
                     frequency=ee.freq * 1e6,
                     knl=[ee.volt / sequence.beam.pc*1e-3],
-                    pn=[ee.lag * 360 - 90],
+                    pn=[ee.lag * 360 + 90], # TODO: Changed sign to match sixtrack
+                                            # To be checked!!!! 
+
                 )
 
 
