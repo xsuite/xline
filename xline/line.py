@@ -45,13 +45,13 @@ class Line(Element):
 
     def to_json(self, filename,  keepextra=True):
         with open(filename, 'w') as fid:
-            json.dump(self.to_dict(keepextra=keepextra), fid, cls=JEncoder)    
-    
+            json.dump(self.to_dict(keepextra=keepextra), fid, cls=JEncoder)
+
     @classmethod
     def from_json(cls, filename,  keepextra=True):
         with open(filename, 'r') as fid:
             return cls.from_dict(json.load(fid), keepextra=keepextra)
-    
+
     def append_line(self, line):
         # Append the elements
         if type(line) is Line:
@@ -176,7 +176,8 @@ class Line(Element):
                 prev_nn = newline.element_names[-1]
                 if isinstance(prev_ee, (elements.Drift, elements.DriftExact)):
                     prev_ee.length += ee.length
-                    prev_nn += nn
+                    prev_nn += ('_' + nn)
+                    newline.element_names[-1] = prev_nn
                 else:
                     newline.append_element(ee, nn)
             else:
@@ -215,7 +216,8 @@ class Line(Element):
                         ksl[ii]+=kk
                     prev_ee.knl=knl
                     prev_ee.ksl=ksl
-                    prev_nn += nn
+                    prev_nn += ('_' + nn)
+                    newline.element_names[-1] = prev_nn
                 else:
                     newline.append_element(ee, nn)
             else:
