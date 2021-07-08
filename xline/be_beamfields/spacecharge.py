@@ -41,7 +41,7 @@ class SCCoasting(Element):
                 / self.circumference
                 * (charge * p.qratio)
                 * charge
-                * (1 - p.beta0 * - p.beta0)
+                * (1 - p.beta0 * p.beta0)
                 / (p.p0c * p.echarge * p.beta0)
                 * self.length
             )
