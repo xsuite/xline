@@ -17,11 +17,11 @@ class Particles:
 
     s       [m]  Reference accumulated pathlength
     x       [m]  Horizontal offset
-    px      [1]  Px / (m/m0 * p0c) = beta_x gamma /(beta0 gamma0)
+    px      [1]  pxc / (m/m0 * p0c) = beta_x gamma /(beta0 gamma0)
     y       [m]  Vertical offset
-    py      [1]  Py / (m/m0 * p0c)
+    py      [1]  pyc / (m/m0 * p0c)
     delta   [1]  Pc / (m/m0 * p0c) - 1
-    ptau    [1]  Energy / (m/m0 * p0c) - 1
+    ptau    [1]  energy / (m/m0 * p0c) - 1
     psigma  [1]  ptau/beta0
     rvv     [1]  beta/beta0
     rpp     [1]  1/(1+delta) = (m/m0 * p0c) / Pc
@@ -286,8 +286,8 @@ class Particles:
                         raise ValueError(f"invalid length len({nn})={len(xx)}")
         return length
 
-    Px = property(lambda p: p.px * p.p0c * p.mratio)
-    Py = property(lambda p: p.py * p.p0c * p.mratio)
+    pxc = property(lambda p: p.px * p.p0c * p.mratio)
+    pyc = property(lambda p: p.py * p.p0c * p.mratio)
     energy = property(lambda p: (p.ptau * p.p0c + p.energy0) * p.mratio)
     pc = property(lambda p: (p.delta * p.p0c + p.p0c) * p.mratio)
     mass = property(lambda p: p.mass0 * p.mratio)
@@ -419,7 +419,7 @@ class Particles:
         self._chi = chi
 
     def _get_absolute(self):
-        return self.Px, self.Py, self.pc, self.energy
+        return self.pxc, self.pyc, self.pc, self.energy
 
     def _update_ref(self, mass0, beta0, gamma0, p0c, energy0):
         self._mass0 = mass0
@@ -428,7 +428,7 @@ class Particles:
         self._p0c = p0c
         self._energy0 = energy0
 
-    def _update_particles_from_absolute(self, Px, Py, pc, energy):
+    def _update_particles_from_absolute(self, pxc, pyc, pc, energy):
         if self._update_coordinates:
             mratio = self.mass / self.mass0
             norm = mratio * self.p0c
@@ -436,8 +436,8 @@ class Particles:
             self._chi = self._qratio / mratio
             self._ptau = energy / norm - 1
             self._delta = pc / norm - 1
-            self.px = Px / norm
-            self.py = Py / norm
+            self.px = pxc / norm
+            self.py = pyc / norm
 
     def __repr__(self):
         out = f"""\
