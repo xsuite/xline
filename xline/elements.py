@@ -532,6 +532,7 @@ __all__ = [
     "Drift",
     "DriftExact",
     "Element",
+    "Elens",
     "LimitEllipse",
     "LimitRect",
     "Multipole",
