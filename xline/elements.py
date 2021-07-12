@@ -270,6 +270,78 @@ class XYShift(Element):
         p.y -= self.dy
 
 
+
+
+class Elens(Element):
+    """Hollow Electron Lens"""
+
+    _description = [("voltage", "V", "Voltage of the electron lens", 0),
+                    ("current", "A", "Current of the e-beam", 0),
+                    ("inner_radius", "m", "Inner radius of the hollow e-beam", 0),
+                    ("outer_radius", "m", "Outer radius of the hollow e-beam", 0),
+                    ("ebeam_center_x", "m", "Center of the e-beam in x", 0),
+                    ("ebeam_center_y", "m", "Center of the e-beam in y", 0),
+                    ("elens_length", "m", "Length of the hollow electron lens", 0)
+                    ]
+
+    def track(self, p):
+
+        # vacuum permittivity
+        epsilon0 = p.epsilon0
+        pi       = p._m.pi             # pi
+        clight   = p.clight            # speed of light
+        e_mass   = p.emass             # electron mass
+
+        # get the transverse amplitude
+        # TO DO: needs to be modified for off-centererd e-beam
+        r = np.sqrt(p.x**2 + p.y**2)
+
+        # magnetic rigidity
+        Brho = p.pc[0]/(p.q0*p.clight)
+
+        # Electron properties
+        Ekin_e = self.voltage                         # kinetic energy
+        Etot_e = Ekin_e + e_mass                      # total energy
+        p_e    = np.sqrt(Etot_e**2 - e_mass**2)       # electron momentum
+        beta_e = p_e/Etot_e                           # relativ. beta
+
+        # relativistic beta  of protons
+        beta_p = p.rvv*p.beta0
+
+        # abbreviate for better readability
+        r1 = self.inner_radius
+        r2 = self.outer_radius
+        I  = self.current
+
+        # geometric factor frr
+        frr = ((r**2 - r1**2)/(r2**2 - r1**2))  # uniform distribution
+        frr[frr<0] = 0
+        frr[frr>1] = 1
+
+        # calculate the kick at r2 (maximum kick)
+        theta_max = ((1/(4*pi*epsilon0))*(2*self.elens_length*I)*
+                    (1+beta_e*beta_p)*(1/(r2*Brho*beta_e*beta_p*clight**2)))
+
+        # calculate the kick of the particles
+        # the (-1) stems from the attractive force of the E-field
+        theta = (-1)*theta_max*r2*p.rpp*p.chi
+        theta = theta*np.divide(frr, r, out=np.zeros_like(frr), where=r!=0)
+
+        # convert px and py to x' and y'
+        xp   = p.px * p.rpp
+        yp   = p.py * p.rpp
+
+        # update xp and yp with the HEL kick
+        # use np.divide to not crash when r=0
+        xp = xp + p.x*np.divide(theta, r, out=np.zeros_like(theta), where=r!=0)
+        yp = yp + p.y*np.divide(theta, r, out=np.zeros_like(theta), where=r!=0)
+
+        # update px and py.
+        p.px = xp/p.rpp
+        p.py = yp/p.rpp
+
+
+
 class SRotation(Element):
     """anti-clockwise rotation of the reference frame"""
 
