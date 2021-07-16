@@ -40,6 +40,7 @@ class Particles:
     partid  int
     turn    int
     state   int
+    weight  int  particle weight in number of particles (for collective sims.)
     elemid  int
     """
 
@@ -233,6 +234,7 @@ class Particles:
         partid=None,
         turn=None,
         state=None,  # == 0 particle lost, == 1 particle active
+        weight=None,
         elemid=None,
         mathlib=MathlibDefault,
         **args,
@@ -270,6 +272,10 @@ class Particles:
         if state is None:
             state = np.ones(length) if length is not None else 1
         self.state = state
+
+        if weight is None:
+            weight = np.ones(length) if length is not None else 1
+        self.weight = weight
 
         self.lost_particles = []
 
@@ -456,7 +462,9 @@ class Particles:
         ptau    = {self.ptau}
         mratio  = {self.mratio}
         qratio  = {self.qratio}
-        chi     = {self.chi}"""
+        chi     = {self.chi}
+        state   = {self.state}
+        weight  = {self.weight}"""
         return out
 
     _dict_vars = (
@@ -475,6 +483,7 @@ class Particles:
         "partid",
         "turn",
         "state",
+        "weight",
     )
 
     def remove_lost_particles(self, keep_memory=True):
