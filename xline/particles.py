@@ -9,7 +9,7 @@ def count_not_none(*lst):
 
 class Particles:
     """
-        Particle objects have teh following fields
+        Particle objects have the following fields
 
              - s [m]: Reference accumulated pathlength
              - x [m]:  Horizontal offset
