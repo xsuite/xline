@@ -304,9 +304,9 @@ def track_particle_sixtracklib(
         part.sigma += Dsigma_wrt_CO_m[i_part]
         part.delta += Ddelta_wrt_CO[i_part]
 
-        part.partid = i_part
+        part.particle_id = i_part
         part.state = 1
-        part.elemid = 0
+        part.at_element = 0
         part.turn = 0
 
         p.from_xline(part, i_part)

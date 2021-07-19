@@ -44,7 +44,7 @@ class BeamBeam4D(Element):
 
     def track(self, p):
         if self.enabled:
-            charge = p.qratio * p.q0
+            charge = p.charge_ratio * p.q0
             x = p.x - self.x_bb
             px = p.px
             y = p.y - self.y_bb

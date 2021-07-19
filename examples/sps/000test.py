@@ -10,21 +10,21 @@ def savedata(out, fname):
     fmt = "%5d" * 2 + " %26.15e" * 13 + "\n"
     fh = gzip.open(fname, "w")
     for iel, p in enumerate(ptrack):
-        for partid in range(npart):
+        for particle_id in range(npart):
             fh.write(
                 fmt
                 % (
                     iel,
-                    partid,
-                    p.x[partid],
-                    p.px[partid],
-                    p.y[partid],
-                    p.py[partid],
-                    p.tau[partid],
-                    p.pt[partid],
-                    p.delta[partid],
+                    particle_id,
+                    p.x[particle_id],
+                    p.px[particle_id],
+                    p.y[particle_id],
+                    p.py[particle_id],
+                    p.tau[particle_id],
+                    p.pt[particle_id],
+                    p.delta[particle_id],
                     p.chi,
-                    p.qratio,
+                    p.charge_ratio,
                     p.mratio,
                     p.e0,
                     p.p0c,
