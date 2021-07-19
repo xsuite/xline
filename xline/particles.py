@@ -101,7 +101,7 @@ class Particles:
             p0c = 1e9
             not_none = 1
             # raise ValueError("Particles defined without energy reference")
-        if not_none == 1:
+        if not_none > 0:
             if p0c is not None:
                 new = self._f1(self.mass0, p0c)
                 self._update_ref(*new)
@@ -114,35 +114,50 @@ class Particles:
             elif beta0 is not None:
                 new = self._f3(self.mass0, beta0)
                 self._update_ref(*new)
-        else:
-            raise ValueError(
-                f"""\
-            Particles defined with multiple energy references:
-            p0c    = {p0c},
-            energy0     = {energy0},
-            gamma0 = {gamma0},
-            beta0  = {beta0}"""
-            )
+
+            if not_none>1:
+                ddd = {'beta0': beta0, 'gamma0': gamma0, 'energy0': energy0,
+                       'p0c': p0c}
+                for nn, vv in ddd.items():
+                    if vv is None:
+                        continue
+
+                    if not np.isclose(vv, getattr(self, nn), atol=1e-13):
+                        raise ValueError(
+                            f"""\
+                        Provided energy reference is inconsistent:
+                        p0c    = {p0c},
+                        energy0     = {energy0},
+                        gamma0 = {gamma0},
+                        beta0  = {beta0}"""
+                        )
 
     def __init__delta(self, delta, ptau, psigma):
         not_none = count_not_none(delta, ptau, psigma)
         if not_none == 0:
             self.delta = 0.0
-        elif not_none == 1:
+        elif not_none >= 1:
             if delta is not None:
                 self.delta = delta
             elif ptau is not None:
                 self.ptau = ptau
             elif psigma is not None:
                 self.psigma = psigma
-        else:
-            raise ValueError(
-                f"""
-            Particles defined with multiple energy deviations:
-            delta  = {delta},
-            ptau     = {ptau},
-            psigma = {psigma}"""
-            )
+
+            if not_none>1:
+                ddd = {'delta': delta, 'ptau': ptau, 'psigma': psigma}
+                for nn, vv in ddd.items():
+                    if vv is None:
+                        continue
+
+                    if not np.allclose(vv, getattr(self, nn), atol=1e-13):
+                        raise ValueError(
+                            f"""
+                        Particles defined with inconsistent energy deviations:
+                        delta  = {delta},
+                        ptau     = {ptau},
+                        psigma = {psigma}"""
+                        )
 
     def __init__zeta(self, zeta, tau, sigma):
         not_none = count_not_none(zeta, tau, sigma)
@@ -270,7 +285,7 @@ class Particles:
         self.state = state
 
         if weight is None:
-            weight = np.ones(length) if length is not None else 1
+            weight = np.ones(length, dtype=np.float64) if length is not None else 1
         self.weight = weight
 
         self.lost_particles = []
