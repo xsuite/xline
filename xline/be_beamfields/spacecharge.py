@@ -39,7 +39,7 @@ class SCCoasting(Element):
                 p.chi
                 * self.number_of_particles
                 / self.circumference
-                * (charge * p.qratio)
+                * (charge * p.charge_ratio)
                 * charge
                 * (1 - p.beta0 * p.beta0)
                 / (p.p0c * p.echarge * p.beta0)
@@ -84,7 +84,7 @@ class SCQGaussProfile(Element):
             )
 
             charge = p.q0 * p.echarge
-            fact_kick *= p.chi * p.qratio * self.length * charge * charge
+            fact_kick *= p.chi * p.charge_ratio * self.length * charge * charge
             fact_kick *= 1 - p.beta0 * p.beta0
             fact_kick /= p.p0c * p.echarge * p.beta0
 
@@ -149,7 +149,7 @@ class SCInterpolatedProfile(Element):
 
             fact_kick = (
                 p.chi
-                * (charge * p.qratio)
+                * (charge * p.charge_ratio)
                 * charge
                 * (1 - p.beta0 * p.beta0)
                 / (p.p0c * p.echarge * p.beta0)

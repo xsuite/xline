@@ -218,7 +218,7 @@ class RFMultipole(Element):
         p.px += -chi * dpx
         p.py += chi * dpy
         dv0 = self.voltage * sin(self.lag * deg2rad - ktau)
-        p.add_to_energy(p.qratio * p.q0 * (dv0 - p.p0c * k * dptr))
+        p.add_to_energy(p.charge_ratio * p.q0 * (dv0 - p.p0c * k * dptr))
 
 
 class Cavity(Element):
@@ -236,7 +236,7 @@ class Cavity(Element):
         k = 2 * pi * self.frequency / p.clight
         tau = p.zeta / p.rvv / p.beta0
         phase = self.lag * pi / 180 - k * tau
-        p.add_to_energy(p.qratio * p.q0 * self.voltage * sin(phase))
+        p.add_to_energy(p.charge_ratio * p.q0 * self.voltage * sin(phase))
 
 
 class SawtoothCavity(Element):
@@ -254,7 +254,7 @@ class SawtoothCavity(Element):
         tau = p.zeta / p.rvv / p.beta0
         phase = self.lag * pi / 180 - k * tau
         phase = (phase + pi) % (2 * pi) - pi
-        p.add_to_energy(p.qratio * p.q0 * self.voltage * phase)
+        p.add_to_energy(p.charge_ratio * p.q0 * self.voltage * phase)
 
 
 class XYShift(Element):
@@ -481,8 +481,8 @@ class BeamMonitor(Element):
         if (
             particle.turn >= self.start
             and nn > 0
-            and particle.partid >= self.min_particle_id
-            and particle.partid <= self.max_particle_id
+            and particle.particle_id >= self.min_particle_id
+            and particle.particle_id <= self.max_particle_id
         ):
             turns_since_start = particle.turns - self.start
             store_index = turns_since_start // self.skip
@@ -494,7 +494,7 @@ class BeamMonitor(Element):
                 store_index = -1
 
             if store_index >= 0:
-                _offset = store_index * nn + particle.partid
+                _offset = store_index * nn + particle.particle_id
 
         return _offset
 
