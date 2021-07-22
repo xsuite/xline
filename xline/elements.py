@@ -297,7 +297,12 @@ class Elens(Element):
         r = np.sqrt(p.x**2 + p.y**2)
 
         # magnetic rigidity
-        Brho = p.pc[0]/(p.q0*p.clight)
+
+        if type(p.pc) is float:
+            Brho = p.pc/(p.q0*p.clight)
+        else:
+            Brho = p.pc[0]/(p.q0*p.clight)
+
 
         # Electron properties
         Ekin_e = self.voltage                         # kinetic energy
@@ -315,8 +320,23 @@ class Elens(Element):
 
         # geometric factor frr
         frr = ((r**2 - r1**2)/(r2**2 - r1**2))  # uniform distribution
-        frr[frr<0] = 0
-        frr[frr>1] = 1
+
+        try:
+            frr = [max(0,iitem) for iitem in frr]
+            frr = [min(1,iitem) for iitem in frr]
+            frr = np.array(frr, dtype = float)
+
+        except TypeError:
+            frr = max(0,frr)
+            frr = min(1,frr)
+            frr = np.array([frr], dtype=float)
+
+
+        #
+        #
+        # if len(frr)>0:
+        #     frr[frr<0] = 0
+        #     frr[frr>1] = 1
 
         # calculate the kick at r2 (maximum kick)
         theta_max = ((1/(4*pi*epsilon0))*(2*self.elens_length*I)*
@@ -325,6 +345,10 @@ class Elens(Element):
         # calculate the kick of the particles
         # the (-1) stems from the attractive force of the E-field
         theta = (-1)*theta_max*r2*p.rpp*p.chi
+
+        print("type frr", type(frr))
+        print("type r", type(r))
+
         theta = theta*np.divide(frr, r, out=np.zeros_like(frr), where=r!=0)
 
         # convert px and py to x' and y'
