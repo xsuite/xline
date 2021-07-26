@@ -291,7 +291,7 @@ class Particles:
         self.lost_particles = []
 
     def _check_array_length(self):
-        names = ["x", "px", "y", "py", "zeta", "_mass0", "q0", "p0c"]
+        names = ["x", "px", "y", "py", "zeta", "delta", "_mass0", "q0", "p0c"]
         length = None
         for nn in names:
             xx = getattr(self, nn)
