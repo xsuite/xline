@@ -332,11 +332,18 @@ class Particles:
     @delta.setter
     def delta(self, delta):
         sqrt = self._m.sqrt
+        if hasattr(self, '_rvv'):
+            oldrvv = self._rvv
+        else:
+            # Needed for particle initialization
+            oldrvv = None
         self._delta = delta
         deltabeta0 = delta * self.beta0
         ptaubeta0 = sqrt(deltabeta0 ** 2 + 2 * deltabeta0 * self.beta0 + 1) - 1
         self._rvv = (1 + self.delta) / (1 + ptaubeta0)
         self._rpp = 1 / (1 + self.delta)
+        if oldrvv is not None:
+            self.zeta *= self._rvv / oldrvv
 
     psigma = property(lambda self: self.ptau / self.beta0)
 
