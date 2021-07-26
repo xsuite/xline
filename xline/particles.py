@@ -122,7 +122,7 @@ class Particles:
                     if vv is None:
                         continue
 
-                    if not np.isclose(vv, getattr(self, nn), atol=1e-13):
+                    if not np.allclose(vv, getattr(self, nn), atol=1e-13):
                         raise ValueError(
                             f"""\
                         Provided energy reference is inconsistent:
