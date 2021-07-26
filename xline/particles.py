@@ -523,13 +523,13 @@ class Particles:
 
     def to_json(self, filename):
         with open(filename, 'w') as fid:
-            json.dump(self.to_dict(), fid, cls=JEncoder)    
-    
+            json.dump(self.to_dict(), fid, cls=JEncoder)
+
     @classmethod
     def from_json(cls, filename):
         with open(filename, 'r') as fid:
             return cls.from_dict(json.load(fid))
-    
+
     def compare(self, particle, rel_tol=1e-6, abs_tol=1e-15):
         res = True
         for kk in self._dict_vars:

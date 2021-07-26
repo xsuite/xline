@@ -39,11 +39,11 @@ class _MetaElement(type):
         except KeyError:
             doc = ["\nFields:\n"]
         fields = [
-            f"{name:10} [{unit+']:':5} {desc} "
+            f"    - {name:10} [{unit+']:':5} {desc} "
             for name, unit, desc, default in description
         ]
         fields += [
-            f"{name:10} [{unit+']:':5} {desc} "
+            f"    - {name:10} [{unit+']:':5} {desc} "
             for name, unit, desc, default in extra
         ]
         doc += fields
