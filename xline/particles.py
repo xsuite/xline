@@ -491,8 +491,8 @@ class Particles:
         "px",
         "y",
         "py",
-        "delta",
         "zeta",
+        "delta",
         "mass0",
         "q0",
         "p0c",
@@ -512,12 +512,13 @@ class Particles:
             if np.any(~mask_valid):
                 if keep_memory:
                     to_trash = self.copy()  # Not exactly efficient (but robust)
-                    for ff in self._dict_vars:
+                    for ff in ('_rvv',) + self._dict_vars: # _rvv needs to be updated
+                                                           # before delta
                         if hasattr(getattr(self, ff), "__iter__"):
                             setattr(to_trash, ff, getattr(self, ff)[~mask_valid])
                     self.lost_particles.append(to_trash)
 
-            for ff in self._dict_vars:
+            for ff in ('_rvv',) + self._dict_vars:
                 if hasattr(getattr(self, ff), "__iter__"):
                     setattr(self, ff, getattr(self, ff)[mask_valid])
 
