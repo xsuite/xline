@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail; IFS=$'\n\t'
 
-NAME=$( python setup.py --name | tail -1 )
-VER=$( python setup.py --version | tail -1 )
+NAME=$( python setup.py --name )
+VER=$( python setup.py --version )
 
 echo "========================================================================"
 echo "Tagging $NAME v$VER"
