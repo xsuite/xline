@@ -31,13 +31,14 @@ class Particles:
              - gamma0 [1]:  Reference relativistic gamma
              - beta0 [1]:  Reference relativistix beta
              - chi [1]:  q/ q0 * m0/m = qratio / mratio
-             - mratio [1]:  mass/mass0
-             - qratio [1]:  q / q0
+             - mass_ratio [1]:  mass/mass0
+             - charge_ratio [1]:  q / q0
              - particle_id [int]: Identifier of the particle
              - at_turn [int]: Number of tracked turns
              - state [int]: It is ``0`` if the particle is lost, ``1`` otherwise
              - weight [int]: particle weight in number of particles (for collective sims.)
              - at_element [int]: Identifier of the last element through which the particle has been
+             - parent_particle_id [int]: Identifier of the parent particle (secondary production processes)
     """
 
     clight = 299792458
@@ -243,6 +244,7 @@ class Particles:
         mass_ratio=None,
         charge_ratio=None,
         particle_id=None,
+        parent_particle_id=None,
         at_turn=None,
         state=None,  # == 0 particle lost, == 1 particle active
         weight=None,
@@ -271,6 +273,10 @@ class Particles:
         if particle_id is None:
             particle_id = np.arange(length) if length is not None else 0
         self.particle_id = particle_id
+
+        if parent_particle_id is None:
+            parent_particle_id = self.particle_id.copy() if length is not None else 0
+        self.parent_particle_id = parent_particle_id
 
         if at_turn is None:
             at_turn = np.zeros(length) if length is not None else 0
@@ -499,6 +505,7 @@ class Particles:
         "chi",
         "mass_ratio",
         "particle_id",
+        "parent_particle_id",
         "at_turn",
         "state",
         "weight",
