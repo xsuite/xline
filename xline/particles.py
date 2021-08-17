@@ -275,7 +275,10 @@ class Particles:
         self.particle_id = particle_id
 
         if parent_particle_id is None:
-            parent_particle_id = self.particle_id.copy() if length is not None else 0
+            if np.isscalar(self.particle_id):
+                parent_particle_id = self.particle_id
+            else:
+                parent_particle_id = self.particle_id.copy()
         self.parent_particle_id = parent_particle_id
 
         if at_turn is None:
