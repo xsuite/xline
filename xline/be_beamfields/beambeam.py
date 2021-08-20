@@ -7,6 +7,9 @@ from .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
 from . import BB6D
 from . import BB6Ddata
 
+"""
+17/08/21: add px py_bb_co
+"""
 
 class BeamBeam4D(Element):
     """Interaction with a transverse-Gaussian strong beam (4D modelling)."""
@@ -107,6 +110,18 @@ class BeamBeam6D(Element):
             "y_bb_co",
             "m",
             "V. position of the strong beam w.r.t. the closed orbit",
+            0,
+        ),
+        (
+            "px_bb_co",
+            "1",
+            "H. momentum of the strong beam w.r.t. the closed orbit",
+            0,
+        ),
+        (
+            "py_bb_co",
+            "1",
+            "V. momentum of the strong beam w.r.t. the closed orbit",
             0,
         ),
         (
@@ -224,6 +239,8 @@ class BeamBeam6D(Element):
                 self.alpha,
                 self.x_bb_co,
                 self.y_bb_co,
+                self.px_bb_co,
+                self.py_bb_co,
                 np.atleast_1d(self.charge_slices),
                 np.atleast_1d(self.zeta_slices),
                 self.sigma_11,

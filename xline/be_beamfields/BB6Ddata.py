@@ -2,7 +2,9 @@ import numpy as np
 
 from . import boost
 
-
+"""
+17/08/21: add delta_px py
+"""
 class ParBoost(object):
     # it is practically a struct
     def __init__(self, phi, alpha):
@@ -96,6 +98,8 @@ class BB6D_Data(object):
         threshold_singular,
         delta_x,
         delta_y,
+        delta_px,
+        delta_py,
         x_CO,
         px_CO,
         y_CO,
@@ -124,6 +128,8 @@ class BB6D_Data(object):
 
         self.delta_x = delta_x
         self.delta_y = delta_y
+        self.delta_px = delta_px
+        self.delta_py = delta_py
         self.x_CO = x_CO
         self.px_CO = px_CO
         self.y_CO = y_CO
@@ -154,6 +160,8 @@ class BB6D_Data(object):
 
         buffer_list.append(np.array([self.delta_x], dtype=np.float64))
         buffer_list.append(np.array([self.delta_y], dtype=np.float64))
+        buffer_list.append(np.array([self.delta_px], dtype=np.float64))
+        buffer_list.append(np.array([self.delta_py], dtype=np.float64))
         buffer_list.append(np.array([self.x_CO], dtype=np.float64))
         buffer_list.append(np.array([self.px_CO], dtype=np.float64))
         buffer_list.append(np.array([self.y_CO], dtype=np.float64))
@@ -195,6 +203,8 @@ def BB6D_init(
     alpha,
     delta_x,
     delta_y,
+    delta_px,
+    delta_py,
     N_part_per_slice,
     z_slices,
     Sig_11_0,
@@ -286,6 +296,8 @@ def BB6D_init(
         threshold_singular,
         delta_x,
         delta_y,
+        delta_px,
+        delta_py,
         x_CO,
         px_CO,
         y_CO,
