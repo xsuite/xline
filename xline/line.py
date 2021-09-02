@@ -12,6 +12,14 @@ from .closed_orbit import healy_symplectify
 from .linear_normal_form import _linear_normal_form
 
 
+
+_thick_element_types = (elements.Drift, elements.DriftExact)
+
+def _is_thick(element):
+    return  ((hasattr(element, "isthick") and element.isthick) or
+             (isinstance(element, _thick_element_types)))
+
+
 # missing access to particles._m:
 deg2rad = np.pi / 180.
 
@@ -119,12 +127,12 @@ class Line(Element):
 
         ll = 0
         for ee in self.elements:
-            if isinstance(ee, thick_element_types):
+            if _is_thick(ee):
                 ll += ee.length
+
         return ll
 
     def get_s_elements(self, mode="upstream"):
-        thick_element_types = (elements.Drift, elements.DriftExact)
 
         assert mode in ["upstream", "downstream"]
         s_prev = 0
@@ -132,7 +140,7 @@ class Line(Element):
         for ee in self.elements:
             if mode == "upstream":
                 s.append(s_prev)
-            if isinstance(ee, thick_element_types):
+            if _is_thick(ee):
                 s_prev += ee.length
             if mode == "downstream":
                 s.append(s_prev)
