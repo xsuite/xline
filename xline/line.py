@@ -23,9 +23,19 @@ class Line(Element):
     ]
     _extra = []
 
+    def __init__(self, elements=(), element_names=None):
+        self.elements = elements
+        if element_names is None:
+            element_names = [ f"e{ii}" for ii in range(len(elements))]
+
+        self.element_names = element_names
+
+        assert len(self.elements) == len(self.element_names)
+
     def __len__(self):
         assert len(self.elements) == len(self.element_names)
         return len(self.elements)
+
 
     def to_dict(self, keepextra=True):
         out = {}
