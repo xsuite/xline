@@ -480,6 +480,14 @@ class LimitRectEllipse(Element):
             if len(particle.state) == 0:
                 return "All particles lost"
 
+class LimitPolygon(Element):
+    _description = [
+        ("x_vertices", "m", "Horizontal vertices coordinates", ()),
+        ("y_vertices", "m", "Vertical vertices coordinates", ()),
+    ]
+
+    def track(self, particle):
+        raise NotImplementedError
 
 class BeamMonitor(Element):
     _description = [

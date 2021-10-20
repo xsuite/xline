@@ -91,3 +91,16 @@ def test_line():
     line.remove_zero_length_drifts(inplace=True)
     n_elements -= n_zerolength_drifts
     assert len(line) == n_elements
+
+
+def test_thick():
+    dummy_thick_mult = xline.Multipole(knl=[0, -1.], ksl=[0,0], length=4)
+    dummy_thick_mult.isthick = True
+
+    line = xline.Line(elements=[xline.Drift(length=1.),
+                                xline.Multipole(knl=[0, 1.], ksl=[0,0]),
+                                xline.Drift(length=3),
+                                dummy_thick_mult])
+
+    assert np.isclose(line.get_length(), 8.0, rtol=1.e-30, atol=1.e-20)
+

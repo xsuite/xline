@@ -223,6 +223,23 @@ def iter_from_madx_sequence(
                     a=ee.aperture[2],
                     b=ee.aperture[3],
                 )
+            elif ee.apertype == "octagon":
+                a0 = ee.aperture[0]
+                a1 = ee.aperture[1]
+                a2 = ee.aperture[2]
+                a3 = ee.aperture[3]
+                V1 = (a0, a0*np.tan(a2))
+                V2 = (a1/np.tan(a3), a1)
+                newaperture = classes.LimitPolygon(
+                    x_vertices = [V1[0],  V2[0],
+                                 -V2[0], -V1[0],
+                                 -V1[0], -V2[0],
+                                  V2[0],  V1[0]],
+                    y_vertices = [V1[1],  V2[1],
+                                  V2[1],  V1[1],
+                                 -V1[1], -V2[1],
+                                 -V2[1], -V1[1]],
+                )
             else:
                 raise ValueError("Aperture type not recognized")
 
