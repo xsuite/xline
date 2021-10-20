@@ -3,6 +3,11 @@ import numpy as np
 from .mathlibs import MathlibDefault
 from .base_classes import JEncoder
 
+"""
+19/10/2021: add test attribute for test particles that do not contribute to the bb field but are affected by it
+"""
+
+
 def count_not_none(*lst):
     return len(lst) - sum(p is None for p in lst)
 
@@ -36,6 +41,7 @@ class Particles:
              - particle_id [int]: Identifier of the particle
              - at_turn [int]: Number of tracked turns
              - state [int]: It is ``0`` if the particle is lost, ``1`` otherwise
+             - test [int]: 0 by default and 1 if a particle does not contribute to the field at beambeam but is affected by the other beam
              - weight [int]: particle weight in number of particles (for collective sims.)
              - at_element [int]: Identifier of the last element through which the particle has been
              - parent_particle_id [int]: Identifier of the parent particle (secondary production processes)
@@ -247,6 +253,7 @@ class Particles:
         parent_particle_id=None,
         at_turn=None,
         state=None,  # == 0 particle lost, == 1 particle active
+        test=None,
         weight=None,
         at_element=None,
         mathlib=MathlibDefault,
@@ -289,6 +296,11 @@ class Particles:
         if state is None:
             state = np.ones(length) if length is not None else 1
         self.state = state
+
+        if test is None:
+            test = np.zeros(length) if length is not None else 0
+        self.test = test
+
 
         if weight is None:
             weight = np.ones(length, dtype=np.float64) if length is not None else 1
@@ -488,6 +500,7 @@ class Particles:
         charge_ratio  = {self.charge_ratio}
         chi     = {self.chi}
         state   = {self.state}
+        test    = {self.test}
         weight  = {self.weight}"""
         return out
 
@@ -508,6 +521,7 @@ class Particles:
         "parent_particle_id",
         "at_turn",
         "state",
+        "test",
         "weight",
     )
 
