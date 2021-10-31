@@ -31,7 +31,7 @@ def test_track_all():
 
 
 def test_track_rfmultipole():
-    p1 = xline.Particles()
+    p1 = xline.Particles(p0c=1e9)
     p1.x = 1
     p1.y = 1
     p2 = p1.copy()
@@ -58,7 +58,7 @@ def test_track_LimitRect():
     p1.x = 1
     p1.y = 1
     ret = el.track(p1)
-    assert ret == "Particle lost"
+    assert p1._num_active_particles == 0
 
     arr = np.arange(0, 1, 0.001)
     p2 = xline.Particles(x=arr, y=arr)
@@ -70,7 +70,8 @@ def test_track_LimitRect():
 
     p2.x += max_x + 1e-6
     ret = el.track(p2)
-    assert ret == "All particles lost"
+    assert p2._num_active_particles == 0
+    assert p2._num_lost_particles == 1000
 
 
 def test_track_LimitEllipse():
@@ -82,7 +83,7 @@ def test_track_LimitEllipse():
     p1.x = 1
     p1.y = 1
     ret = el.track(p1)
-    assert ret == "Particle lost"
+    assert p1._num_active_particles == 0
 
     arr = np.arange(0, 1, 0.001)
     p2 = xline.Particles(x=arr, y=arr)
@@ -94,7 +95,8 @@ def test_track_LimitEllipse():
 
     p2.x += limit_a + 1e-6
     ret = el.track(p2)
-    assert ret == "All particles lost"
+    assert p2._num_active_particles == 0
+    assert p2._num_lost_particles == 1000
 
 
 def test_track_LimitRectEllipse():
@@ -110,7 +112,7 @@ def test_track_LimitRectEllipse():
     p1.x = 1
     p1.y = 1
     ret = el.track(p1)
-    assert ret == "Particle lost"
+    assert p1._num_active_particles == 0
 
     arr = np.arange(0, 1, 0.001)
     p2 = xline.Particles(x=arr, y=arr)
@@ -126,4 +128,5 @@ def test_track_LimitRectEllipse():
 
     p2.x += limit_a + 1e-6
     ret = el.track(p2)
-    assert ret == "All particles lost"
+    assert p2._num_active_particles == 0
+    assert p2._num_lost_particles == 1000
