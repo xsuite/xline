@@ -5,9 +5,9 @@ class Particles(xp.Particles):
 
     _m = MathlibDefault
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.hide_lost_particles()
+    #def __init__(self, *args, **kwargs):
+    #    super().__init__(*args, **kwargs)
+    #    self.hide_lost_particles()
 
     def remove_lost_particles(self):
         self.reorganize()
