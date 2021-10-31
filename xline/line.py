@@ -1,16 +1,17 @@
 import json
 import numpy as np
 
-from .base_classes import Element, JEncoder
+from .base_classes import Element
 from . import elements
-from .particles import Particles
+
+import xpart as xp
+import xobjects as xo
 
 from .loader_sixtrack import _expand_struct
 from .loader_mad import iter_from_madx_sequence
 from .closed_orbit import linearize_around_closed_orbit
 from .closed_orbit import healy_symplectify
 from .linear_normal_form import _linear_normal_form
-
 
 
 _thick_element_types = (elements.Drift, elements.DriftExact)
@@ -63,7 +64,7 @@ class Line(Element):
 
     def to_json(self, filename,  keepextra=True):
         with open(filename, 'w') as fid:
-            json.dump(self.to_dict(keepextra=keepextra), fid, cls=JEncoder)
+            json.dump(self.to_dict(keepextra=keepextra), fid, cls=xo.JEncoder)
 
     @classmethod
     def from_json(cls, filename,  keepextra=True):
@@ -304,7 +305,7 @@ class Line(Element):
             )
 
             error = np.linalg.norm( new_closed_orbit - closed_orbit )
-    
+
             closed_orbit = new_closed_orbit
             if error < tol:
                 print('Converged with approximate distance: {}'.format(error))
@@ -312,9 +313,9 @@ class Line(Element):
                     self, closed_orbit, p0c, d, longitudinal_coordinate, longitudinal_momentum
                 )
                 return closed_orbit, healy_symplectify(M)
-    
+
             print ('Closed orbit search iteration: {}'.format(i))
-    
+
         print('WARNING!: Search did not converge, approximate distance: {}'.format(error))
         return closed_orbit, healy_symplectify(M)
 
@@ -323,7 +324,7 @@ class Line(Element):
             method="Nelder-Mead", **kwargs
             ):
         def _one_turn_map(coord):
-            pcl = Particles(p0c=p0c, **kwargs)
+            pcl = xp.Particles(p0c=p0c, **kwargs)
             pcl.x = coord[0]
             pcl.px = coord[1]
             pcl.y = coord[2]

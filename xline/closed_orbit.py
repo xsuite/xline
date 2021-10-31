@@ -1,11 +1,11 @@
 import numpy as np
-from .particles import Particles
 
+import xpart as xp
 
 def get_init_particles_for_linear_map(
         closed_orbit, p0c, d, longitudinal_coordinate,
         longitudinal_momentum, **kwargs):
-    part = Particles(p0c=p0c, **kwargs)
+    part = xp.Particles(p0c=p0c, **kwargs)
 #    part = Particles()
 #    part.p0c = p0c
     part.x  = closed_orbit[0] + np.array([0.0, 1.0 * d, 0.0, 0.0, 0.0, 0.0, 0.0])
