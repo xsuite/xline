@@ -290,7 +290,7 @@ def test_neutral_errors():
     initial_x = 0.025
     initial_y = -0.015
 
-    particle = xline.Particles()
+    particle = xline.Particles(p0c=1e9)
     particle.x = initial_x
     particle.y = initial_y
     particle.state = 1
@@ -349,6 +349,7 @@ def test_error_functionality():
     x_init = 0.1*np.random.rand(10)
     y_init = 0.1*np.random.rand(10)
     particles = xline.Particles(
+        p0c=1e9,
         x=x_init.copy(),
         y=y_init.copy()
     )

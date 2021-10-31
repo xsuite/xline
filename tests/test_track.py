@@ -26,7 +26,7 @@ element_list = [
 
 def test_track_all():
     for el in element_list:
-        p = xline.Particles()
+        p = xline.Particles(p0c=1e9)
         el().track(p)
 
 
@@ -54,7 +54,7 @@ def test_track_LimitRect():
         min_x=min_x, max_x=max_x, min_y=min_y, max_y=max_y
     )
 
-    p1 = xline.Particles()
+    p1 = xline.Particles(p0c=1e9)
     p1.x = 1
     p1.y = 1
     ret = el.track(p1)
@@ -79,7 +79,7 @@ def test_track_LimitEllipse():
     limit_b = 0.2
     el = xline.elements.LimitEllipse(a=limit_a, b=limit_b)
 
-    p1 = xline.Particles()
+    p1 = xline.Particles(p0c=1e9)
     p1.x = 1
     p1.y = 1
     ret = el.track(p1)
