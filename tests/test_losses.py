@@ -1,9 +1,9 @@
 import numpy as np
-from xline.particles import Particles
+from xline.particles import XlineTestParticles
 
 
 def test_particle_loss():
-    p = Particles(p0c=1e9,
+    p = XlineTestParticles(p0c=1e9,
             x=np.arange(10, dtype=np.float64))
 
     # I cut away all the odd coordinates (to check that I can skip)

@@ -20,9 +20,9 @@ def test_madx_import():
     n_SCkicks = 120
     length_fuzzy = 0.0
     p0c = 0.571e6
-    particle = xline.Particles(p0c=p0c)
+    particle = xline.XlineTestParticles(p0c=p0c)
     betagamma = particle.beta0 * particle.gamma0
-    # mass = xline.Particles.pmass
+    # mass = xline.XlineTestParticles.pmass
     delta_rms = 1e-3
     neps_x = 1.5e-6
     neps_y = 1.5e-6
@@ -290,7 +290,7 @@ def test_neutral_errors():
     initial_x = 0.025
     initial_y = -0.015
 
-    particle = xline.Particles(p0c=1e9)
+    particle = xline.XlineTestParticles(p0c=1e9)
     particle.x = initial_x
     particle.y = initial_y
     particle.state = 1
@@ -348,7 +348,7 @@ def test_error_functionality():
 
     x_init = 0.1*np.random.rand(10)
     y_init = 0.1*np.random.rand(10)
-    particles = xline.Particles(
+    particles = xline.XlineTestParticles(
         p0c=1e9,
         x=x_init.copy(),
         y=y_init.copy()

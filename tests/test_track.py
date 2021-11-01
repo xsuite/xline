@@ -26,12 +26,12 @@ element_list = [
 
 def test_track_all():
     for el in element_list:
-        p = xline.Particles(p0c=1e9)
+        p = xline.XlineTestParticles(p0c=1e9)
         el().track(p)
 
 
 def test_track_rfmultipole():
-    p1 = xline.Particles(p0c=1e9)
+    p1 = xline.XlineTestParticles(p0c=1e9)
     p1.x = 1
     p1.y = 1
     p2 = p1.copy()
@@ -54,14 +54,14 @@ def test_track_LimitRect():
         min_x=min_x, max_x=max_x, min_y=min_y, max_y=max_y
     )
 
-    p1 = xline.Particles(p0c=1e9)
+    p1 = xline.XlineTestParticles(p0c=1e9)
     p1.x = 1
     p1.y = 1
     ret = el.track(p1)
     assert p1._num_active_particles == 0
 
     arr = np.arange(0, 1, 0.001)
-    p2 = xline.Particles(x=arr, y=arr)
+    p2 = xline.XlineTestParticles(x=arr, y=arr)
     survive = np.where(
         (p2.x >= min_x) & (p2.x <= max_x) & (p2.y >= min_y) & (p2.y <= max_y)
     )
@@ -79,14 +79,14 @@ def test_track_LimitEllipse():
     limit_b = 0.2
     el = xline.elements.LimitEllipse(a=limit_a, b=limit_b)
 
-    p1 = xline.Particles(p0c=1e9)
+    p1 = xline.XlineTestParticles(p0c=1e9)
     p1.x = 1
     p1.y = 1
     ret = el.track(p1)
     assert p1._num_active_particles == 0
 
     arr = np.arange(0, 1, 0.001)
-    p2 = xline.Particles(x=arr, y=arr)
+    p2 = xline.XlineTestParticles(x=arr, y=arr)
     survive = np.where(
         (p2.x ** 2 / limit_a ** 2 + p2.y ** 2 / limit_b ** 2 <= 1.0)
     )
@@ -108,14 +108,14 @@ def test_track_LimitRectEllipse():
         max_x=max_x, max_y=max_y, a=limit_a, b=limit_b
     )
 
-    p1 = xline.Particles()
+    p1 = xline.XlineTestParticles()
     p1.x = 1
     p1.y = 1
     ret = el.track(p1)
     assert p1._num_active_particles == 0
 
     arr = np.arange(0, 1, 0.001)
-    p2 = xline.Particles(x=arr, y=arr)
+    p2 = xline.XlineTestParticles(x=arr, y=arr)
     survive = np.where(
         (p2.x ** 2 / limit_a ** 2 + p2.y ** 2 / limit_b ** 2 <= 1.0)
         & (p2.x >= -max_x)

@@ -6,7 +6,7 @@ from .elements import *
 
 from .line import Line
 
-from .particles import Particles
+from .particles import XlineTestParticles
 
 from .be_beamfields import BB6Ddata
 from .loader_mad import MadPoint, mad_benchmark
