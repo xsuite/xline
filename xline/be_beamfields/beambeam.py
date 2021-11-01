@@ -277,4 +277,4 @@ class BeamBeam6D(Element):
             p.y = y_ret
             p.py = py_ret
             p.zeta = zeta_ret
-            p.delta = delta_ret
+            p._update_delta(delta_ret)
