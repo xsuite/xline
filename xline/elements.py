@@ -1,5 +1,10 @@
 import numpy as np
 from scipy.constants import c as clight
+from scipy.constants import epsilon_0
+from scipy.constants import m_e as me_kg
+from scipy.constants import e as qe
+
+me = me_kg*clight**2/qe
 
 from .base_classes import Element
 from .be_beamfields.beambeam import BeamBeam4D
@@ -288,9 +293,9 @@ class Elens(Element):
     def track(self, p):
 
         # vacuum permittivity
-        epsilon0 = p.epsilon0
-        pi       = p._m.pi             # pi
-        e_mass   = p.emass             # electron mass
+        epsilon0 = epsilon_0
+        pi       = np.pi             # pi
+        e_mass   = me                # electron mass
 
         # get the transverse amplitude
         # TO DO: needs to be modified for off-centererd e-beam
@@ -298,10 +303,10 @@ class Elens(Element):
 
         # magnetic rigidity
 
-        if type(p.pc) is float:
-            Brho = p.pc/(p.q0*clight)
+        if type(p.p0c) is float:
+            Brho = p.p0c/(p.q0*clight)
         else:
-            Brho = p.pc[0]/(p.q0*clight)
+            Brho = p.p0c[0]/(p.q0*clight)
 
 
         # Electron properties
