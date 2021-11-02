@@ -110,7 +110,7 @@ def test_track_LimitRectEllipse():
     p1.x = 1
     p1.y = 1
     ret = el.track(p1)
-    assert p1.state== 0
+    assert p1.state == 0
 
     arr = np.arange(0, 1, 0.001)
     p2 = xline.XlineTestParticles(x=arr, y=arr)
