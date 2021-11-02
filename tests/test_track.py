@@ -58,7 +58,7 @@ def test_track_LimitRect():
     p1.x = 1
     p1.y = 1
     ret = el.track(p1)
-    assert p1._num_active_particles == 0
+    assert p1.state == 0
 
     arr = np.arange(0, 1, 0.001)
     p2 = xline.XlineTestParticles(x=arr, y=arr)
@@ -69,9 +69,8 @@ def test_track_LimitRect():
     assert len(p2.state) == len(survive[0])
 
     p2.x += max_x + 1e-6
-    ret = el.track(p2)
-    assert p2._num_active_particles == 0
-    assert p2._num_lost_particles == 1000
+    el.track(p2)
+    assert len(p2.x) == 0
 
 
 def test_track_LimitEllipse():
@@ -83,7 +82,7 @@ def test_track_LimitEllipse():
     p1.x = 1
     p1.y = 1
     ret = el.track(p1)
-    assert p1._num_active_particles == 0
+    assert p1.state == 0
 
     arr = np.arange(0, 1, 0.001)
     p2 = xline.XlineTestParticles(x=arr, y=arr)
@@ -95,8 +94,7 @@ def test_track_LimitEllipse():
 
     p2.x += limit_a + 1e-6
     ret = el.track(p2)
-    assert p2._num_active_particles == 0
-    assert p2._num_lost_particles == 1000
+    assert len(p2.x) == 0
 
 
 def test_track_LimitRectEllipse():
@@ -112,7 +110,7 @@ def test_track_LimitRectEllipse():
     p1.x = 1
     p1.y = 1
     ret = el.track(p1)
-    assert p1._num_active_particles == 0
+    assert p1.state== 0
 
     arr = np.arange(0, 1, 0.001)
     p2 = xline.XlineTestParticles(x=arr, y=arr)
@@ -128,5 +126,4 @@ def test_track_LimitRectEllipse():
 
     p2.x += limit_a + 1e-6
     ret = el.track(p2)
-    assert p2._num_active_particles == 0
-    assert p2._num_lost_particles == 1000
+    assert len(p2.x) == 0
