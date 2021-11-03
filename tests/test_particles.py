@@ -16,10 +16,10 @@ def test_particle_reference():
     assert err < 1.17e-15
     p.gamma0 = 1.99
     err = abs(p.p0c ** 2 + p.mass0 ** 2 - p.energy0 ** 2) / p.mass0 ** 2
-    assert err <1e-15
+    assert err < 1e-15
     # p.energy0 = 2 * p.mass0
     # err = abs(p.p0c ** 2 + p.mass0 ** 2 - p.energy0 ** 2) / p.mass0 ** 2
     # assert err == 0
     p.p0c = 0.1 * p.mass0
     err = abs(p.p0c ** 2 + p.mass0 ** 2 - p.energy0 ** 2) / p.mass0 ** 2
-    assert err == 0
+    assert err < 1e-15

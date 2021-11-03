@@ -3,7 +3,6 @@ import sys
 from importlib import util
 
 import xline
-import xline.be_beamfields.tools as bt
 
 
 def test_madx_import():
@@ -46,70 +45,10 @@ def test_madx_import():
         path = os.path.dirname(file_path) + "/psb/"
         mad.call(path + "psb_fb_lhc.madx", chdir=True)
 
-        # Determine space charge locations
-        temp_line = xline.Line.from_madx_sequence(mad.sequence[seq_name])
-        sc_locations, sc_lengths = bt.determine_sc_locations(
-            temp_line, n_SCkicks, length_fuzzy
-        )
-
-        # Install spacecharge place holders
-        sc_names = ["sc%d" % number for number in range(len(sc_locations))]
-        bt.install_sc_placeholders(
-            mad, seq_name, sc_names, sc_locations, mode=sc_mode
-        )
-
         # Generate line with spacecharge
         line = xline.Line.from_madx_sequence(
             mad.sequence[seq_name], install_apertures=use_aperture
         )
-
-        # Get sc info from optics
-        mad_sc_names, sc_twdata = bt.get_spacecharge_names_twdata(
-            mad, seq_name, mode=sc_mode
-        )
-
-        # Check consistency
-        if sc_mode == "Bunched":
-            sc_elements, sc_names = line.get_elements_of_type(
-                xline.elements.SCQGaussProfile
-            )
-        elif sc_mode == "Coasting":
-            sc_elements, sc_names = line.get_elements_of_type(
-                xline.elements.SCCoasting
-            )
-        else:
-            raise ValueError("mode not understood")
-        bt.check_spacecharge_consistency(
-            sc_elements, sc_names, sc_lengths, mad_sc_names
-        )
-
-        # Setup spacecharge in the line
-        if sc_mode == "Bunched":
-            bt.setup_spacecharge_bunched_in_line(
-                sc_elements,
-                sc_lengths,
-                sc_twdata,
-                betagamma,
-                number_of_particles,
-                delta_rms,
-                neps_x,
-                neps_y,
-                bunchlength_rms,
-            )
-        elif sc_mode == "Coasting":
-            bt.setup_spacecharge_coasting_in_line(
-                sc_elements,
-                sc_lengths,
-                sc_twdata,
-                betagamma,
-                number_of_particles,
-                delta_rms,
-                neps_x,
-                neps_y,
-                circumference,
-            )
-        else:
-            raise ValueError("mode not understood")
 
 
 def test_error_import():
