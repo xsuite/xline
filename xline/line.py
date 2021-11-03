@@ -9,10 +9,6 @@ import xobjects as xo
 
 from .loader_sixtrack import _expand_struct
 from .loader_mad import iter_from_madx_sequence
-from .closed_orbit import linearize_around_closed_orbit
-from .closed_orbit import healy_symplectify
-from .linear_normal_form import _linear_normal_form
-
 
 _thick_element_types = (elements.Drift, elements.DriftExact)
 
@@ -281,87 +277,6 @@ class Line(Element):
 
     def linear_normal_form(self, M):
         return _linear_normal_form(M)
-
-    def find_closed_orbit_and_linear_OTM(
-        self, p0c, guess=None, d=1.e-7, tol=1.e-10, max_iterations=20, longitudinal_coordinate='zeta'
-    ):
-        if guess is None:
-            guess = [0., 0., 0., 0., 0., 0.]
-        
-        assert len(guess) == 6
-
-        closed_orbit = np.array(guess).copy()
-    
-        canonical_conjugate_momentum = {'tau' : 'ptau', 'zeta' : 'delta', 'sigma' : 'psigma'}
-    
-        if longitudinal_coordinate not in ['tau', 'zeta', 'sigma']:
-            raise Exception('Longitudinal variable not recognized in search of closed orbit')
-    
-        longitudinal_momentum = canonical_conjugate_momentum[longitudinal_coordinate]
-    
-        for i in range(max_iterations):
-            new_closed_orbit, M = linearize_around_closed_orbit(
-                self, closed_orbit, p0c, d, longitudinal_coordinate, longitudinal_momentum
-            )
-
-            error = np.linalg.norm( new_closed_orbit - closed_orbit )
-
-            closed_orbit = new_closed_orbit
-            if error < tol:
-                print('Converged with approximate distance: {}'.format(error))
-                _, M = linearize_around_closed_orbit(
-                    self, closed_orbit, p0c, d, longitudinal_coordinate, longitudinal_momentum
-                )
-                return closed_orbit, healy_symplectify(M)
-
-            print ('Closed orbit search iteration: {}'.format(i))
-
-        print('WARNING!: Search did not converge, approximate distance: {}'.format(error))
-        return closed_orbit, healy_symplectify(M)
-
-    def find_closed_orbit(
-            self, p0c, guess=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            method="Nelder-Mead", **kwargs
-            ):
-        def _one_turn_map(coord):
-            pcl = xp.Particles(p0c=p0c, **kwargs)
-            pcl.x = coord[0]
-            pcl.px = coord[1]
-            pcl.y = coord[2]
-            pcl.py = coord[3]
-            pcl.zeta = coord[4]
-            pcl.delta = coord[5]
-
-            self.track(pcl)
-            coord_out = np.array(
-                [pcl.x, pcl.px, pcl.y, pcl.py, pcl.zeta, pcl.delta]
-            )
-
-            return coord_out
-
-        def _CO_error(coord):
-            return np.sum((_one_turn_map(coord) - coord) ** 2)
-
-        if method == "get_guess":
-            res = type("", (), {})()
-            res.x = guess
-        else:
-            import scipy.optimize as so
-
-            res = so.minimize(
-                _CO_error, np.array(guess), tol=1e-20, method=method
-            )
-
-        pcl = Particles(p0c=p0c, **kwargs)
-
-        pcl.x = res.x[0]
-        pcl.px = res.x[1]
-        pcl.y = res.x[2]
-        pcl.py = res.x[3]
-        pcl.zeta = res.x[4]
-        pcl.delta = res.x[5]
-
-        return pcl
 
     def enable_beambeam(self):
 
