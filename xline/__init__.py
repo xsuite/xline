@@ -1,6 +1,6 @@
 __version__ = "0.0.9"
 
-raise ImportError("xline is not anymore suppoerted by xsuite\n"
+raise ImportError("xline is not anymore supported by xsuite\n"
     "    Instead of `xline.Line` use `xtrack.Line`\n"
     "    Instead of `xline.Particles` use `xpart.Particles`\n"
     "    Instead of `xline.Drift` use `xtrack.Drift`\n"
