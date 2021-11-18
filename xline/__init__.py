@@ -1,4 +1,4 @@
-__version__ = "0.0.10"
+__version__ = "0.0.10e"
 
 raise ImportError("xline is not anymore supported by xsuite\n"
     "    Instead of `xline.Line` use `xtrack.Line`\n"
