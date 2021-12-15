@@ -2,7 +2,7 @@ from scipy.special import wofz
 from scipy.special import gamma as tgamma
 
 
-class MathlibDefault(object):
+class MathlibDefault:
 
     from numpy import sqrt, exp, sin, cos, abs, pi, tan, interp, linspace
     from numpy import power as pow

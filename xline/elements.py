@@ -1,4 +1,10 @@
 import numpy as np
+from scipy.constants import c as clight
+from scipy.constants import epsilon_0
+from scipy.constants import m_e as me_kg
+from scipy.constants import e as qe
+
+me = me_kg*clight**2/qe
 
 from .base_classes import Element
 from .be_beamfields.beambeam import BeamBeam4D
@@ -178,7 +184,7 @@ class RFMultipole(Element):
         cos = p._m.cos
         pi = p._m.pi
         order = self.order
-        k = 2 * pi * self.frequency / p.clight
+        k = 2 * pi * self.frequency / clight
         tau = p.zeta / p.rvv / p.beta0
         ktau = k * tau
         deg2rad = pi / 180
@@ -233,7 +239,7 @@ class Cavity(Element):
     def track(self, p):
         sin = p._m.sin
         pi = p._m.pi
-        k = 2 * pi * self.frequency / p.clight
+        k = 2 * pi * self.frequency / clight
         tau = p.zeta / p.rvv / p.beta0
         phase = self.lag * pi / 180 - k * tau
         p.add_to_energy(p.charge_ratio * p.q0 * self.voltage * sin(phase))
@@ -250,7 +256,7 @@ class SawtoothCavity(Element):
 
     def track(self, p):
         pi = p._m.pi
-        k = 2 * pi * self.frequency / p.clight
+        k = 2 * pi * self.frequency / clight
         tau = p.zeta / p.rvv / p.beta0
         phase = self.lag * pi / 180 - k * tau
         phase = (phase + pi) % (2 * pi) - pi
@@ -287,10 +293,9 @@ class Elens(Element):
     def track(self, p):
 
         # vacuum permittivity
-        epsilon0 = p.epsilon0
-        pi       = p._m.pi             # pi
-        clight   = p.clight            # speed of light
-        e_mass   = p.emass             # electron mass
+        epsilon0 = epsilon_0
+        pi       = np.pi             # pi
+        e_mass   = me                # electron mass
 
         # get the transverse amplitude
         # TO DO: needs to be modified for off-centererd e-beam
@@ -298,10 +303,10 @@ class Elens(Element):
 
         # magnetic rigidity
 
-        if type(p.pc) is float:
-            Brho = p.pc/(p.q0*p.clight)
+        if type(p.p0c) is float:
+            Brho = p.p0c/(p.q0*clight)
         else:
-            Brho = p.pc[0]/(p.q0*p.clight)
+            Brho = p.p0c[0]/(p.q0*clight)
 
 
         # Electron properties
@@ -405,8 +410,6 @@ class LimitRect(Element):
                 and y >= self.min_y
                 and y <= self.max_y
             )
-            if particle.state != 1:
-                return "Particle lost"
         else:
             particle.state = np.int_(
                 (x >= self.min_x)
@@ -415,8 +418,6 @@ class LimitRect(Element):
                 & (y <= self.max_y)
             )
             particle.remove_lost_particles()
-            if len(particle.state) == 0:
-                return "All particles lost"
 
 
 class LimitEllipse(Element):
@@ -434,15 +435,11 @@ class LimitEllipse(Element):
             particle.state = int(
                 x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
             )
-            if particle.state != 1:
-                return "Particle lost"
         else:
             particle.state = np.int_(
                 x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
             )
             particle.remove_lost_particles()
-            if len(particle.state) == 0:
-                return "All particles lost"
 
 
 class LimitRectEllipse(Element):
@@ -466,8 +463,6 @@ class LimitRectEllipse(Element):
                 and y <= self.max_y
                 and x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0
             )
-            if particle.state != 1:
-                return "Particle lost"
         else:
             particle.state = np.int_(
                 (x >= -self.max_x)
@@ -477,8 +472,6 @@ class LimitRectEllipse(Element):
                 & (x * x / (self.a * self.a) + y * y / (self.b * self.b) <= 1.0)
             )
             particle.remove_lost_particles()
-            if len(particle.state) == 0:
-                return "All particles lost"
 
 class LimitPolygon(Element):
     _description = [

@@ -86,11 +86,3 @@ class Element(Base):
     pass
 
 
-class JEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        elif np.issubdtype(type(obj), np.integer):
-            return int(obj)
-        else:
-            return json.JSONEncoder.default(self, obj)

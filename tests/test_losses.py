@@ -1,10 +1,10 @@
 import numpy as np
-from xline.particles import Particles
+from xline.particles import XlineTestParticles
 
 
 def test_particle_loss():
-    p = Particles()
-    p.x = np.arange(10, dtype=np.float64)
+    p = XlineTestParticles(p0c=1e9,
+            x=np.arange(10, dtype=np.float64))
 
     # I cut away all the odd coordinates (to check that I can skip)
     p.state = np.int_(np.mod(np.int_(p.x), 2) == 0)
@@ -15,5 +15,3 @@ def test_particle_loss():
     p.remove_lost_particles()
 
     assert np.all(p.x == np.array([6.0, 8.0]))
-    assert np.all(p.lost_particles[0].x == np.array([1, 3, 5, 7, 9]))
-    assert np.all(p.lost_particles[1].x == np.array([0, 2.0, 4.0]))

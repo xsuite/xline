@@ -33,7 +33,7 @@ def test_track_spacecharge():
     # test absolute kick for sigma_x > sigma_y
     x_offset = 0.2
     y_offset = -0.5
-    p1 = xline.Particles()
+    p1 = xline.XlineTestParticles(p0c=1e9)
     p1.x = x_co + x_offset
     p1.y = y_co + y_offset
     p2 = p1.copy()
@@ -48,7 +48,7 @@ def test_track_spacecharge():
     el1.sigma_y = sigma_x
     el2.sigma_x = sigma_y
     el2.sigma_y = sigma_x
-    p1 = xline.Particles()
+    p1 = xline.XlineTestParticles(p0c=1e9)
     p1.x = x_co + y_offset
     p1.y = y_co + x_offset
     p2 = p1.copy()
@@ -59,7 +59,7 @@ def test_track_spacecharge():
     assert p1.compare(p2, abs_tol=1e-15)
 
     # test no kick for particle on closed orbit
-    p1 = xline.Particles()
+    p1 = xline.XlineTestParticles(p0c=1e9)
     p1.x = el1.x_co
     p1.y = el1.y_co
     p2 = p1.copy()
@@ -70,7 +70,7 @@ def test_track_spacecharge():
     assert p1.compare(p2, abs_tol=1e-15)
 
     # test round beam
-    p1 = xline.Particles()
+    p1 = xline.XlineTestParticles(p0c=1e9)
     p1.x = el1.x_co + 0.5
     p1.y = el1.y_co + 0.1
     p2 = p1.copy()

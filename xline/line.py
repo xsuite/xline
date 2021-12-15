@@ -1,17 +1,14 @@
 import json
 import numpy as np
 
-from .base_classes import Element, JEncoder
+from .base_classes import Element
 from . import elements
-from .particles import Particles
+
+import xpart as xp
+import xobjects as xo
 
 from .loader_sixtrack import _expand_struct
 from .loader_mad import iter_from_madx_sequence
-from .closed_orbit import linearize_around_closed_orbit
-from .closed_orbit import healy_symplectify
-from .linear_normal_form import _linear_normal_form
-
-
 
 _thick_element_types = (elements.Drift, elements.DriftExact)
 
@@ -63,7 +60,7 @@ class Line(Element):
 
     def to_json(self, filename,  keepextra=True):
         with open(filename, 'w') as fid:
-            json.dump(self.to_dict(keepextra=keepextra), fid, cls=JEncoder)
+            json.dump(self.to_dict(keepextra=keepextra), fid, cls=xo.JEncoder)
 
     @classmethod
     def from_json(cls, filename,  keepextra=True):
@@ -278,155 +275,6 @@ class Line(Element):
                     break
         return elem_idx
 
-    def linear_normal_form(self, M):
-        return _linear_normal_form(M)
-
-    def find_closed_orbit_and_linear_OTM(
-        self, p0c, guess=None, d=1.e-7, tol=1.e-10, max_iterations=20, longitudinal_coordinate='zeta'
-    ):
-        if guess is None:
-            guess = [0., 0., 0., 0., 0., 0.]
-        
-        assert len(guess) == 6
-
-        closed_orbit = np.array(guess).copy()
-    
-        canonical_conjugate_momentum = {'tau' : 'ptau', 'zeta' : 'delta', 'sigma' : 'psigma'}
-    
-        if longitudinal_coordinate not in ['tau', 'zeta', 'sigma']:
-            raise Exception('Longitudinal variable not recognized in search of closed orbit')
-    
-        longitudinal_momentum = canonical_conjugate_momentum[longitudinal_coordinate]
-    
-        for i in range(max_iterations):
-            new_closed_orbit, M = linearize_around_closed_orbit(
-                self, closed_orbit, p0c, d, longitudinal_coordinate, longitudinal_momentum
-            )
-
-            error = np.linalg.norm( new_closed_orbit - closed_orbit )
-    
-            closed_orbit = new_closed_orbit
-            if error < tol:
-                print('Converged with approximate distance: {}'.format(error))
-                _, M = linearize_around_closed_orbit(
-                    self, closed_orbit, p0c, d, longitudinal_coordinate, longitudinal_momentum
-                )
-                return closed_orbit, healy_symplectify(M)
-    
-            print ('Closed orbit search iteration: {}'.format(i))
-    
-        print('WARNING!: Search did not converge, approximate distance: {}'.format(error))
-        return closed_orbit, healy_symplectify(M)
-
-    def find_closed_orbit(
-            self, p0c, guess=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            method="Nelder-Mead", **kwargs
-            ):
-        def _one_turn_map(coord):
-            pcl = Particles(p0c=p0c, **kwargs)
-            pcl.x = coord[0]
-            pcl.px = coord[1]
-            pcl.y = coord[2]
-            pcl.py = coord[3]
-            pcl.zeta = coord[4]
-            pcl.delta = coord[5]
-
-            self.track(pcl)
-            coord_out = np.array(
-                [pcl.x, pcl.px, pcl.y, pcl.py, pcl.zeta, pcl.delta]
-            )
-
-            return coord_out
-
-        def _CO_error(coord):
-            return np.sum((_one_turn_map(coord) - coord) ** 2)
-
-        if method == "get_guess":
-            res = type("", (), {})()
-            res.x = guess
-        else:
-            import scipy.optimize as so
-
-            res = so.minimize(
-                _CO_error, np.array(guess), tol=1e-20, method=method
-            )
-
-        pcl = Particles(p0c=p0c, **kwargs)
-
-        pcl.x = res.x[0]
-        pcl.px = res.x[1]
-        pcl.y = res.x[2]
-        pcl.py = res.x[3]
-        pcl.zeta = res.x[4]
-        pcl.delta = res.x[5]
-
-        return pcl
-
-    def enable_beambeam(self):
-
-        for ee in self.elements:
-            if isinstance(ee, (elements.BeamBeam4D, elements.BeamBeam6D)):
-                ee.enabled = True
-
-    def disable_beambeam(self):
-
-        for ee in self.elements:
-            if isinstance(ee, (elements.BeamBeam4D, elements.BeamBeam6D)):
-                ee.enabled = False
-
-    def beambeam_store_closed_orbit_and_dipolar_kicks(
-        self,
-        particle_on_CO,
-        separation_given_wrt_closed_orbit_4D=True,
-        separation_given_wrt_closed_orbit_6D=True,
-    ):
-
-        self.disable_beambeam()
-        closed_orbit = self.track_elem_by_elem(particle_on_CO)
-
-        self.enable_beambeam()
-
-        for ie, ee in enumerate(self.elements):
-            # to transfer to beambeam.py
-
-            if ee.__class__.__name__ == "BeamBeam4D":
-                if separation_given_wrt_closed_orbit_4D:
-                    ee.x_bb += closed_orbit[ie].x
-                    ee.y_bb += closed_orbit[ie].y
-
-                # Evaluate dipolar kick
-                ptemp = closed_orbit[ie].copy()
-                ptempin = ptemp.copy()
-
-                ee.track(ptemp)
-
-                ee.d_px = ptemp.px - ptempin.px
-                ee.d_py = ptemp.py - ptempin.py
-
-            elif ee.__class__.__name__ == "BeamBeam6D":
-                if not separation_given_wrt_closed_orbit_6D:
-                    raise ValueError("Not implemented!")
-
-                # Store closed orbit
-                ee.x_co = closed_orbit[ie].x
-                ee.px_co = closed_orbit[ie].px
-                ee.y_co = closed_orbit[ie].y
-                ee.py_co = closed_orbit[ie].py
-                ee.zeta_co = closed_orbit[ie].zeta
-                ee.delta_co = closed_orbit[ie].delta
-
-                # Evaluate 6d kick on closed orbit
-                ptemp = closed_orbit[ie].copy()
-                ptempin = ptemp.copy()
-
-                ee.track(ptemp)
-
-                ee.d_x = ptemp.x - ptempin.x
-                ee.d_px = ptemp.px - ptempin.px
-                ee.d_y = ptemp.y - ptempin.y
-                ee.d_py = ptemp.py - ptempin.py
-                ee.d_zeta = ptemp.zeta - ptempin.zeta
-                ee.d_delta = ptemp.delta - ptempin.delta
 
     @classmethod
     def from_sixinput(cls, sixinput, classes=elements):

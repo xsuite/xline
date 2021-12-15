@@ -1,3 +1,5 @@
+from scipy.constants import e as echarge
+
 from xline.base_classes import Element
 from .gaussian_fields import get_Ex_Ey_Gx_Gy_gauss
 from .qgauss import QGauss
@@ -23,7 +25,7 @@ class SCCoasting(Element):
 
     def track(self, p):
         if self.enabled:
-            charge = p.q0 * p.echarge
+            charge = p.q0 * echarge
 
             Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(
                 p.x - self.x_co,
@@ -42,7 +44,7 @@ class SCCoasting(Element):
                 * (charge * p.charge_ratio)
                 * charge
                 * (1 - p.beta0 * p.beta0)
-                / (p.p0c * p.echarge * p.beta0)
+                / (p.p0c * echarge * p.beta0)
                 * self.length
             )
 
@@ -83,10 +85,10 @@ class SCQGaussProfile(Element):
                 sigma, QGauss.sqrt_beta(self.bunchlength_rms)
             )
 
-            charge = p.q0 * p.echarge
+            charge = p.q0 * echarge
             fact_kick *= p.chi * p.charge_ratio * self.length * charge * charge
             fact_kick *= 1 - p.beta0 * p.beta0
-            fact_kick /= p.p0c * p.echarge * p.beta0
+            fact_kick /= p.p0c * echarge * p.beta0
 
             Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(
                 p.x - self.x_co,
@@ -135,7 +137,7 @@ class SCInterpolatedProfile(Element):
     def track(self, p):
         if self.enabled:
             n_prof_points = len(self.line_density_profile)
-            charge = p.q0 * p.echarge
+            charge = p.q0 * echarge
 
             Ex, Ey = get_Ex_Ey_Gx_Gy_gauss(
                 p.x - self.x_co,
@@ -152,7 +154,7 @@ class SCInterpolatedProfile(Element):
                 * (charge * p.charge_ratio)
                 * charge
                 * (1 - p.beta0 * p.beta0)
-                / (p.p0c * p.echarge * p.beta0)
+                / (p.p0c * echarge * p.beta0)
                 * self.length
             )
 

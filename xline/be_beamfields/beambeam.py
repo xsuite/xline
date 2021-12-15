@@ -294,4 +294,7 @@ class BeamBeam6D(Element):
             p.y = y_ret
             p.py = py_ret
             p.zeta = zeta_ret
-            p.delta = delta_ret
+            if hasattr(p, 'update_delta'):
+                p._update_delta(delta_ret)
+            else:
+                p.delta = delta_ret
